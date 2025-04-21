@@ -9,6 +9,7 @@ const firebaseConfig = {
   appId: "1:173103533896:web:78bbe18e17ca8f5da5ad7d",
   measurementId: "G-Y3E0QVFSBB"
 };
+
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
@@ -229,24 +230,6 @@ document.addEventListener('DOMContentLoaded', function() {
         loadGlobalTests();
         loadLeaderboard();
         cleanupOldData();
-
-        database.ref(`users/${user.uid}`).once('value').then(snapshot => {
-          if (!snapshot.exists()) {
-            database.ref(`users/${user.uid}`).set({
-              name: user.displayName,
-              photoURL: user.photoURL,
-              stats: {
-                testsCompleted: 0,
-                bestAccuracy: 0,
-                bestWPM: 0,
-                totalKeystrokes: 0
-              },
-              achievements: [],
-              testHistory: {},
-              customCategories: {}
-            });
-          }
-        });
       } else {
         loginBtn.classList.remove('hidden');
         userInfo.classList.add('hidden');
@@ -397,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         return direction === 'asc'
           ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
+          : bValue.localeCompare(bValue);
       }
     });
   }
@@ -735,6 +718,27 @@ document.addEventListener('DOMContentLoaded', function() {
     return categories[category] || 'General';
   }
 
+  function embedVideo(videoUrl) {
+    const existingVideo = document.getElementById('testVideoPlayer');
+    if (existingVideo) existingVideo.remove();
+
+    const videoContainer = document.createElement('div');
+    videoContainer.id = 'testVideoPlayer';
+    videoContainer.style.marginBottom = '1rem';
+
+    const youtubeMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (youtubeMatch) {
+      const videoId = youtubeMatch[1];
+      videoContainer.innerHTML = `
+        <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      `;
+    } else {
+      videoContainer.innerHTML = `<video controls><source src="${videoUrl}" type="video/mp4">Your browser does not support the video tag.</video>`;
+    }
+
+    originalTextGroup.parentNode.insertBefore(videoContainer, originalTextGroup);
+  }
+
   originalTextEl.addEventListener('paste', function() {
     document.querySelectorAll('.test-card').forEach(card => {
       card.classList.remove('selected');
@@ -955,7 +959,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let testTitle = "Custom Test";
     const selectedTestCard = document.querySelector('.test-card.selected');
     if (selectedTestCard) {
-      testTitle = selectedTestCard.querySelector('h4').textContent;
+      testTitle = selectedTestCard.querySelector('h4').textContent.split('<')[0].trim();
     }
 
     const originalWords = processText(originalText);
@@ -991,47 +995,6 @@ document.addEventListener('DOMContentLoaded', function() {
       database.ref('attempts').push(attemptData)
         .then(() => loadLeaderboard())
         .catch(error => console.error('Error saving attempt:', error));
-
-      const testRef = database.ref(`users/${user.uid}`);
-
-      const newTestRef = testRef.child(`testHistory`).push();
-      newTestRef.set({
-        date: Date.now(),
-        testTitle: testTitle,
-        accuracy: comparison.stats.accuracy,
-        wpm: comparison.stats.wpm
-      });
-
-      testRef.child('stats').transaction(stats => {
-        if (!stats) {
-          stats = { testsCompleted: 0, bestAccuracy: 0, bestWPM: 0, totalKeystrokes: 0 };
-        }
-
-        stats.testsCompleted = (stats.testsCompleted || 0) + 1;
-        stats.bestAccuracy = Math.max(stats.bestAccuracy || 0, comparison.stats.accuracy);
-        stats.bestWPM = Math.max(stats.bestWPM || 0, comparison.stats.wpm);
-        stats.totalKeystrokes = (stats.totalKeystrokes || 0) + comparison.stats.keystrokes;
-
-        const achievements = [];
-        if (comparison.stats.wpm >= 50 && !stats.achievements?.includes('fast-typer')) {
-          achievements.push('fast-typer');
-        }
-        if (comparison.stats.accuracy >= 95 && !stats.achievements?.includes('accuracy-master')) {
-          achievements.push('accuracy-master');
-        }
-        if (stats.testsCompleted >= 100 && !stats.achievements?.includes('veteran')) {
-          achievements.push('veteran');
-        }
-
-        if (achievements.length > 0) {
-          testRef.child('achievements').transaction(ach => {
-            ach = ach || [];
-            return [...new Set([...ach, ...achievements])];
-          });
-        }
-
-        return stats;
-      });
     }
   }
 
@@ -1090,7 +1053,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const threshold = 50;
 
     for (let i = 0; i < minLength; i++) {
- LOCKED      if (wordA[i] === wordB[i]) {
+      if (wordA[i] === wordB[i]) {
         similarCount++;
       }
     }
@@ -1172,4 +1135,108 @@ document.addEventListener('DOMContentLoaded', function() {
               if (arraysAreEqual(subarrayA, pairB)) {
                 for (let j = 0; j < i; j++) {
                   comparedText += `<span class="missing">${paragraphA[wordAIndex + j]}</span> `;
- among others.
+                  wordAIndex++;
+                  numFullDiff++;
+                }
+                foundPairInA = true;
+                break;
+              }
+            }
+
+            let foundPairInB = false;
+            if (!foundPairInA) {
+              for (let i = 1; i <= 50 && (wordBIndex + i) < paragraphB.length; i++) {
+                const subarrayB = paragraphB.slice(wordBIndex + i, wordBIndex + i + pairA.length);
+                if (arraysAreEqual(subarrayB, pairA)) {
+                  for (let j = 0; j < i; j++) {
+                    comparedText += `<span class="addition">${paragraphB[wordBIndex + j]}</span> `;
+                    wordBIndex++;
+                    numFullDiff++;
+                  }
+                  foundPairInB = true;
+                  break;
+                }
+              }
+            }
+
+            if (!foundPairInA && !foundPairInB) {
+              comparedText += `<span class="missing">${wordA}</span> `;
+              comparedText += `<span class="addition">${wordB}</span> `;
+              wordAIndex++;
+              wordBIndex++;
+              numFullDiff++;
+            }
+          }
+        }
+      }
+    }
+
+    const totalWords = paragraphA.length;
+    const accuracy = totalWords > 0 ? ((totalWords - numFullDiff - numHalfDiff / 2) / totalWords * 100) : 0;
+    const wpm = startTime ? Math.round((paragraphB.length / ((new Date() - startTime) / 60000))) : 0;
+    const keystrokes = paragraphB.join(' ').length;
+
+    return {
+      text: comparedText,
+      stats: {
+        accuracy,
+        wpm,
+        totalOriginal: paragraphA.length,
+        totalUser: paragraphB.length,
+        halfMistakes: numHalfDiff,
+        fullMistakes: numFullDiff,
+        timeTaken: endTime ? Math.round((endTime - startTime) / 1000) : 0,
+        keystrokes
+      }
+    };
+  }
+
+  function displayComparison(comparison) {
+    comparisonResultEl.innerHTML = comparison.text;
+  }
+
+  function displayStats(stats) {
+    statsEl.innerHTML = `
+      <p><strong>Accuracy:</strong> ${stats.accuracy.toFixed(1)}%</p>
+      <p><strong>Speed:</strong> ${stats.wpm} WPM</p>
+      <p><strong>Original Words:</strong> ${stats.totalOriginal}</p>
+      <p><strong>Typed Words:</strong> ${stats.totalUser}</p>
+      <p><strong>Half Mistakes:</strong> ${stats.halfMistakes}</p>
+      <p><strong>Full Mistakes:</strong> ${stats.fullMistakes}</p>
+      <p><strong>Time Taken:</strong> ${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p>
+      <p><strong>Keystrokes:</strong> ${stats.keystrokes}</p>
+    `;
+  }
+
+  function displayFeedback(stats, originalWords, userWords) {
+    let feedback = '';
+    if (stats.accuracy >= 90) {
+      feedback += '<p>Excellent work! Your accuracy is outstanding.</p>';
+    } else if (stats.accuracy >= 70) {
+      feedback += '<p>Good effort! Try focusing on reducing spelling and capitalization errors.</p>';
+    } else {
+      feedback += '<p>Keep practicing! Pay attention to the original text to minimize mistakes.</p>';
+    }
+
+    if (stats.wpm >= 50) {
+      feedback += '<p>Impressive typing speed! You’re a fast typist.</p>';
+    } else if (stats.wpm >= 30) {
+      feedback += '<p>Decent typing speed. Practice regularly to improve.</p>';
+    } else {
+      feedback += '<p>Your typing speed could use some work. Try typing exercises to build speed.</p>';
+    }
+
+    if (stats.halfMistakes > stats.fullMistakes) {
+      feedback += '<p>Most of your errors are minor (e.g., capitalization). Double-check case sensitivity.</p>';
+    } else if (stats.fullMistakes > 0) {
+      feedback += '<p>You have several full mistakes (e.g., missing or added words). Review the text carefully.</p>';
+    }
+
+    feedbackEl.innerHTML = feedback;
+  }
+
+  function displayFullTexts(original, user) {
+    originalDisplayEl.textContent = original;
+    userDisplayEl.textContent = user;
+  }
+});
