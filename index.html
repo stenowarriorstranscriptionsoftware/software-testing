@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Steno Warriors Transcription</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -16,6 +16,12 @@
 <body>
   <div class="container">
     <header>
+      <div class="theme-toggle">
+        <input type="checkbox" id="darkModeToggle">
+        <label for="darkModeToggle" class="toggle-label">
+          <span class="toggle-icon">🌙</span>
+        </label>
+      </div>
       <h1>Steno Warriors</h1>
       <p class="subtitle">Advanced Transcription Comparison Tool</p>
       <div id="authSection">
@@ -34,12 +40,12 @@
         <div id="loginForm">
           <h3>Login to Steno Warriors</h3>
           <div class="input-group">
+            <input type="email" id="loginEmail" placeholder=" ">
             <label for="loginEmail">Email</label>
-            <input type="email" id="loginEmail" placeholder="Enter your email">
           </div>
           <div class="input-group">
+            <input type="password" id="loginPassword" placeholder=" ">
             <label for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" placeholder="Enter your password">
           </div>
           <button id="emailLoginBtn" class="auth-btn">Login</button>
           <button id="googleLoginBtn" class="auth-btn secondary-btn">Login with Google</button>
@@ -49,20 +55,20 @@
         <div id="registerForm" class="hidden">
           <h3>Create an Account</h3>
           <div class="input-group">
+            <input type="text" id="registerName" placeholder=" ">
             <label for="registerName">Full Name</label>
-            <input type="text" id="registerName" placeholder="Enter your full name">
           </div>
           <div class="input-group">
+            <input type="email" id="registerEmail" placeholder=" ">
             <label for="registerEmail">Email</label>
-            <input type="email" id="registerEmail" placeholder="Enter your email">
           </div>
           <div class="input-group">
-            <label for="registerPassword">Password</label>
-            <input type="password" id="registerPassword" placeholder="Create a password (min 6 characters)">
+            <input type="password" id="registerPassword" placeholder=" ">
+            <label for="registerPassword">Password (min 6 characters)</label>
           </div>
           <div class="input-group">
+            <input type="password" id="confirmPassword" placeholder=" ">
             <label for="confirmPassword">Confirm Password</label>
-            <input type="password" id="confirmPassword" placeholder="Confirm your password">
           </div>
           <button id="registerBtn" class="auth-btn">Register</button>
           <button id="showLogin" class="auth-btn secondary-btn">Back to Login</button>
@@ -98,16 +104,16 @@
       <section id="customTestSection" class="hidden custom-test-section">
         <h3>Add Your Own Test</h3>
         <div class="input-group">
+          <input type="text" id="customTitle" placeholder=" ">
           <label for="customTitle">Test Title</label>
-          <input type="text" id="customTitle" placeholder="Enter a name for your test..." />
         </div>
         <div class="input-group">
+          <textarea id="customOriginal" placeholder=" "></textarea>
           <label for="customOriginal">Original Text</label>
-          <textarea id="customOriginal" placeholder="Paste your custom test text here..."></textarea>
         </div>
         <div class="input-group">
+          <input type="url" id="customVideoUrl" placeholder=" ">
           <label for="customVideoUrl">Video URL (Optional)</label>
-          <input type="url" id="customVideoUrl" placeholder="Enter YouTube or video URL...">
         </div>
         <div class="button-group">
           <button id="saveTestBtn">Save & Share Test</button>
@@ -118,8 +124,8 @@
       <!-- Main Input Section -->
       <section class="input-section">
         <div class="input-group" id="originalTextGroup">
+          <textarea id="originalText" placeholder=" "></textarea>
           <label for="originalText">Original Text</label>
-          <textarea id="originalText" placeholder="Paste the original text here or select from community tests..."></textarea>
         </div>
 
         <div id="timerOptions" class="timer-options hidden">
@@ -130,8 +136,8 @@
         <div id="timerDisplay" class="timer-display hidden"></div>
 
         <div class="input-group">
+          <textarea id="userText" placeholder=" "></textarea>
           <label for="userText">Your Transcription</label>
-          <textarea id="userText" placeholder="Type or paste your transcription here..."></textarea>
         </div>
 
         <div class="button-group test-controls">

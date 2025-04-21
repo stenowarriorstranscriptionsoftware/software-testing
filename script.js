@@ -1320,3 +1320,14 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
 });
+// Add this to your existing script.js
+document.getElementById('darkModeToggle').addEventListener('change', function() {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', this.checked);
+});
+
+// Check for saved user preference
+if (localStorage.getItem('darkMode') === 'true') {
+  document.getElementById('darkModeToggle').checked = true;
+  document.body.classList.add('dark-mode');
+}
