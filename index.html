@@ -5,11 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Steno Warriors Transcription</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
@@ -27,21 +26,18 @@
       <h1>Steno Warriors</h1>
       <p class="subtitle">Advanced Transcription Comparison Tool</p>
       <div id="authSection">
-        <button id="loginBtn" class="auth-btn">Login with Google</button>
+        <button id="loginBtn" class="auth-btn">
+          <i class="fas fa-sign-in-alt"></i> Login with Google
+        </button>
         <div id="userInfo" class="hidden">
           <img id="userPhoto" class="user-photo">
           <span id="userName"></span>
-          <button id="logoutBtn" class="auth-btn secondary-btn">Logout</button>
+          <button id="logoutBtn" class="auth-btn secondary-btn">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
         </div>
       </div>
     </header>
-
-    <nav class="main-nav">
-      <button id="homeLink" class="nav-link active">Home</button>
-      <button id="testsLink" class="nav-link">Community Tests</button>
-      <button id="leaderboardLink" class="nav-link">Leaderboard</button>
-      <button id="profileLink" class="nav-link hidden">My Profile</button>
-    </nav>
 
     <main>
       <!-- Login Prompt -->
@@ -56,8 +52,12 @@
             <input type="password" id="loginPassword" placeholder=" ">
             <label for="loginPassword">Password</label>
           </div>
-          <button id="emailLoginBtn" class="auth-btn">Login</button>
-          <button id="googleLoginBtn" class="auth-btn secondary-btn">Login with Google</button>
+          <button id="emailLoginBtn" class="auth-btn">
+            <i class="fas fa-sign-in-alt"></i> Login
+          </button>
+          <button id="googleLoginBtn" class="auth-btn secondary-btn">
+            <i class="fab fa-google"></i> Login with Google
+          </button>
           <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
         </div>
 
@@ -79,59 +79,18 @@
             <input type="password" id="confirmPassword" placeholder=" ">
             <label for="confirmPassword">Confirm Password</label>
           </div>
-          <button id="registerBtn" class="auth-btn">Register</button>
-          <button id="showLogin" class="auth-btn secondary-btn">Back to Login</button>
-        </div>
-      </section>
-
-      <!-- Profile Section -->
-      <section id="profileSection" class="hidden">
-        <div class="profile-header">
-          <img id="profilePhoto" class="user-photo-large">
-          <h3 id="profileName"></h3>
-        </div>
-        
-        <div class="stats-grid">
-          <div class="stat-card">
-            <h4>Tests Completed</h4>
-            <p id="testsCompleted">0</p>
-          </div>
-          <div class="stat-card">
-            <h4>Best Accuracy</h4>
-            <p id="bestAccuracy">0%</p>
-          </div>
-          <div class="stat-card">
-            <h4>Best Speed</h4>
-            <p id="bestWPM">0 WPM</p>
-          </div>
-        </div>
-
-        <div class="progress-dashboard">
-          <h4>Your Progress</h4>
-          <div class="chart-container">
-            <canvas id="progressChart"></canvas>
-          </div>
-        </div>
-
-        <h4>Achievements</h4>
-        <div id="achievementsContainer" class="achievements-grid"></div>
-
-        <h4>Test History</h4>
-        <div id="testHistory" class="history-table"></div>
-
-        <div class="custom-categories">
-          <h4>Your Categories</h4>
-          <div id="categoriesList"></div>
-          <div class="add-category">
-            <input type="text" id="newCategoryName" placeholder="New category name">
-            <button id="addCategoryBtn">Add Category</button>
-          </div>
+          <button id="registerBtn" class="auth-btn">
+            <i class="fas fa-user-plus"></i> Register
+          </button>
+          <button id="showLogin" class="auth-btn secondary-btn">
+            <i class="fas fa-arrow-left"></i> Back to Login
+          </button>
         </div>
       </section>
 
       <!-- Leaderboard Section -->
-      <section id="leaderboardSection" class="hidden leaderboard-section">
-        <h3>Leaderboard</h3>
+      <section id="leaderboardSection" class="hidden">
+        <div class="section-title">Leaderboard</div>
         <div class="leaderboard-controls">
           <select id="leaderboardFilter">
             <option value="all">All Tests</option>
@@ -149,21 +108,21 @@
             <option value="legal">Legal</option>
             <option value="previous">Previous Year</option>
           </select>
-          <button id="prevPageBtn" class="secondary-btn" disabled>Previous</button>
-          <button id="nextPageBtn" class="secondary-btn">Next</button>
+          <button id="prevPageBtn" class="secondary-btn" disabled>
+            <i class="fas fa-chevron-left"></i> Previous
+          </button>
+          <button id="nextPageBtn" class="secondary-btn">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
         </div>
         <div id="leaderboardList" class="leaderboard-list"></div>
         <div id="leaderboardPagination" class="pagination-info"></div>
       </section>
 
       <!-- Global Tests Section -->
-      <section id="globalTestsSection" class="hidden global-tests-section">
-        <h3>Community Tests</h3>
-        <div class="test-controls">
-          <div class="search-container">
-            <input type="text" id="testSearchInput" placeholder="Search tests...">
-            <button id="searchTestsBtn">Search</button>
-          </div>
+      <section id="globalTestsSection" class="hidden">
+        <div class="section-title">Community Tests</div>
+        <div class="test-filters">
           <select id="testCategoryFilter">
             <option value="all">All Categories</option>
             <option value="general">General Matter</option>
@@ -177,8 +136,8 @@
       </section>
 
       <!-- Custom Test Section -->
-      <section id="customTestSection" class="hidden custom-test-section">
-        <h3>Add Your Own Test</h3>
+      <section id="customTestSection" class="hidden">
+        <div class="section-title">Add Your Own Test</div>
         <div class="input-group">
           <input type="text" id="customTitle" placeholder=" ">
           <label for="customTitle">Test Title</label>
@@ -202,25 +161,29 @@
           <label for="customVideoUrl">Video URL (Optional)</label>
         </div>
         <div class="button-group">
-          <button id="saveTestBtn">Save & Share Test</button>
-          <button id="clearTestsBtn" class="secondary-btn">Clear My Tests</button>
+          <button id="saveTestBtn">
+            <i class="fas fa-save"></i> Save & Share Test
+          </button>
+          <button id="clearTestsBtn" class="secondary-btn">
+            <i class="fas fa-trash"></i> Clear My Tests
+          </button>
         </div>
       </section>
 
       <!-- Main Input Section -->
-      <section id="mainSection" class="input-section">
+      <section class="input-section">
         <div class="input-group" id="originalTextGroup">
           <textarea id="originalText" placeholder=" "></textarea>
           <label for="originalText">Original Text</label>
         </div>
 
         <div id="timerOptions" class="timer-options hidden">
-          <button class="timer-option" data-minutes="40">40 Minutes</button>
-          <button class="timer-option" data-minutes="50">50 Minutes</button>
-          <div class="custom-timer">
-            <input type="number" id="customTimerMinutes" min="1" max="120" placeholder="Min">
-            <button id="startCustomTimer">Start</button>
-          </div>
+          <button class="timer-option" data-minutes="40">
+            <i class="fas fa-clock"></i> 40 Minutes
+          </button>
+          <button class="timer-option" data-minutes="50">
+            <i class="fas fa-clock"></i> 50 Minutes
+          </button>
         </div>
 
         <div id="timerDisplay" class="timer-display hidden"></div>
@@ -231,9 +194,15 @@
         </div>
 
         <div class="button-group test-controls">
-          <button id="compareBtn">Compare Texts</button>
-          <button id="showFullTextBtn" class="secondary-btn">View Full Texts</button>
-          <button id="closeResultsBtn" class="close-results-btn hidden">Close Results</button>
+          <button id="compareBtn">
+            <i class="fas fa-exchange-alt"></i> Compare Texts
+          </button>
+          <button id="showFullTextBtn" class="secondary-btn">
+            <i class="fas fa-file-alt"></i> View Full Texts
+          </button>
+          <button id="closeResultsBtn" class="danger-btn hidden">
+            <i class="fas fa-times"></i> Close Results
+          </button>
         </div>
       </section>
 
@@ -246,7 +215,9 @@
               <span>Steno Warriors Transcription Tool</span>
             </div>
           </div>
-          <button id="downloadPdfBtn" class="download-btn">Download as PDF</button>
+          <button id="downloadPdfBtn" class="download-btn">
+            <i class="fas fa-file-pdf"></i> Download as PDF
+          </button>
         </div>
 
         <div class="comparison-section">
@@ -275,7 +246,9 @@
       <section id="fullTextSection" class="hidden">
         <div class="fulltext-header">
           <h2>Full Texts</h2>
-          <button id="backToResultsBtn" class="secondary-btn">Back to Results</button>
+          <button id="backToResultsBtn" class="secondary-btn">
+            <i class="fas fa-arrow-left"></i> Back to Results
+          </button>
         </div>
         <div class="columns">
           <div class="column">
