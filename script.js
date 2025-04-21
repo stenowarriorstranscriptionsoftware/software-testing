@@ -28,179 +28,53 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeResultsBtn = document.getElementById('closeResultsBtn');
   const resultsSection = document.getElementById('results');
   const fullTextSection = document.getElementById('fullTextSection');
-  const comparisonResultEl = document.getElementById('comparisonResult');
-  const statsEl = document.getElementById('stats');
-  const feedbackEl = document.getElementById('feedback');
-  const originalDisplayEl = document.getElementById('originalDisplay');
-  const userDisplayEl = document.getElementById('userDisplay');
-  const resultDateEl = document.getElementById('resultDate');
-  const originalTextGroup = document.getElementById('originalTextGroup');
-  const timerOptions = document.getElementById('timerOptions');
-  const timerDisplay = document.getElementById('timerDisplay');
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const userInfo = document.getElementById('userInfo');
-  const userPhoto = document.getElementById('userPhoto');
-  const userName = document.getElementById('userName');
-  const loginPrompt = document.getElementById('loginPrompt');
-  const customTestSection = document.getElementById('customTestSection');
+  const profileSection = document.getElementById('profileSection');
   const globalTestsSection = document.getElementById('globalTestsSection');
-  const globalTestsList = document.getElementById('globalTestsList');
   const leaderboardSection = document.getElementById('leaderboardSection');
-  const leaderboardList = document.getElementById('leaderboardList');
-  const leaderboardFilter = document.getElementById('leaderboardFilter');
-  const testNameFilter = document.getElementById('testNameFilter');
-  const categoryFilter = document.getElementById('categoryFilter');
-  const testCategoryFilter = document.getElementById('testCategoryFilter');
-  const prevPageBtn = document.getElementById('prevPageBtn');
-  const nextPageBtn = document.getElementById('nextPageBtn');
-  const leaderboardPagination = document.getElementById('leaderboardPagination');
-  const saveBtn = document.getElementById('saveTestBtn');
-  const clearBtn = document.getElementById('clearTestsBtn');
-  const customTitle = document.getElementById('customTitle');
-  const customOriginal = document.getElementById('customOriginal');
-  const customVideoUrl = document.getElementById('customVideoUrl');
-  const customCategory = document.getElementById('customCategory');
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const emailLoginBtn = document.getElementById('emailLoginBtn');
-  const googleLoginBtn = document.getElementById('googleLoginBtn');
-  const registerBtn = document.getElementById('registerBtn');
-  const showRegister = document.getElementById('showRegister');
-  const showLogin = document.getElementById('showLogin');
-  const loginEmail = document.getElementById('loginEmail');
-  const loginPassword = document.getElementById('loginPassword');
-  const registerName = document.getElementById('registerName');
-  const registerEmail = document.getElementById('registerEmail');
-  const registerPassword = document.getElementById('registerPassword');
-  const confirmPassword = document.getElementById('confirmPassword');
-
-  // Timer variables
-  let timerInterval;
-  let endTime;
-  let testActive = false;
-  let timerButtons = document.querySelectorAll('.timer-option');
+  const mainSection = document.getElementById('mainSection');
   
-  // Leaderboard variables
-  let currentPage = 1;
-  const entriesPerPage = 10;
-  let allAttempts = [];
-  let filteredAttempts = [];
-  let uniqueTestNames = new Set();
-  let currentSortColumn = 'accuracy';
-  let currentSortDirection = 'desc';
+  // Navigation elements
+  const homeLink = document.getElementById('homeLink');
+  const testsLink = document.getElementById('testsLink');
+  const leaderboardLink = document.getElementById('leaderboardLink');
+  const profileLink = document.getElementById('profileLink');
 
-  // Initialize typing timer
-  let startTime = null;
-  userTextEl.addEventListener('input', function() {
-    if (!startTime) {
-      startTime = new Date();
-    }
-  });
+  // Profile elements
+  const profileName = document.getElementById('profileName');
+  const profilePhoto = document.getElementById('profilePhoto');
+  const testsCompleted = document.getElementById('testsCompleted');
+  const bestAccuracy = document.getElementById('bestAccuracy');
+  const bestWPM = document.getElementById('bestWPM');
+  const achievementsContainer = document.getElementById('achievementsContainer');
+  const testHistory = document.getElementById('testHistory');
+  const categoriesList = document.getElementById('categoriesList');
+  const newCategoryName = document.getElementById('newCategoryName');
+  const addCategoryBtn = document.getElementById('addCategoryBtn');
 
-  // Toggle between login and register forms
-  showRegister.addEventListener('click', (e) => {
-    e.preventDefault();
-    loginForm.classList.add('hidden');
-    registerForm.classList.remove('hidden');
-  });
+  // Search elements
+  const testSearchInput = document.getElementById('testSearchInput');
+  const searchTestsBtn = document.getElementById('searchTestsBtn');
 
-  showLogin.addEventListener('click', (e) => {
-    e.preventDefault();
-    registerForm.classList.add('hidden');
-    loginForm.classList.remove('hidden');
-  });
+  // Timer elements
+  const customTimerMinutes = document.getElementById('customTimerMinutes');
+  const startCustomTimer = document.getElementById('startCustomTimer');
 
-  // Email/password login handler
-  emailLoginBtn.addEventListener('click', () => {
-    const email = loginEmail.value.trim();
-    const password = loginPassword.value.trim();
-    
-    if (!email || !password) {
-      alert('Please enter both email and password');
-      return;
-    }
-    
-    auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        console.log('Login successful');
-      })
-      .catch(error => {
-        console.error('Login error:', error);
-        alert('Login failed: ' + error.message);
-      });
-  });
+  // Initialize the app
+  initNavigation();
+  initAuth();
+  initTimer();
+  initProfile();
+  initSearch();
 
-  // Registration handler
-  registerBtn.addEventListener('click', () => {
-    const name = registerName.value.trim();
-    const email = registerEmail.value.trim();
-    const password = registerPassword.value.trim();
-    const confirm = confirmPassword.value.trim();
-    
-    if (!name || !email || !password || !confirm) {
-      alert('Please fill in all fields');
-      return;
-    }
-    
-    if (password !== confirm) {
-      alert('Passwords do not match');
-      return;
-    }
-    
-    if (password.length < 6) {
-      alert('Password should be at least 6 characters');
-      return;
-    }
-    
-    auth.createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        return userCredential.user.updateProfile({
-          displayName: name
-        });
-      })
-      .then(() => {
-        alert('Registration successful! You are now logged in.');
-        registerName.value = '';
-        registerEmail.value = '';
-        registerPassword.value = '';
-        confirmPassword.value = '';
-        registerForm.classList.add('hidden');
-        loginForm.classList.remove('hidden');
-      })
-      .catch(error => {
-        console.error('Registration error:', error);
-        alert('Registration failed: ' + error.message);
-      });
-  });
-
-  // Google login handler
-  googleLoginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .catch(error => {
-        console.error('Google login error:', error);
-        alert('Google login failed. Please try again.');
-      });
-  });
-
-  // Auth state listener
-  auth.onAuthStateChanged(user => {
-    if (user) {
-      loginBtn.classList.add('hidden');
-      userInfo.classList.remove('hidden');
-      if (user.photoURL) {
-        userPhoto.src = user.photoURL;
-      } else {
-        userPhoto.src = 'https://www.gravatar.com/avatar/' + user.uid + '?d=identicon';
-      }
-      userName.textContent = user.displayName || 'User';
-      loginPrompt.classList.add('hidden');
-      customTestSection.classList.remove('hidden');
-      globalTestsSection.classList.remove('hidden');
-      leaderboardSection.classList.remove('hidden');
+  function initNavigation() {
+    homeLink.addEventListener('click', () => showSection(mainSection));
+    testsLink.addEventListener('click', () => {
+      showSection(globalTestsSection);
       loadGlobalTests();
-      loadLeaderboard();
+    });
+    leaderboardLink.addEventListener('click', () => {
+      showSection(leaderboardSection);
+     loadLeaderboard();
       cleanupOldData();
     } else {
       loginBtn.classList.remove('hidden');
