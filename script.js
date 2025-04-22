@@ -1,15 +1,14 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDNdovILjmsBQxGuXx4iOOw1JgCL2_3TLI",
-  authDomain: "stenowarriorsyoursteno.firebaseapp.com",
-  databaseURL: "https://stenowarriorsyoursteno-default-rtdb.firebaseio.com",
-  projectId: "stenowarriorsyoursteno",
-  storageBucket: "stenowarriorsyoursteno.appspot.com",
-  messagingSenderId: "173103533896",
-  appId: "1:173103533896:web:78bbe18e17ca8f5da5ad7d",
-  measurementId: "G-Y3E0QVFSBB"
+  apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
+  authDomain: "setup-login-page.firebaseapp.com",
+  databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
+  projectId: "setup-login-page",
+  storageBucket: "setup-login-page.firebasestorage.app",
+  messagingSenderId: "341251531099",
+  appId: "1:341251531099:web:f4263621455541ffdc3a7e",
+  measurementId: "G-ZXFC7NR9HV"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
