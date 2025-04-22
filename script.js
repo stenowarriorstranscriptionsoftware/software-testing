@@ -4,7 +4,7 @@ const firebaseConfig = {
   authDomain: "stenowarriorsyoursteno.firebaseapp.com",
   databaseURL: "https://stenowarriorsyoursteno-default-rtdb.firebaseio.com",
   projectId: "stenowarriorsyoursteno",
-  storageBucket: "stenowarriorsyoursteno.appspot.com",
+  storageBucket: "stenowarriorsyoursteno.firebasestorage.app",
   messagingSenderId: "173103533896",
   appId: "1:173103533896:web:78bbe18e17ca8f5da5ad7d",
   measurementId: "G-Y3E0QVFSBB"
