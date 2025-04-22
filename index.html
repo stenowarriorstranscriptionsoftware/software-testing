@@ -1,46 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>EduAccess</title>
+  <title>Admin Panel</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
-    #dashboard { display: none; }
-    img { max-width: 100%; margin-top: 10px; }
-  </style>
 </head>
 <body>
-  <h2>EduAccess Portal</h2>
-
-  <div id="auth">
-    <input id="email" placeholder="Email" /><br><br>
-    <input id="password" placeholder="Password" type="password" /><br><br>
-    <button onclick="signUp()">Sign Up</button>
-    <button onclick="login()">Log In</button>
-  </div>
-
-  <div id="dashboard">
-    <p id="statusMsg"></p>
-
-    <div id="uploadSection">
-      <h3>Step 1: Pay via QR</h3>
-      <img src="your-qr-code.png" alt="QR Code"><br><br>
-
-      <h3>Step 2: Upload Payment Screenshot</h3>
-      <input type="file" id="screenshot" /><br><br>
-      <button onclick="uploadScreenshot()">Upload</button>
-    </div>
-
-    <div id="content" style="display:none;">
-      <h3>✅ Welcome to the learning area!</h3>
-      <p>Protected content goes here.</p>
-    </div>
-
-    <button onclick="logout()">Log Out</button>
-  </div>
+  <h2>Admin: Payment Approval</h2>
+  <div id="list"></div>
 
   <script>
     const firebaseConfig = {
@@ -59,63 +28,46 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
 
-    // Auth
-    async function signUp() {
-      const email = emailEl.value;
-      const password = passwordEl.value;
-      await auth.createUserWithEmailAndPassword(email, password);
-    }
-
-    async function login() {
-      const email = emailEl.value;
-      const password = passwordEl.value;
-      await auth.signInWithEmailAndPassword(email, password);
-    }
-
-    async function logout() {
-      await auth.signOut();
-      location.reload();
-    }
-
     auth.onAuthStateChanged(async user => {
-      if (user) {
-        document.getElementById('auth').style.display = 'none';
-        document.getElementById('dashboard').style.display = 'block';
-
-        const docRef = db.collection("users").doc(user.uid);
-        const doc = await docRef.get();
-
-        const now = new Date();
-
-        if (doc.exists && doc.data().paidUntil?.toDate() > now) {
-          document.getElementById("statusMsg").textContent = "✅ Subscription active until: " + doc.data().paidUntil.toDate().toDateString();
-          document.getElementById("content").style.display = 'block';
-          document.getElementById("uploadSection").style.display = 'none';
-        } else {
-          document.getElementById("statusMsg").textContent = "🔒 Access locked. Please upload payment screenshot.";
-        }
+      if (!user) {
+        const email = prompt("Admin Email:");
+        const password = prompt("Admin Password:");
+        await auth.signInWithEmailAndPassword(email, password);
+        return;
       }
+
+      // Load pending payments
+      const querySnapshot = await db.collection("users")
+        .where("screenshotUploaded", "==", true)
+        .where("approved", "==", false)
+        .get();
+
+      const list = document.getElementById("list");
+      list.innerHTML = "";
+
+      querySnapshot.forEach(async doc => {
+        const data = doc.data();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <p><strong>User:</strong> ${doc.id}</p>
+          <button onclick="approveUser('${doc.id}')">✅ Approve</button>
+          <hr>`;
+        list.appendChild(div);
+      });
     });
 
-    async function uploadScreenshot() {
-      const file = document.getElementById('screenshot').files[0];
-      if (!file) return alert('Please select a screenshot.');
+    async function approveUser(uid) {
+      const date = new Date();
+      date.setDate(date.getDate() + 30);
 
-      const user = auth.currentUser;
-      const ref = storage.ref(`payments/${user.uid}/${file.name}`);
-      await ref.put(file);
-
-      await db.collection("users").doc(user.uid).set({
-        screenshotUploaded: true,
-        approved: false
+      await db.collection("users").doc(uid).set({
+        approved: true,
+        paidUntil: firebase.firestore.Timestamp.fromDate(date)
       }, { merge: true });
 
-      alert("Screenshot uploaded! Admin will review and activate your access.");
+      alert("Approved! Reload to see updates.");
+      location.reload();
     }
-
-    // Shortcut references
-    const emailEl = document.getElementById("email");
-    const passwordEl = document.getElementById("password");
   </script>
 </body>
 </html>
