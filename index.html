@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>Steno Warriors Transcription</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="styles.css"/>
@@ -80,9 +80,11 @@
         <h3>Leaderboard</h3>
         <div class="leaderboard-controls">
           <select id="leaderboardFilter">
-            <option value="all">All Tests</option>
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
             <option value="week">This Week</option>
             <option value="month">This Month</option>
+            <option value="year">This Year</option>
           </select>
           <select id="testNameFilter">
             <option value="all">All Tests</option>
@@ -95,15 +97,21 @@
             <option value="legal">Legal</option>
             <option value="previous">Previous Year</option>
           </select>
+          <select id="userFilter">
+            <option value="all">All Users</option>
+          </select>
+          <button id="exportBtn" class="secondary-btn">Export CSV</button>
+        </div>
+        <div class="leaderboard-pagination">
+          <button id="firstPageBtn" class="pagination-btn">First</button>
+          <button id="prevPageBtn" class="pagination-btn">Previous</button>
+          <span id="pageInfo">Page 1 of 1</span>
+          <button id="nextPageBtn" class="pagination-btn">Next</button>
+          <button id="lastPageBtn" class="pagination-btn">Last</button>
         </div>
         <div id="leaderboardList" class="leaderboard-list"></div>
-        <div class="leaderboard-pagination">
-          <button id="firstPageBtn">First</button>
-          <button id="prevPageBtn">Previous</button>
-          <span id="pageInfo">Page 1 of 5</span>
-          <button id="nextPageBtn">Next</button>
-          <button id="lastPageBtn">Last</button>
-        </div>
+        <button id="toggleGraphBtn" class="secondary-btn">Show Graph View</button>
+        <div id="leaderboardGraph" class="hidden"></div>
       </section>
 
       <!-- Global Tests Section -->
@@ -237,7 +245,7 @@
     </footer>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="script.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9342a08c0c677bb7',t:'MTc0NTI5ODc1Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
