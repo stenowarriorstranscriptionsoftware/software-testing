@@ -1,251 +1,121 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Steno Warriors Transcription</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="styles.css"/>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+  <title>EduAccess</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+    #dashboard { display: none; }
+    img { max-width: 100%; margin-top: 10px; }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="theme-toggle">
-        <input type="checkbox" id="darkModeToggle">
-        <label for="darkModeToggle" class="toggle-label">
-          <span class="toggle-icon">🌙</span>
-        </label>
-      </div>
-      <h1>Steno Warriors</h1>
-      <p class="subtitle">Advanced Transcription Comparison Tool</p>
-      <div id="authSection">
-        <button id="loginBtn" class="auth-btn">Login with Google</button>
-        <div id="userInfo" class="hidden">
-          <img id="userPhoto" class="user-photo">
-          <span id="userName"></span>
-          <button id="logoutBtn" class="auth-btn secondary-btn">Logout</button>
-        </div>
-      </div>
-    </header>
+  <h2>EduAccess Portal</h2>
 
-    <main>
-      <!-- Login Prompt -->
-      <section id="loginPrompt" class="login-prompt">
-        <div id="loginForm">
-          <h3>Login to Steno Warriors</h3>
-          <div class="input-group">
-            <input type="email" id="loginEmail" placeholder=" ">
-            <label for="loginEmail">Email</label>
-          </div>
-          <div class="input-group">
-            <input type="password" id="loginPassword" placeholder=" ">
-            <label for="loginPassword">Password</label>
-          </div>
-          <button id="emailLoginBtn" class="auth-btn">Login</button>
-          <button id="googleLoginBtn" class="auth-btn secondary-btn">Login with Google</button>
-          <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
-        </div>
-
-        <div id="registerForm" class="hidden">
-          <h3>Create an Account</h3>
-          <div class="input-group">
-            <input type="text" id="registerName" placeholder=" ">
-            <label for="registerName">Full Name</label>
-          </div>
-          <div class="input-group">
-            <input type="email" id="registerEmail" placeholder=" ">
-            <label for="registerEmail">Email</label>
-          </div>
-          <div class="input-group">
-            <input type="password" id="registerPassword" placeholder=" ">
-            <label for="registerPassword">Password (min 6 characters)</label>
-          </div>
-          <div class="input-group">
-            <input type="password" id="confirmPassword" placeholder=" ">
-            <label for="confirmPassword">Confirm Password</label>
-          </div>
-          <button id="registerBtn" class="auth-btn">Register</button>
-          <button id="showLogin" class="auth-btn secondary-btn">Back to Login</button>
-        </div>
-      </section>
-
-      <!-- Leaderboard Section -->
-      <section id="leaderboardSection" class="hidden leaderboard-section">
-        <h3>Leaderboard</h3>
-        <div class="leaderboard-controls">
-          <select id="leaderboardFilter">
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-          </select>
-          <select id="testNameFilter">
-            <option value="all">All Tests</option>
-          </select>
-          <select id="categoryFilter">
-            <option value="all">All Categories</option>
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-          </select>
-          <select id="userFilter">
-            <option value="all">All Users</option>
-          </select>
-          <button id="exportBtn" class="secondary-btn">Export CSV</button>
-        </div>
-        <div class="leaderboard-pagination">
-          <button id="firstPageBtn" class="pagination-btn">First</button>
-          <button id="prevPageBtn" class="pagination-btn">Previous</button>
-          <span id="pageInfo">Page 1 of 1</span>
-          <button id="nextPageBtn" class="pagination-btn">Next</button>
-          <button id="lastPageBtn" class="pagination-btn">Last</button>
-        </div>
-        <div id="leaderboardList" class="leaderboard-list"></div>
-        <button id="toggleGraphBtn" class="secondary-btn">Show Graph View</button>
-        <div id="leaderboardGraph" class="hidden"></div>
-      </section>
-
-      <!-- Global Tests Section -->
-      <section id="globalTestsSection" class="hidden global-tests-section">
-        <h3>Community Tests</h3>
-        <div class="test-filters">
-          <select id="testCategoryFilter">
-            <option value="all">All Categories</option>
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-          </select>
-        </div>
-        <div id="globalTestsList" class="tests-list"></div>
-      </section>
-
-      <!-- Custom Test Section -->
-      <section id="customTestSection" class="hidden custom-test-section">
-        <h3>Add Your Own Test</h3>
-        <div class="input-group">
-          <input type="text" id="customTitle" placeholder=" ">
-          <label for="customTitle">Test Title</label>
-        </div>
-        <div class="input-group">
-          <select id="customCategory">
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-          </select>
-          <label for="customCategory">Test Category</label>
-        </div>
-        <div class="input-group">
-          <textarea id="customOriginal" placeholder=" "></textarea>
-          <label for="customOriginal">Original Text</label>
-        </div>
-        <div class="input-group">
-          <input type="url" id="customVideoUrl" placeholder=" ">
-          <label for="customVideoUrl">Video URL (Optional)</label>
-        </div>
-        <div class="button-group">
-          <button id="saveTestBtn">Save & Share Test</button>
-          <button id="clearTestsBtn" class="secondary-btn">Clear My Tests</button>
-        </div>
-      </section>
-
-      <!-- Main Input Section -->
-      <section class="input-section">
-        <div class="input-group" id="originalTextGroup">
-          <textarea id="originalText" placeholder=" "></textarea>
-          <label for="originalText">Original Text</label>
-        </div>
-
-        <div id="timerOptions" class="timer-options hidden">
-          <button class="timer-option" data-minutes="40">40 Minutes</button>
-          <button class="timer-option" data-minutes="50">50 Minutes</button>
-        </div>
-
-        <div id="timerDisplay" class="timer-display hidden"></div>
-
-        <div class="input-group">
-          <textarea id="userText" placeholder=" "></textarea>
-          <label for="userText">Your Transcription</label>
-        </div>
-
-        <div class="button-group test-controls">
-          <button id="compareBtn">Compare Texts</button>
-          <button id="showFullTextBtn" class="secondary-btn">View Full Texts</button>
-          <button id="closeResultsBtn" class="close-results-btn hidden">Close Results</button>
-        </div>
-      </section>
-
-      <section id="results" class="hidden">
-        <div class="results-header">
-          <div>
-            <h2>Results</h2>
-            <div class="result-meta">
-              <span id="resultDate"></span>
-              <span>Steno Warriors Transcription Tool</span>
-            </div>
-          </div>
-          <button id="downloadPdfBtn" class="download-btn">Download as PDF</button>
-        </div>
-
-        <div class="comparison-section">
-          <div class="legend-box">
-            <div class="legend-row"><span class="correct">■</span> Correct</div>
-            <div class="legend-row"><span class="missing">■</span> Missing</div>
-            <div class="legend-row"><span class="addition">■</span> Added</div>
-            <div class="legend-row"><span class="spelling">■</span> Spelling</div>
-            <div class="legend-row"><span class="capitalization">■</span> Capitalization</div>
-          </div>
-          <div id="comparisonResult" class="result-box"></div>
-        </div>
-
-        <div class="analysis-section">
-          <div class="analysis-column">
-            <h3>Statistics</h3>
-            <div id="stats" class="stats-box"></div>
-          </div>
-          <div class="analysis-column">
-            <h3>Feedback</h3>
-            <div id="feedback" class="feedback-box"></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="fullTextSection" class="hidden">
-        <div class="fulltext-header">
-          <h2>Full Texts</h2>
-          <button id="backToResultsBtn" class="secondary-btn">Back to Results</button>
-        </div>
-        <div class="columns">
-          <div class="column">
-            <h3>Original Text</h3>
-            <div id="originalDisplay" class="text-display"></div>
-          </div>
-          <div class="column">
-            <h3>Your Transcription</h3>
-            <div id="userDisplay" class="text-display"></div>
-          </div>
-        </div>
-      </section>
-    </main>
-
-    <footer>
-      <p>© 2023 Steno Warriors | Professional Transcription Tool</p>
-    </footer>
+  <div id="auth">
+    <input id="email" placeholder="Email" /><br><br>
+    <input id="password" placeholder="Password" type="password" /><br><br>
+    <button onclick="signUp()">Sign Up</button>
+    <button onclick="login()">Log In</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="script.js"></script>
+  <div id="dashboard">
+    <p id="statusMsg"></p>
+
+    <div id="uploadSection">
+      <h3>Step 1: Pay via QR</h3>
+      <img src="your-qr-code.png" alt="QR Code"><br><br>
+
+      <h3>Step 2: Upload Payment Screenshot</h3>
+      <input type="file" id="screenshot" /><br><br>
+      <button onclick="uploadScreenshot()">Upload</button>
+    </div>
+
+    <div id="content" style="display:none;">
+      <h3>✅ Welcome to the learning area!</h3>
+      <p>Protected content goes here.</p>
+    </div>
+
+    <button onclick="logout()">Log Out</button>
+  </div>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyB9vruL_f9KZPC-Ihdj3UuqcXSgy1Lzqm0",
+      authDomain: "score-collection.firebaseapp.com",
+      databaseURL: "https://score-collection-default-rtdb.firebaseio.com",
+      projectId: "score-collection",
+      storageBucket: "score-collection.appspot.com",
+      messagingSenderId: "720795371551",
+      appId: "1:720795371551:web:78ff7863cbeaca0161ed2a",
+      measurementId: "G-L6MHY1KCZ0"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    // Auth
+    async function signUp() {
+      const email = emailEl.value;
+      const password = passwordEl.value;
+      await auth.createUserWithEmailAndPassword(email, password);
+    }
+
+    async function login() {
+      const email = emailEl.value;
+      const password = passwordEl.value;
+      await auth.signInWithEmailAndPassword(email, password);
+    }
+
+    async function logout() {
+      await auth.signOut();
+      location.reload();
+    }
+
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        document.getElementById('auth').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+
+        const docRef = db.collection("users").doc(user.uid);
+        const doc = await docRef.get();
+
+        const now = new Date();
+
+        if (doc.exists && doc.data().paidUntil?.toDate() > now) {
+          document.getElementById("statusMsg").textContent = "✅ Subscription active until: " + doc.data().paidUntil.toDate().toDateString();
+          document.getElementById("content").style.display = 'block';
+          document.getElementById("uploadSection").style.display = 'none';
+        } else {
+          document.getElementById("statusMsg").textContent = "🔒 Access locked. Please upload payment screenshot.";
+        }
+      }
+    });
+
+    async function uploadScreenshot() {
+      const file = document.getElementById('screenshot').files[0];
+      if (!file) return alert('Please select a screenshot.');
+
+      const user = auth.currentUser;
+      const ref = storage.ref(`payments/${user.uid}/${file.name}`);
+      await ref.put(file);
+
+      await db.collection("users").doc(user.uid).set({
+        screenshotUploaded: true,
+        approved: false
+      }, { merge: true });
+
+      alert("Screenshot uploaded! Admin will review and activate your access.");
+    }
+
+    // Shortcut references
+    const emailEl = document.getElementById("email");
+    const passwordEl = document.getElementById("password");
+  </script>
 </body>
 </html>
