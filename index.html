@@ -16,8 +16,13 @@
 <body>
   <div class="container">
     <header>
+      <button class="hamburger" aria-label="Toggle navigation menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
       <div class="theme-toggle">
-        <input type="checkbox" id="darkModeToggle">
+        <input type="checkbox" id="darkModeToggle" aria-label="Toggle dark mode">
         <label for="darkModeToggle" class="toggle-label">
           <span class="toggle-icon">🌙</span>
         </label>
@@ -27,12 +32,21 @@
       <div id="authSection">
         <button id="loginBtn" class="auth-btn">Login with Google</button>
         <div id="userInfo" class="hidden">
-          <img id="userPhoto" class="user-photo">
+          <img id="userPhoto" class="user-photo" alt="User profile photo">
           <span id="userName"></span>
           <button id="logoutBtn" class="auth-btn secondary-btn">Logout</button>
         </div>
       </div>
     </header>
+
+    <nav class="mobile-nav hidden">
+      <ul>
+        <li><a href="#inputSection" class="nav-link">Typing Test</a></li>
+        <li><a href="#leaderboardSection" class="nav-link">Leaderboard</a></li>
+        <li><a href="#globalTestsSection" class="nav-link">Community Tests</a></li>
+        <li><a href="#customTestSection" class="nav-link">Add Test</a></li>
+      </ul>
+    </nav>
 
     <main>
       <!-- Login Prompt -->
@@ -40,11 +54,11 @@
         <div id="loginForm">
           <h3>Login to Steno Warriors</h3>
           <div class="input-group">
-            <input type="email" id="loginEmail" placeholder=" ">
+            <input type="email" id="loginEmail" placeholder=" " aria-label="Email">
             <label for="loginEmail">Email</label>
           </div>
           <div class="input-group">
-            <input type="password" id="loginPassword" placeholder=" ">
+            <input type="password" id="loginPassword" placeholder=" " aria-label="Password">
             <label for="loginPassword">Password</label>
           </div>
           <button id="emailLoginBtn" class="auth-btn">Login</button>
@@ -55,19 +69,19 @@
         <div id="registerForm" class="hidden">
           <h3>Create an Account</h3>
           <div class="input-group">
-            <input type="text" id="registerName" placeholder=" ">
+            <input type="text" id="registerName" placeholder=" " aria-label="Full Name">
             <label for="registerName">Full Name</label>
           </div>
           <div class="input-group">
-            <input type="email" id="registerEmail" placeholder=" ">
+            <input type="email" id="registerEmail" placeholder=" " aria-label="Email">
             <label for="registerEmail">Email</label>
           </div>
           <div class="input-group">
-            <input type="password" id="registerPassword" placeholder=" ">
+            <input type="password" id="registerPassword" placeholder=" " aria-label="Password">
             <label for="registerPassword">Password (min 6 characters)</label>
           </div>
           <div class="input-group">
-            <input type="password" id="confirmPassword" placeholder=" ">
+            <input type="password" id="confirmPassword" placeholder=" " aria-label="Confirm Password">
             <label for="confirmPassword">Confirm Password</label>
           </div>
           <button id="registerBtn" class="auth-btn">Register</button>
@@ -78,81 +92,90 @@
       <!-- Leaderboard Section -->
       <section id="leaderboardSection" class="hidden leaderboard-section">
         <h3>Leaderboard</h3>
-        <div class="leaderboard-controls">
-          <select id="leaderboardFilter">
-            <option value="all">All Tests</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-          </select>
-          <select id="testNameFilter">
-            <option value="all">All Tests</option>
-          </select>
-          <select id="categoryFilter">
-            <option value="all">All Categories</option>
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-          </select>
-          <button id="prevPageBtn" class="secondary-btn" disabled>Previous</button>
-          <button id="nextPageBtn" class="secondary-btn">Next</button>
+        <button class="toggle-section" aria-expanded="false" aria-controls="leaderboardContent">Toggle Leaderboard</button>
+        <div id="leaderboardContent" class="section-content">
+          <div class="leaderboard-controls">
+            <select id="leaderboardFilter" aria-label="Filter leaderboard by time">
+              <option value="all">All Tests</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+            </select>
+            <select id="testNameFilter" aria-label="Filter leaderboard by test name">
+              <option value="all">All Tests</option>
+            </select>
+            <select id="categoryFilter" aria-label="Filter leaderboard by category">
+              <option value="all">All oneself>
+              <option value="general">General Matter</option>
+              <option value="kailash">Kailash Chandra</option>
+              <option value="progressive">Progressive</option>
+              <option value="legal">Legal</option>
+              <option value="previous">Previous Year</option>
+            </select>
+            <button id="prevPageBtn" class="secondary-btn" disabled>Previous</button>
+            <button id="nextPageBtn" class="secondary-btn">Next</button>
+          </div>
+          <div id="leaderboardList" class="leaderboard-list"></div>
+          <div id="leaderboardPagination" class="pagination-info"></div>
         </div>
-        <div id="leaderboardList" class="leaderboard-list"></div>
-        <div id="leaderboardPagination" class="pagination-info"></div>
       </section>
 
       <!-- Global Tests Section -->
       <section id="globalTestsSection" class="hidden global-tests-section">
         <h3>Community Tests</h3>
-        <div class="test-filters">
-          <select id="testCategoryFilter">
-            <option value="all">All Categories</option>
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-          </select>
+        <button class="toggle-section" aria-expanded="false" aria-controls="globalTestsContent">Toggle Community Tests</button>
+        <div id="globalTestsContent" class="section-content">
+          <div class="test-filters">
+            <select id="testCategoryFilter" aria-label="Filter tests by category">
+              <option value="all">All Categories</option>
+              <option value="general">General Matter</option>
+              <option value="kailash">Kailash Chandra</option>
+              <option value="progressive">Progressive</option>
+              <option value="legal">Legal</option>
+              <option value="previous">Previous Year</option>
+            </select>
+          </div>
+          <div id="globalTestsList" class="tests-list"></div>
         </div>
-        <div id="globalTestsList" class="tests-list"></div>
       </section>
 
       <!-- Custom Test Section -->
       <section id="customTestSection" class="hidden custom-test-section">
         <h3>Add Your Own Test</h3>
-        <div class="input-group">
-          <input type="text" id="customTitle" placeholder=" ">
-          <label for="customTitle">Test Title</label>
-        </div>
-        <div class="input-group">
-          <select id="customCategory">
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-          </select>
-          <label for="customCategory">Test Category</label>
-        </div>
-        <div class="input-group">
-          <textarea id="customOriginal" placeholder=" "></textarea>
-          <label for="customOriginal">Original Text</label>
-        </div>
-        <div class="input-group">
-          <input type="url" id="customVideoUrl" placeholder=" ">
-          <label for="customVideoUrl">Video URL (Optional)</label>
-        </div>
-        <div class="button-group">
-          <button id="saveTestBtn">Save & Share Test</button>
-          <button id="clearTestsBtn" class="secondary-btn">Clear My Tests</button>
+        <button class="toggle-section" aria-expanded="false" aria-controls="customTestContent">Toggle Add Test</button>
+        <div id="customTestContent" class="section-content">
+          <div class="input-group">
+            <input type="text" id="customTitle" placeholder=" " aria-label="Test Title">
+            <label for="customTitle">Test Title</label>
+          </div>
+          <div class="input-group">
+            <select id="customCategory" aria-label="Test Category">
+              <option value="general">General Matter</option>
+              <option value="kailash">Kailash Chandra</option>
+              <option value="progressive">Progressive</option>
+              <option value="legal">Legal</option>
+              <option value="previous">Previous Year</option>
+            </select>
+            <label for="customCategory">Test Category</label>
+          </div>
+          <div class="input-group">
+            <textarea id="customOriginal" placeholder=" " aria-label="Original Text"></textarea>
+            <label for="customOriginal">Original Text</label>
+          </div>
+          <div class="input-group">
+            <input type="url" id="customVideoUrl" placeholder=" " aria-label="Video URL">
+            <label for="customVideoUrl">Video URL (Optional)</label>
+          </div>
+          <div class="button-group">
+            <button id="saveTestBtn">Save & Share Test</button>
+            <button id="clearTestsBtn" class="secondary-btn">Clear My Tests</button>
+          </div>
         </div>
       </section>
 
       <!-- Main Input Section -->
-      <section class="input-section">
+      <section id="inputSection" class="input-section">
         <div class="input-group" id="originalTextGroup">
-          <textarea id="originalText" placeholder=" "></textarea>
+          <textarea id="originalText" placeholder=" " aria-label="Original Text"></textarea>
           <label for="originalText">Original Text</label>
         </div>
 
@@ -164,7 +187,7 @@
         <div id="timerDisplay" class="timer-display hidden"></div>
 
         <div class="input-group">
-          <textarea id="userText" placeholder=" "></textarea>
+          <textarea id="userText" placeholder=" " aria-label="Your Transcription"></textarea>
           <label for="userText">Your Transcription</label>
         </div>
 
@@ -234,6 +257,6 @@
   </div>
 
   <script src="script.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9341ad634e3abf66',t:'MTc0NTI4ODc5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9341d82cfad253ba',t:'MTc0NTI5MDU0OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>

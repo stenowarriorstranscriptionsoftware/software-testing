@@ -1,13 +1,13 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
-  authDomain: "setup-login-page.firebaseapp.com",
-  databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
-  projectId: "setup-login-page",
-  storageBucket: "setup-login-page.firebasestorage.app",
-  messagingSenderId: "341251531099",
-  appId: "1:341251531099:web:f4263621455541ffdc3a7e",
-  measurementId: "G-ZXFC7NR9HV"
+  apiKey: "AIzaSyDNdovILjmsBQxGuXx4iOOw1JgCL2_3TLI",
+  authDomain: "stenowarriorsyoursteno.firebaseapp.com",
+  databaseURL: "https://stenowarriorsyoursteno-default-rtdb.firebaseio.com",
+  projectId: "stenowarriorsyoursteno",
+  storageBucket: "stenowarriorsyoursteno.appspot.com",
+  messagingSenderId: "173103533896",
+  appId: "1:173103533896:web:78bbe18e17ca8f5da5ad7d",
+  measurementId: "G-Y3E0QVFSBB"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -74,6 +74,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const registerEmail = document.getElementById('registerEmail');
   const registerPassword = document.getElementById('registerPassword');
   const confirmPassword = document.getElementById('confirmPassword');
+  const hamburger = document.querySelector('.hamburger');
+  const mobileNav = document.querySelector('.mobile-nav');
+  const toggleSections = document.querySelectorAll('.toggle-section');
 
   // Timer variables
   let timerInterval;
@@ -92,10 +95,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize typing timer
   let startTime = null;
-  userTextEl.addEventListener('input', function() {
+  let typingTimeout;
+  function debounce(func, wait) {
+    return function executedFunction(...args) {
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => func(...args), wait);
+    };
+  }
+  userTextEl.addEventListener('input', debounce(function() {
     if (!startTime) {
       startTime = new Date();
     }
+  }, 250));
+
+  // Mobile navigation toggle
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('active');
+    mobileNav.classList.toggle('active');
+  });
+
+  // Section toggle buttons
+  toggleSections.forEach(button => {
+    button.addEventListener('click', () => {
+      const content = document.getElementById(button.getAttribute('aria-controls'));
+      const isExpanded = button.getAttribute('aria-expanded') === 'true';
+      button.setAttribute('aria-expanded', !isExpanded);
+      content.classList.toggle('active');
+    });
   });
 
   // Toggle between login and register forms
@@ -340,7 +366,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         return direction === 'asc' 
           ? aValue.localeCompare(bValue) 
-          : bValue.localeCompare(bValue);
+          : bValue.localeCompare(aValue);
       }
     });
   }
@@ -375,10 +401,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     leaderboardPagination.innerHTML = `Showing ${startIdx + 1}-${Math.min(endIdx, filteredAttempts.length)} of ${filteredAttempts.length} entries`;
     
-    renderLeaderboardTable(pageAttempts, startIdx + 1);
+    renderLeaderboard(pageAttempts, startIdx + 1);
   }
 
-  function renderLeaderboardTable(attempts, startRank) {
+  function renderLeaderboard(attempts, startRank) {
     if (attempts.length === 0) {
       leaderboardList.innerHTML = '<p>No attempts match your filters.</p>';
       return;
@@ -404,7 +430,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <tbody>
     `;
 
-    let cardHTML = ''; // For mobile card layout
+    let cardHTML = '';
 
     attempts.forEach((attempt, index) => {
       const date = new Date(attempt.timestamp);
@@ -416,6 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const seconds = attempt.stats.timeTaken % 60;
       const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
+      // Add badges to top 3
       let badge = '';
       if (startRank + index === 1) {
         badge = '<span class="badge badge-gold">🥇</span>';
@@ -428,51 +455,45 @@ document.addEventListener('DOMContentLoaded', function() {
       // Table row for desktop
       tableHTML += `
         <tr>
-          <td data-label="Rank">${startRank + index} ${badge}</td>
-          <td data-label="User" class="leaderboard-user">
+          <td>${startRank + index} ${badge}</td>
+          <td class="leaderboard-user">
             <img src="${attempt.userPhoto}" alt="${attempt.userName}">
             <span>${attempt.userName}</span>
           </td>
-          <td data-label="Test">${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
-          <td data-label="Accuracy" class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</td>
-          <td data-label="Speed">${attempt.stats.wpm}</td>
-          <td data-label="Original Words">${attempt.stats.totalOriginal}</td>
-          <td data-label="Typed Words">${attempt.stats.totalUser}</td>
-          <td data-label="Time Taken">${timeFormatted}</td>
-          <td data-label="Half Mistakes">${attempt.stats.halfMistakes}</td>
-          <td data-label="Full Mistakes">${attempt.stats.fullMistakes}</td>
-          <td data-label="Date">${date.toLocaleDateString()}</td>
+          <td>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
+          <td class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</td>
+          <td>${attempt.stats.wpm}</td>
+          <td>${attempt.stats.totalOriginal}</td>
+          <td>${attempt.stats.totalUser}</td>
+          <td>${timeFormatted}</td>
+          <td>${attempt.stats.halfMistakes}</td>
+          <td>${attempt.stats.fullMistakes}</td>
+          <td>${date.toLocaleDateString()}</td>
         </tr>
       `;
 
       // Card for mobile
       cardHTML += `
-        <div class="leaderboard-card">
+        <div class="leaderboard-card" aria-expanded="false">
           <div class="leaderboard-card-header">
-            <h4>${startRank + index}. ${attempt.userName} ${badge}</h4>
-            <button class="leaderboard-card-toggle" aria-label="Toggle details">+</button>
+            <div>
+              <span>${startRank + index} ${badge}</span>
+              <span class="leaderboard-user">
+                <img src="${attempt.userPhoto}" alt="${attempt.userName}">
+                ${attempt.userName}
+              </span>
+            </div>
+            <span class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</span>
           </div>
           <div class="leaderboard-card-details">
-            <dl>
-              <dt>Test:</dt>
-              <dd>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</dd>
-              <dt>Accuracy:</dt>
-              <dd class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</dd>
-              <dt>Speed:</dt>
-              <dd>${attempt.stats.wpm} WPM</dd>
-              <dt>Original Words:</dt>
-              <dd>${attempt.stats.totalOriginal}</dd>
-              <dt>Typed Words:</dt>
-              <dd>${attempt.stats.totalUser}</dd>
-              <dt>Time Taken:</dt>
-              <dd>${timeFormatted}</dd>
-              <dt>Half Mistakes:</dt>
-              <dd>${attempt.stats.halfMistakes}</dd>
-              <dt>Full Mistakes:</dt>
-              <dd>${attempt.stats.fullMistakes}</dd>
-              <dt>Date:</dt>
-              <dd>${date.toLocaleDateString()}</dd>
-            </dl>
+            <p><strong>Test:</strong> ${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</p>
+            <p><strong>Speed:</strong> ${attempt.stats.wpm} WPM</p>
+            <p><strong>Original Words:</strong> ${attempt.stats.totalOriginal}</p>
+            <p><strong>Typed Words:</strong> ${attempt.stats.totalUser}</p>
+            <p><strong>Time Taken:</strong> ${timeFormatted}</p>
+            <p><strong>Half Mistakes:</strong> ${attempt.stats.halfMistakes}</p>
+            <p><strong>Full Mistakes:</strong> ${attempt.stats.fullMistakes}</p>
+            <p><strong>Date:</strong> ${date.toLocaleDateString()}</p>
           </div>
         </div>
       `;
@@ -481,18 +502,8 @@ document.addEventListener('DOMContentLoaded', function() {
     tableHTML += `</tbody></table>`;
     leaderboardList.innerHTML = tableHTML + cardHTML;
     
-    // Add toggle functionality for cards
-    document.querySelectorAll('.leaderboard-card-toggle').forEach(toggle => {
-      toggle.addEventListener('click', () => {
-        const details = toggle.parentElement.nextElementSibling;
-        const isExpanded = details.classList.contains('show');
-        details.classList.toggle('show');
-        toggle.textContent = isExpanded ? '+' : '−';
-        toggle.setAttribute('aria-label', isExpanded ? 'Show details' : 'Hide details');
-      });
-    });
-    
     makeTableSortable();
+    setupCardToggles();
   }
 
   function makeTableSortable() {
@@ -523,6 +534,18 @@ document.addEventListener('DOMContentLoaded', function() {
       if (header.getAttribute('data-column') === currentSortColumn) {
         header.classList.add(`sorted-${currentSortDirection}`);
       }
+    });
+  }
+
+  function setupCardToggles() {
+    const cards = document.querySelectorAll('.leaderboard-card');
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const details = card.querySelector('.leaderboard-card-details');
+        const isExpanded = card.getAttribute('aria-expanded') === 'true';
+        card.setAttribute('aria-expanded', !isExpanded);
+        details.classList.toggle('active');
+      });
     });
   }
 
@@ -574,6 +597,7 @@ document.addEventListener('DOMContentLoaded', function() {
           btn.disabled = false;
           btn.style.opacity = '1';
         });
+        window.scrollTo({ top: timerOptions.offsetTop, behavior: 'smooth' });
       }
     }, 0);
   });
@@ -615,137 +639,3 @@ document.addEventListener('DOMContentLoaded', function() {
   function startTimer(minutes) {
     endTime = new Date();
     endTime.setMinutes(endTime.getMinutes() + minutes);
-    
-    updateTimerDisplay();
-    
-    timerInterval = setInterval(() => {
-      updateTimerDisplay();
-      
-      const now = new Date();
-      if (now >= endTime) {
-        stopTimer();
-        timerDisplay.classList.add('timer-ended');
-        timerDisplay.textContent = "TIME'S UP!";
-        compareTexts();
-        lockTest();
-        disableTimerOptions();
-      }
-    }, 1000);
-  }
-  
-  function stopTimer() {
-    clearInterval(timerInterval);
-    timerDisplay.classList.add('hidden');
-  }
-  
-  function disableTimerOptions() {
-    timerButtons.forEach(btn => {
-      btn.disabled = true;
-      btn.style.opacity = '0.5';
-      btn.style.cursor = 'not-allowed';
-    });
-  }
-  
-  function updateTimerDisplay() {
-    const now = new Date();
-    const remaining = endTime - now;
-    
-    if (remaining <= 0) return;
-    
-    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-    
-    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
-  
-  function lockTest() {
-    userTextEl.readOnly = true;
-    userTextEl.classList.add('locked-textarea');
-    compareBtn.disabled = true;
-    closeResultsBtn.classList.remove('hidden');
-  }
-  
-  function compareTexts() {
-    const originalText = originalTextEl.value;
-    const userText = userTextEl.value;
-    
-    if (!originalText || !userText) {
-      alert('Please enter both original text and your transcription.');
-      return;
-    }
-    
-    let testTitle = "Custom Test";
-    const selectedTestCard = document.querySelector('.test-card.selected');
-    if (selectedTestCard) {
-        testTitle = selectedTestCard.querySelector('h4').textContent;
-    }
-    
-    const originalWords = processText(originalText);
-    const userWords = processText(userText);
-    
-    const comparison = compareParagraphs(originalWords, userWords);
-    
-    displayComparison(comparison);
-    displayStats(comparison.stats);
-    displayFeedback(comparison.stats, originalWords, userWords);
-    displayFullTexts(originalText, userText);
-    
-    const now = new Date();
-    resultDateEl.textContent = now.toLocaleString();
-    
-    showResults();
-    
-    if (testActive) {
-      lockTest();
-    }
-
-    const user = auth.currentUser;
-    if (user) {
-      const attemptData = {
-        userName: user.displayName,
-        userPhoto: user.photoURL,
-        testTitle: testTitle,
-        category: selectedTestCard ? selectedTestCard.dataset.category : customCategory.value,
-        stats: comparison.stats,
-        timestamp: Date.now()
-      };
-
-      database.ref('attempts').push(attemptData)
-        .then(() => loadLeaderboard())
-        .catch(error => console.error('Error saving attempt:', error));
-    }
-  }
-  
-  function showFullTexts() {
-    resultsSection.classList.add('hidden');
-    fullTextSection.classList.remove('hidden');
-  }
-  
-  function showResults() {
-    fullTextSection.classList.add('hidden');
-    resultsSection.classList.remove('hidden');
-  }
-  
-  function downloadAsPdf() {
-    const resultsElement = document.getElementById('results');
-
-    html2canvas(resultsElement, {
-      scale: 1.5,
-      useCORS: true,
-      allowTaint: true
-    }).then(canvas => {
-      const imgData = canvas.toDataURL('image/jpeg', 0.7);
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 295;
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth
