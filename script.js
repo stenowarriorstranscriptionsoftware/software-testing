@@ -89,6 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let uniqueTestNames = new Set();
   let currentSortColumn = 'accuracy';
   let currentSortDirection = 'desc';
+  let searchQuery = '';
 
   // Initialize typing timer
   let startTime = null;
@@ -219,6 +220,20 @@ document.addEventListener('DOMContentLoaded', function() {
     auth.signOut();
   });
 
+  // Add search input to leaderboard controls
+  const searchInput = document.createElement('input');
+  searchInput.type = 'text';
+  searchInput.placeholder = 'Search by user or test...';
+  searchInput.id = 'leaderboardSearch';
+  leaderboardControls.insertBefore(searchInput, leaderboardFilter);
+  
+  // Search input handler
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    currentPage = 1;
+    loadLeaderboard();
+  });
+
   // Leaderboard filter change handlers
   leaderboardFilter.addEventListener('change', () => {
     currentPage = 1;
@@ -292,7 +307,10 @@ document.addEventListener('DOMContentLoaded', function() {
         filteredAttempts = allAttempts.filter(attempt => {
           const nameMatch = testNameFilter.value === 'all' || attempt.testTitle === testNameFilter.value;
           const categoryMatch = category === 'all' || attempt.category === category;
-          return nameMatch && categoryMatch;
+          const searchMatch = !searchQuery || 
+            attempt.userName.toLowerCase().includes(searchQuery) || 
+            (attempt.testTitle || 'Custom Test').toLowerCase().includes(searchQuery);
+          return nameMatch && categoryMatch && searchMatch;
         });
           
         updatePagination();
@@ -1032,351 +1050,4 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (accuracy >= 70) {
       assessment += '<p>📝 <strong>Fair accuracy.</strong> Focus on reducing errors to improve your score.</p>';
     } else {
-      assessment += '<p>⚠️ <strong>Needs improvement.</strong> Work on accuracy before increasing speed.</p>';
-    }
-    
-    if (wpm >= 50) {
-      assessment += '<p>⚡ <strong>Fast typer!</strong> Your speed is impressive. ';
-      if (accuracy < 90) {
-        assessment += 'Try slowing down slightly to improve accuracy.</p>';
-      } else {
-        assessment += 'Maintain this speed while keeping accuracy high.</p>';
-      }
-    } else if (wpm >= 40) {
-      assessment += '<p>🏃 <strong>Moderate speed.</strong> You\'re typing at a good pace. ';
-      assessment += 'With practice, you can increase speed without sacrificing accuracy.</p>';
-    } else {
-      assessment += '<p>🐢 <strong>Slow pace.</strong> Focus on building muscle memory and gradually increasing your speed.</p>';
-    }
-    
-    return assessment;
-  }
-  
-  function getImprovementSuggestions(analysis, stats) {
-    let suggestions = [];
-    
-    if (analysis.omissionRate > 0.2) {
-      suggestions.push('You\'re skipping many words. Practice reading ahead to anticipate upcoming words.');
-    }
-    
-    if (analysis.additionRate > 0.15) {
-      suggestions.push('You\'re adding extra words. Focus on typing only what you see/hear.');
-    }
-    
-    if (analysis.spellingErrorRate > 0.25) {
-      suggestions.push('Spelling mistakes are frequent. Consider practicing difficult words separately.');
-    }
-    
-    if (analysis.capitalizationErrorRate > 0.1) {
-      suggestions.push('Watch your capitalization. Remember proper nouns and sentence starts need capitals.');
-    }
-    
-    suggestions.push('Practice difficult sections repeatedly until you master them.');
-    suggestions.push('Break long passages into smaller chunks for focused practice.');
-    suggestions.push('Focus on accuracy before speed - speed will come naturally with practice.');
-    
-    return suggestions.map(s => `<li>${s}</li>`).join('');
-  }
-
-  function embedVideo(url) {
-    const existingVideo = document.getElementById('testVideoPlayer');
-    if (existingVideo) {
-      existingVideo.remove();
-    }
-    
-    if (!url) return;
-    
-    const videoContainer = document.createElement('div');
-    videoContainer.className = 'video-container';
-    videoContainer.id = 'testVideoPlayer';
-    
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      let videoId;
-      if (url.includes('youtube.com/watch?v=')) {
-        videoId = url.split('v=')[1].split('&')[0];
-      } else if (url.includes('youtu.be/')) {
-        videoId = url.split('youtu.be/')[1].split('?')[0];
-      }
-      
-      if (videoId) {
-        videoContainer.innerHTML = `
-          <iframe src="https://www.youtube.com/embed/${videoId}" 
-                  frameborder="0" 
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                  allowfullscreen></iframe>
-        `;
-      }
-    } else {
-      videoContainer.innerHTML = `
-        <video controls style="width:100%">
-          <source src="${url}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-      `;
-    }
-    
-    originalTextGroup.insertAdjacentElement('afterend', videoContainer);
-  }
-
-  function loadGlobalTests() {
-    const category = testCategoryFilter.value;
-    
-    database.ref('tests').orderByChild('timestamp').once('value')
-      .then(snapshot => {
-        globalTestsList.innerHTML = '';
-        const tests = snapshot.val();
-        
-        if (!tests) {
-          globalTestsList.innerHTML = '<p>No community tests yet. Be the first to share one!</p>';
-          return;
-        }
-        
-        const testsArray = Object.entries(tests).map(([id, test]) => ({
-          id,
-          ...test
-        })).sort((a, b) => b.timestamp - a.timestamp);
-        
-        // Filter by category if not "all"
-        const filteredTests = category === 'all' 
-          ? testsArray 
-          : testsArray.filter(test => test.category === category);
-        
-        const recentTests = filteredTests.slice(0, 6);
-        
-        recentTests.forEach(test => {
-          const testCard = document.createElement('div');
-          testCard.className = 'test-card';
-          testCard.dataset.category = test.category;
-          testCard.innerHTML = `
-            <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
-            <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
-            ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
-            <div class="test-author">
-              <img src="${test.userPhoto}" alt="${test.userName}">
-              <span>Added by ${test.userName}</span>
-            </div>
-          `;
-          testCard.addEventListener('click', () => {
-            document.querySelectorAll('.test-card').forEach(card => {
-              card.classList.remove('selected');
-            });
-            testCard.classList.add('selected');
-            
-            originalTextEl.value = test.text;
-            originalTextGroup.classList.add('hidden');
-            timerOptions.classList.remove('hidden');
-            timerButtons.forEach(btn => {
-              btn.disabled = false;
-              btn.style.opacity = '1';
-            });
-            
-            if (test.videoUrl) {
-              embedVideo(test.videoUrl);
-            } else {
-              const existingVideo = document.getElementById('testVideoPlayer');
-              if (existingVideo) existingVideo.remove();
-            }
-          });
-          globalTestsList.appendChild(testCard);
-        });
-        
-        if (filteredTests.length > 6) {
-          const showMoreBtn = document.createElement('button');
-          showMoreBtn.className = 'secondary-btn';
-          showMoreBtn.textContent = 'Show More Tests';
-          showMoreBtn.style.marginTop = '1rem';
-          showMoreBtn.addEventListener('click', () => {
-            globalTestsList.innerHTML = '';
-            filteredTests.forEach(test => {
-              const testCard = document.createElement('div');
-              testCard.className = 'test-card';
-              testCard.dataset.category = test.category;
-              testCard.innerHTML = `
-                <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
-                <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
-                ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
-                <div class="test-author">
-                  <img src="${test.userPhoto}" alt="${test.userName}">
-                  <span>Added by ${test.userName}</span>
-                </div>
-              `;
-              testCard.addEventListener('click', () => {
-                document.querySelectorAll('.test-card').forEach(card => {
-                  card.classList.remove('selected');
-                });
-                testCard.classList.add('selected');
-                originalTextEl.value = test.text;
-                originalTextGroup.classList.add('hidden');
-                timerOptions.classList.remove('hidden');
-                timerButtons.forEach(btn => {
-                  btn.disabled = false;
-                  btn.style.opacity = '1';
-                });
-                
-                if (test.videoUrl) {
-                  embedVideo(test.videoUrl);
-                } else {
-                  const existingVideo = document.getElementById('testVideoPlayer');
-                  if (existingVideo) existingVideo.remove();
-                }
-              });
-              globalTestsList.appendChild(testCard);
-            });
-            
-            showMoreBtn.textContent = 'Show Less';
-            showMoreBtn.onclick = () => {
-              loadGlobalTests();
-            };
-          });
-          globalTestsList.parentNode.appendChild(showMoreBtn);
-        }
-      })
-      .catch(error => {
-        console.error('Error loading tests:', error);
-        globalTestsList.innerHTML = '<p>Error loading community tests. Please try again later.</p>';
-      });
-  }
-
-  function getCategoryName(category) {
-    const categories = {
-      'general': 'General Matter',
-      'kailash': 'Kailash Chandra',
-      'progressive': 'Progressive',
-      'legal': 'Legal',
-      'previous': 'Previous Year'
-    };
-    return categories[category] || 'General';
-  }
-
-  saveBtn.addEventListener('click', () => {
-    const user = auth.currentUser;
-    if (!user) {
-      alert('Please login to save tests.');
-      return;
-    }
-
-    const title = customTitle.value.trim();
-    const text = customOriginal.value.trim();
-    const videoUrl = customVideoUrl.value.trim();
-    const category = customCategory.value;
-    
-    if (!title || !text) {
-      alert('Please enter both a title and the original text.');
-      return;
-    }
-
-    const testData = {
-      title,
-      text,
-      videoUrl: videoUrl || null,
-      userName: user.displayName,
-      userPhoto: user.photoURL,
-      category,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    };
-
-    database.ref('tests').push(testData)
-      .then(() => {
-        alert('Test saved and shared with the community!');
-        customTitle.value = '';
-        customOriginal.value = '';
-        customVideoUrl.value = '';
-        loadGlobalTests();
-      })
-      .catch(error => {
-        console.error('Error saving test:', error);
-        alert('Failed to save test. Please try again.');
-      });
-  });
-
-  clearBtn.addEventListener('click', () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    database.ref('tests').orderByChild('userName').equalTo(user.displayName).once('value')
-      .then(snapshot => {
-        const userTests = snapshot.val();
-        if (!userTests || Object.keys(userTests).length === 0) {
-          alert('You have no tests to delete.');
-          return;
-        }
-
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-          <div class="modal-content">
-            <h3>Select Tests to Delete</h3>
-            <div class="test-selection"></div>
-            <div class="modal-buttons">
-              <button id="cancelDelete" class="secondary-btn">Cancel</button>
-              <button id="confirmDelete" class="danger-btn">Delete Selected</button>
-            </div>
-          </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        const testSelection = modal.querySelector('.test-selection');
-        const checkboxes = [];
-        
-        Object.entries(userTests).forEach(([id, test]) => {
-          const testItem = document.createElement('div');
-          testItem.className = 'test-item';
-          const checkboxId = `test-${id}`;
-          testItem.innerHTML = `
-            <input type="checkbox" id="${checkboxId}" checked>
-            <label for="${checkboxId}">${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></label>
-          `;
-          testSelection.appendChild(testItem);
-          checkboxes.push({id, checkbox: testItem.querySelector('input')});
-        });
-        
-        modal.querySelector('#cancelDelete').addEventListener('click', () => {
-          document.body.removeChild(modal);
-        });
-        
-        modal.querySelector('#confirmDelete').addEventListener('click', () => {
-          const selectedTests = checkboxes
-            .filter(item => item.checkbox.checked)
-            .map(item => item.id);
-          
-          if (selectedTests.length === 0) {
-            alert('Please select at least one test to delete.');
-            return;
-          }
-          
-          const updates = {};
-          selectedTests.forEach(id => {
-            updates[id] = null;
-          });
-          
-          database.ref('tests').update(updates)
-            .then(() => {
-              alert(`${selectedTests.length} test(s) deleted successfully.`);
-              document.body.removeChild(modal);
-              loadGlobalTests();
-            })
-            .catch(error => {
-              console.error('Error deleting tests:', error);
-              alert('Failed to delete tests. Please try again.');
-            });
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching user tests:', error);
-        alert('Failed to fetch your tests. Please try again.');
-      });
-  });
-});
-
-// Dark mode toggle
-document.getElementById('darkModeToggle').addEventListener('change', function() {
-  document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', this.checked);
-});
-
-// Check for saved user preference
-if (localStorage.getItem('darkMode') === 'true') {
-  document.getElementById('darkModeToggle').checked = true;
-  document.body.classList.add('dark-mode');
-}
+      assessment += '<p>⚠️
