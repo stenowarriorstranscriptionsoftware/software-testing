@@ -13,6 +13,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
+
+// Initialize jsPDF
 const { jsPDF } = window.jspdf;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -72,22 +74,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const registerEmail = document.getElementById('registerEmail');
   const registerPassword = document.getElementById('registerPassword');
   const confirmPassword = document.getElementById('confirmPassword');
-  const mainSection = document.getElementById('mainSection');
-  const homeLink = document.getElementById('homeLink');
-  const testsLink = document.getElementById('testsLink');
-  const leaderboardLink = document.getElementById('leaderboardLink');
-  const testSearchInput = document.getElementById('testSearchInput');
-  const searchTestsBtn = document.getElementById('searchTestsBtn');
-  const customTimerMinutes = document.getElementById('customTimerMinutes');
-  const startCustomTimer = document.getElementById('startCustomTimer');
 
   // Timer variables
   let timerInterval;
   let endTime;
   let testActive = false;
   let timerButtons = document.querySelectorAll('.timer-option');
-  let startTime = null;
-
+  
   // Leaderboard variables
   let currentPage = 1;
   const entriesPerPage = 10;
@@ -97,196 +90,178 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentSortColumn = 'accuracy';
   let currentSortDirection = 'desc';
 
-  // Initialize the app
-  initNavigation();
-  initAuth();
-  initTimer();
-  initSearch();
+  // Initialize typing timer
+  let startTime = null;
+  userTextEl.addEventListener('input', function() {
+    if (!startTime) {
+      startTime = new Date();
+    }
+  });
 
-  function initNavigation() {
-    homeLink.addEventListener('click', () => showSection(mainSection));
-    testsLink.addEventListener('click', () => {
-      showSection(globalTestsSection);
-      loadGlobalTests();
-    });
-    leaderboardLink.addEventListener('click', () => {
-      showSection(leaderboardSection);
-      loadLeaderboard();
-    });
-  }
+  // Toggle between login and register forms
+  showRegister.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+  });
 
-  function showSection(section) {
-    [mainSection, globalTestsSection, leaderboardSection, resultsSection, fullTextSection].forEach(sec => {
-      sec.classList.add('hidden');
-    });
-    section.classList.remove('hidden');
+  showLogin.addEventListener('click', (e) => {
+    e.preventDefault();
+    registerForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+  });
 
-    document.querySelectorAll('.nav-link').forEach(link => {
-      link.classList.remove('active');
-    });
-
-    if (section === mainSection) homeLink.classList.add('active');
-    if (section === globalTestsSection) testsLink.classList.add('active');
-    if (section === leaderboardSection) leaderboardLink.classList.add('active');
-  }
-
-  function initAuth() {
-    showRegister.addEventListener('click', (e) => {
-      e.preventDefault();
-      loginForm.classList.add('hidden');
-      registerForm.classList.remove('hidden');
-    });
-
-    showLogin.addEventListener('click', (e) => {
-      e.preventDefault();
-      registerForm.classList.add('hidden');
-      loginForm.classList.remove('hidden');
-    });
-
-    emailLoginBtn.addEventListener('click', () => {
-      const email = loginEmail.value.trim();
-      const password = loginPassword.value.trim();
-
-      if (!email || !password) {
-        alert('Please enter both email and password');
-        return;
-      }
-
-      auth.signInWithEmailAndPassword(email, password)
-        .then(() => {
-          console.log('Login successful');
-        })
-        .catch(error => {
-          console.error('Login error:', error);
-          alert('Login failed: ' + error.message);
-        });
-    });
-
-    registerBtn.addEventListener('click', () => {
-      const name = registerName.value.trim();
-      const email = registerEmail.value.trim();
-      const password = registerPassword.value.trim();
-      const confirm = confirmPassword.value.trim();
-
-      if (!name || !email || !password || !confirm) {
-        alert('Please fill in all fields');
-        return;
-      }
-
-      if (password !== confirm) {
-        alert('Passwords do not match');
-        return;
-      }
-
-      if (password.length < 6) {
-        alert('Password should be at least 6 characters');
-        return;
-      }
-
-      auth.createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          return userCredential.user.updateProfile({
-            displayName: name
-          });
-        })
-        .then(() => {
-          alert('Registration successful! You are now logged in.');
-          registerName.value = '';
-          registerEmail.value = '';
-          registerPassword.value = '';
-          confirmPassword.value = '';
-          registerForm.classList.add('hidden');
-          loginForm.classList.remove('hidden');
-        })
-        .catch(error => {
-          console.error('Registration error:', error);
-          alert('Registration failed: ' + error.message);
-        });
-    });
-
-    googleLoginBtn.addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider)
-        .catch(error => {
-          console.error('Google login error:', error);
-          alert('Google login failed. Please try again.');
-        });
-    });
-
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        loginBtn.classList.add('hidden');
-        userInfo.classList.remove('hidden');
-        if (user.photoURL) {
-          userPhoto.src = user.photoURL;
-        } else {
-          userPhoto.src = 'https://www.gravatar.com/avatar/' + user.uid + '?d=identicon';
-        }
-        userName.textContent = user.displayName || 'User';
-        loginPrompt.classList.add('hidden');
-        customTestSection.classList.remove('hidden');
-        globalTestsSection.classList.remove('hidden');
-        leaderboardSection.classList.remove('hidden');
-        loadGlobalTests();
-        loadLeaderboard();
-        cleanupOldData();
-      } else {
-        loginBtn.classList.remove('hidden');
-        userInfo.classList.add('hidden');
-        loginPrompt.classList.remove('hidden');
-        customTestSection.classList.add('hidden');
-        globalTestsSection.classList.add('hidden');
-        leaderboardSection.classList.add('hidden');
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-      }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-      auth.signOut();
-    });
-  }
-
-  function initTimer() {
-    userTextEl.addEventListener('input', function() {
-      if (!startTime) {
-        startTime = new Date();
-      }
-    });
-
-    timerButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const minutes = parseInt(this.dataset.minutes);
-        startTimer(minutes);
-        timerOptions.classList.add('hidden');
-        timerDisplay.classList.remove('hidden');
-        testActive = true;
+  // Email/password login handler
+  emailLoginBtn.addEventListener('click', () => {
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value.trim();
+    
+    if (!email || !password) {
+      alert('Please enter both email and password');
+      return;
+    }
+    
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        console.log('Login successful');
+      })
+      .catch(error => {
+        console.error('Login error:', error);
+        alert('Login failed: ' + error.message);
       });
-    });
+  });
 
-    startCustomTimer.addEventListener('click', () => {
-      const minutes = parseInt(customTimerMinutes.value);
-      if (minutes > 0) {
-        startTimer(minutes);
-        timerOptions.classList.add('hidden');
-        timerDisplay.classList.remove('hidden');
-        testActive = true;
+  // Registration handler
+  registerBtn.addEventListener('click', () => {
+    const name = registerName.value.trim();
+    const email = registerEmail.value.trim();
+    const password = registerPassword.value.trim();
+    const confirm = confirmPassword.value.trim();
+    
+    if (!name || !email || !password || !confirm) {
+      alert('Please fill in all fields');
+      return;
+    }
+    
+    if (password !== confirm) {
+      alert('Passwords do not match');
+      return;
+    }
+    
+    if (password.length < 6) {
+      alert('Password should be at least 6 characters');
+      return;
+    }
+    
+    auth.createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        return userCredential.user.updateProfile({
+          displayName: name
+        });
+      })
+      .then(() => {
+        alert('Registration successful! You are now logged in.');
+        registerName.value = '';
+        registerEmail.value = '';
+        registerPassword.value = '';
+        confirmPassword.value = '';
+        registerForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+      })
+      .catch(error => {
+        console.error('Registration error:', error);
+        alert('Registration failed: ' + error.message);
+      });
+  });
+
+  // Google login handler
+  googleLoginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .catch(error => {
+        console.error('Google login error:', error);
+        alert('Google login failed. Please try again.');
+      });
+  });
+
+  // Auth state listener
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      loginBtn.classList.add('hidden');
+      userInfo.classList.remove('hidden');
+      if (user.photoURL) {
+        userPhoto.src = user.photoURL;
+      } else {
+        userPhoto.src = 'https://www.gravatar.com/avatar/' + user.uid + '?d=identicon';
       }
-    });
-  }
+      userName.textContent = user.displayName || 'User';
+      loginPrompt.classList.add('hidden');
+      customTestSection.classList.remove('hidden');
+      globalTestsSection.classList.remove('hidden');
+      leaderboardSection.classList.remove('hidden');
+      loadGlobalTests();
+      loadLeaderboard();
+      cleanupOldData();
+    } else {
+      loginBtn.classList.remove('hidden');
+      userInfo.classList.add('hidden');
+      loginPrompt.classList.remove('hidden');
+      customTestSection.classList.add('hidden');
+      globalTestsSection.classList.add('hidden');
+      leaderboardSection.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+    }
+  });
 
-  function initSearch() {
-    searchTestsBtn.addEventListener('click', () => loadGlobalTests(testSearchInput.value));
-    testSearchInput.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') loadGlobalTests(testSearchInput.value);
-    });
-  }
+  // Logout handler
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut();
+  });
 
+  // Leaderboard filter change handlers
+  leaderboardFilter.addEventListener('change', () => {
+    currentPage = 1;
+    loadLeaderboard();
+  });
+
+  testNameFilter.addEventListener('change', () => {
+    currentPage = 1;
+    loadLeaderboard();
+  });
+
+  categoryFilter.addEventListener('change', () => {
+    currentPage = 1;
+    loadLeaderboard();
+  });
+
+  // Test category filter for community tests
+  testCategoryFilter.addEventListener('change', () => {
+    loadGlobalTests();
+  });
+
+  // Pagination button handlers
+  prevPageBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      updatePagination();
+    }
+  });
+
+  nextPageBtn.addEventListener('click', () => {
+    const totalPages = Math.ceil(filteredAttempts.length / entriesPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      updatePagination();
+    }
+  });
+
+  // Load leaderboard data with pagination
   function loadLeaderboard() {
     const filter = leaderboardFilter.value;
     const category = categoryFilter.value;
     let query = database.ref('attempts').orderByChild('timestamp');
-
+    
     if (filter === 'week') {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -310,16 +285,16 @@ document.addEventListener('DOMContentLoaded', function() {
           id,
           ...attempt
         }));
-
+        
         sortAttempts(currentSortColumn, currentSortDirection);
         updateTestNameFilter(allAttempts);
-
+        
         filteredAttempts = allAttempts.filter(attempt => {
           const nameMatch = testNameFilter.value === 'all' || attempt.testTitle === testNameFilter.value;
           const categoryMatch = category === 'all' || attempt.category === category;
           return nameMatch && categoryMatch;
         });
-
+          
         updatePagination();
       })
       .catch(error => {
@@ -327,27 +302,12 @@ document.addEventListener('DOMContentLoaded', function() {
         leaderboardList.innerHTML = '<p>Error loading leaderboard. Please try again later.</p>';
         leaderboardPagination.innerHTML = '';
       });
-
-    leaderboardFilter.addEventListener('change', () => {
-      currentPage = 1;
-      loadLeaderboard();
-    });
-
-    testNameFilter.addEventListener('change', () => {
-      currentPage = 1;
-      loadLeaderboard();
-    });
-
-    categoryFilter.addEventListener('change', () => {
-      currentPage = 1;
-      loadLeaderboard();
-    });
   }
 
   function sortAttempts(column, direction) {
     allAttempts.sort((a, b) => {
       let aValue, bValue;
-
+      
       switch (column) {
         case 'accuracy':
         case 'wpm':
@@ -374,12 +334,12 @@ document.addEventListener('DOMContentLoaded', function() {
         default:
           return 0;
       }
-
+      
       if (typeof aValue === 'number' && typeof bValue === 'number') {
         return direction === 'asc' ? aValue - bValue : bValue - aValue;
       } else {
-        return direction === 'asc'
-          ? aValue.localeCompare(bValue)
+        return direction === 'asc' 
+          ? aValue.localeCompare(bValue) 
           : bValue.localeCompare(bValue);
       }
     });
@@ -388,7 +348,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateTestNameFilter(attempts) {
     uniqueTestNames = new Set(attempts.map(attempt => attempt.testTitle || 'Custom Test'));
     const currentTestFilter = testNameFilter.value;
-
+    
     testNameFilter.innerHTML = '<option value="all">All Tests</option>';
     uniqueTestNames.forEach(testName => {
       const option = document.createElement('option');
@@ -396,7 +356,7 @@ document.addEventListener('DOMContentLoaded', function() {
       option.textContent = testName;
       testNameFilter.appendChild(option);
     });
-
+    
     if (currentTestFilter !== 'all' && uniqueTestNames.has(currentTestFilter)) {
       testNameFilter.value = currentTestFilter;
     } else {
@@ -409,27 +369,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const startIdx = (currentPage - 1) * entriesPerPage;
     const endIdx = startIdx + entriesPerPage;
     const pageAttempts = filteredAttempts.slice(startIdx, endIdx);
-
+    
     prevPageBtn.disabled = currentPage === 1;
     nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-
+    
     leaderboardPagination.innerHTML = `Showing ${startIdx + 1}-${Math.min(endIdx, filteredAttempts.length)} of ${filteredAttempts.length} entries`;
-
+    
     renderLeaderboardTable(pageAttempts, startIdx + 1);
-
-    prevPageBtn.addEventListener('click', () => {
-      if (currentPage > 1) {
-        currentPage--;
-        updatePagination();
-      }
-    });
-
-    nextPageBtn.addEventListener('click', () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        updatePagination();
-      }
-    });
   }
 
   function renderLeaderboardTable(attempts, startRank) {
@@ -458,12 +404,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <tbody>
     `;
 
+    let cardHTML = ''; // For mobile card layout
+
     attempts.forEach((attempt, index) => {
       const date = new Date(attempt.timestamp);
-      const accuracyClass =
+      const accuracyClass = 
         attempt.stats.accuracy >= 90 ? 'accuracy-high' :
         attempt.stats.accuracy >= 70 ? 'accuracy-medium' : 'accuracy-low';
-
+      
       const minutes = Math.floor(attempt.stats.timeTaken / 60);
       const seconds = attempt.stats.timeTaken % 60;
       const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
@@ -477,29 +425,73 @@ document.addEventListener('DOMContentLoaded', function() {
         badge = '<span class="badge badge-bronze">🥉</span>';
       }
 
+      // Table row for desktop
       tableHTML += `
         <tr>
-          <td>${startRank + index} ${badge}</td>
-          <td class="leaderboard-user">
+          <td data-label="Rank">${startRank + index} ${badge}</td>
+          <td data-label="User" class="leaderboard-user">
             <img src="${attempt.userPhoto}" alt="${attempt.userName}">
             <span>${attempt.userName}</span>
           </td>
-          <td>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
-          <td class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</td>
-          <td>${attempt.stats.wpm}</td>
-          <td>${attempt.stats.totalOriginal}</td>
-          <td>${attempt.stats.totalUser}</td>
-          <td>${timeFormatted}</td>
-          <td>${attempt.stats.halfMistakes}</td>
-          <td>${attempt.stats.fullMistakes}</td>
-          <td>${date.toLocaleDateString()}</td>
+          <td data-label="Test">${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
+          <td data-label="Accuracy" class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</td>
+          <td data-label="Speed">${attempt.stats.wpm}</td>
+          <td data-label="Original Words">${attempt.stats.totalOriginal}</td>
+          <td data-label="Typed Words">${attempt.stats.totalUser}</td>
+          <td data-label="Time Taken">${timeFormatted}</td>
+          <td data-label="Half Mistakes">${attempt.stats.halfMistakes}</td>
+          <td data-label="Full Mistakes">${attempt.stats.fullMistakes}</td>
+          <td data-label="Date">${date.toLocaleDateString()}</td>
         </tr>
+      `;
+
+      // Card for mobile
+      cardHTML += `
+        <div class="leaderboard-card">
+          <div class="leaderboard-card-header">
+            <h4>${startRank + index}. ${attempt.userName} ${badge}</h4>
+            <button class="leaderboard-card-toggle" aria-label="Toggle details">+</button>
+          </div>
+          <div class="leaderboard-card-details">
+            <dl>
+              <dt>Test:</dt>
+              <dd>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</dd>
+              <dt>Accuracy:</dt>
+              <dd class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</dd>
+              <dt>Speed:</dt>
+              <dd>${attempt.stats.wpm} WPM</dd>
+              <dt>Original Words:</dt>
+              <dd>${attempt.stats.totalOriginal}</dd>
+              <dt>Typed Words:</dt>
+              <dd>${attempt.stats.totalUser}</dd>
+              <dt>Time Taken:</dt>
+              <dd>${timeFormatted}</dd>
+              <dt>Half Mistakes:</dt>
+              <dd>${attempt.stats.halfMistakes}</dd>
+              <dt>Full Mistakes:</dt>
+              <dd>${attempt.stats.fullMistakes}</dd>
+              <dt>Date:</dt>
+              <dd>${date.toLocaleDateString()}</dd>
+            </dl>
+          </div>
+        </div>
       `;
     });
 
     tableHTML += `</tbody></table>`;
-    leaderboardList.innerHTML = tableHTML;
-
+    leaderboardList.innerHTML = tableHTML + cardHTML;
+    
+    // Add toggle functionality for cards
+    document.querySelectorAll('.leaderboard-card-toggle').forEach(toggle => {
+      toggle.addEventListener('click', () => {
+        const details = toggle.parentElement.nextElementSibling;
+        const isExpanded = details.classList.contains('show');
+        details.classList.toggle('show');
+        toggle.textContent = isExpanded ? '+' : '−';
+        toggle.setAttribute('aria-label', isExpanded ? 'Show details' : 'Hide details');
+      });
+    });
+    
     makeTableSortable();
   }
 
@@ -509,17 +501,17 @@ document.addEventListener('DOMContentLoaded', function() {
       header.style.cursor = 'pointer';
       header.addEventListener('click', () => {
         const column = header.getAttribute('data-column');
-
+        
         if (currentSortColumn === column) {
           currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
         } else {
           currentSortColumn = column;
           currentSortDirection = 'desc';
         }
-
-        sortAttempts(currentSortColumn, currentSortDirection);
+        
+        sortAttempts(column, currentSortDirection);
         updatePagination();
-
+        
         headers.forEach(h => {
           h.classList.remove('sorted-asc', 'sorted-desc');
           if (h.getAttribute('data-column') === column) {
@@ -527,13 +519,14 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         });
       });
-
+      
       if (header.getAttribute('data-column') === currentSortColumn) {
         header.classList.add(`sorted-${currentSortDirection}`);
       }
     });
   }
 
+  // Auto-delete old data function
   function cleanupOldData() {
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
@@ -564,186 +557,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Run cleanup weekly
   setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
 
-  function loadGlobalTests(searchTerm = '') {
-    globalTestsList.innerHTML = '<div class="loader"></div>';
-
-    const category = testCategoryFilter.value;
-
-    database.ref('tests').orderByChild('timestamp').once('value')
-      .then(snapshot => {
-        const tests = snapshot.val();
-        if (!tests) {
-          globalTestsList.innerHTML = '<p>No community tests yet. Be the first to share one!</p>';
-          return;
-        }
-
-        const testsArray = Object.entries(tests).map(([id, test]) => ({
-          id,
-          ...test
-        }));
-
-        const filteredTests = testsArray
-          .filter(test => {
-            const matchesCategory = category === 'all' || test.category === category;
-            const matchesSearch = searchTerm === '' ||
-              test.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-              test.text.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesCategory && matchesSearch;
-          })
-          .sort((a, b) => b.timestamp - a.timestamp);
-
-        renderTestCards(filteredTests);
-
-        testCategoryFilter.addEventListener('change', () => {
-          loadGlobalTests(searchTerm);
-        });
-      })
-      .catch(error => {
-        console.error('Error loading tests:', error);
-        globalTestsList.innerHTML = '<p>Error loading community tests. Please try again later.</p>';
-      });
-  }
-
-  function renderTestCards(tests) {
-    globalTestsList.innerHTML = '';
-
-    if (tests.length === 0) {
-      globalTestsList.innerHTML = '<p>No tests found matching your criteria.</p>';
-      return;
-    }
-
-    const recentTests = tests.slice(0, 6);
-
-    recentTests.forEach(test => {
-      const testCard = document.createElement('div');
-      testCard.className = 'test-card';
-      testCard.dataset.category = test.category;
-      testCard.innerHTML = `
-        <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
-        <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
-        ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
-        <div class="test-author">
-          <img src="${test.userPhoto}" alt="${test.userName}">
-          <span>Added by ${test.userName}</span>
-        </div>
-      `;
-      testCard.addEventListener('click', () => {
-        document.querySelectorAll('.test-card').forEach(card => {
-          card.classList.remove('selected');
-        });
-        testCard.classList.add('selected');
-
-        originalTextEl.value = test.text;
-        showSection(mainSection);
-        originalTextGroup.classList.add('hidden');
-        timerOptions.classList.remove('hidden');
-        timerButtons.forEach(btn => {
-          btn.disabled = false;
-          btn.style.opacity = '1';
-        });
-
-        if (test.videoUrl) {
-          embedVideo(test.videoUrl);
-        } else {
-          const existingVideo = document.getElementById('testVideoPlayer');
-          if (existingVideo) existingVideo.remove();
-        }
-      });
-      globalTestsList.appendChild(testCard);
-    });
-
-    if (tests.length > 6) {
-      const showMoreBtn = document.createElement('button');
-      showMoreBtn.className = 'secondary-btn';
-      showMoreBtn.textContent = 'Show More Tests';
-      showMoreBtn.style.marginTop = '1rem';
-      showMoreBtn.addEventListener('click', () => {
-        globalTestsList.innerHTML = '';
-        tests.forEach(test => {
-          const testCard = document.createElement('div');
-          testCard.className = 'test-card';
-          testCard.dataset.category = test.category;
-          testCard.innerHTML = `
-            <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
-            <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
-            ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
-            <div class="test-author">
-              <img src="${test.userPhoto}" alt="${test.userName}">
-              <span>Added by ${test.userName}</span>
-            </div>
-          `;
-          testCard.addEventListener('click', () => {
-            document.querySelectorAll('.test-card').forEach(card => {
-              card.classList.remove('selected');
-            });
-            testCard.classList.add('selected');
-            originalTextEl.value = test.text;
-            showSection(mainSection);
-            originalTextGroup.classList.add('hidden');
-            timerOptions.classList.remove('hidden');
-            timerButtons.forEach(btn => {
-              btn.disabled = false;
-              btn.style.opacity = '1';
-            });
-
-            if (test.videoUrl) {
-              embedVideo(test.videoUrl);
-            } else {
-              const existingVideo = document.getElementById('testVideoPlayer');
-              if (existingVideo) existingVideo.remove();
-            }
-          });
-          globalTestsList.appendChild(testCard);
-        });
-
-        showMoreBtn.textContent = 'Show Less';
-        showMoreBtn.onclick = () => {
-          loadGlobalTests();
-        };
-      });
-      globalTestsList.parentNode.appendChild(showMoreBtn);
-    }
-  }
-
-  function getCategoryName(category) {
-    const categories = {
-      'general': 'General Matter',
-      'kailash': 'Kailash Chandra',
-      'progressive': 'Progressive',
-      'legal': 'Legal',
-      'previous': 'Previous Year'
-    };
-    return categories[category] || 'General';
-  }
-
-  function embedVideo(videoUrl) {
-    const existingVideo = document.getElementById('testVideoPlayer');
-    if (existingVideo) existingVideo.remove();
-
-    const videoContainer = document.createElement('div');
-    videoContainer.id = 'testVideoPlayer';
-    videoContainer.style.marginBottom = '1rem';
-
-    const youtubeMatch = videoUrl.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-    if (youtubeMatch) {
-      const videoId = youtubeMatch[1];
-      videoContainer.innerHTML = `
-        <iframe width="100%" height="315" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-      `;
-    } else {
-      videoContainer.innerHTML = `<video controls><source src="${videoUrl}" type="video/mp4">Your browser does not support the video tag.</video>`;
-    }
-
-    originalTextGroup.parentNode.insertBefore(videoContainer, originalTextGroup);
-  }
-
+  // Original text paste handler
   originalTextEl.addEventListener('paste', function() {
     document.querySelectorAll('.test-card').forEach(card => {
       card.classList.remove('selected');
     });
-
+    
     setTimeout(() => {
       if (originalTextEl.value.trim() !== '' && !testActive) {
         originalTextGroup.classList.add('hidden');
@@ -755,154 +577,50 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, 0);
   });
-
+  
+  // Timer option click handler
+  timerButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const minutes = parseInt(this.dataset.minutes);
+      startTimer(minutes);
+      timerOptions.classList.add('hidden');
+      timerDisplay.classList.remove('hidden');
+      testActive = true;
+    });
+  });
+  
+  // Compare button click handler
   compareBtn.addEventListener('click', function() {
     stopTimer();
     compareTexts();
     disableTimerOptions();
   });
-
+  
+  // Show full text button click handler
   showFullTextBtn.addEventListener('click', showFullTexts);
-
+  
+  // Back to results button click handler
   backToResultsBtn.addEventListener('click', showResults);
-
+  
+  // Download PDF button click handler
   downloadPdfBtn.addEventListener('click', downloadAsPdf);
-
+  
+  // Close results button click handler
   closeResultsBtn.addEventListener('click', function() {
     const existingVideo = document.getElementById('testVideoPlayer');
     if (existingVideo) existingVideo.remove();
     location.reload();
   });
-
-  saveBtn.addEventListener('click', () => {
-    const user = auth.currentUser;
-    if (!user) {
-      alert('Please login to save tests.');
-      return;
-    }
-
-    const title = customTitle.value.trim();
-    const text = customOriginal.value.trim();
-    const videoUrl = customVideoUrl.value.trim();
-    const category = customCategory.value;
-
-    if (!title || !text) {
-      alert('Please enter both a title and the original text.');
-      return;
-    }
-
-    const testData = {
-      title,
-      text,
-      videoUrl: videoUrl || null,
-      userName: user.displayName,
-      userPhoto: user.photoURL,
-      category,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
-    };
-
-    database.ref('tests').push(testData)
-      .then(() => {
-        alert('Test saved and shared with the community!');
-        customTitle.value = '';
-        customOriginal.value = '';
-        customVideoUrl.value = '';
-        loadGlobalTests();
-      })
-      .catch(error => {
-        console.error('Error saving test:', error);
-        alert('Failed to save test. Please try again.');
-      });
-  });
-
-  clearBtn.addEventListener('click', () => {
-    const user = auth.currentUser;
-    if (!user) return;
-
-    database.ref('tests').orderByChild('userName').equalTo(user.displayName).once('value')
-      .then(snapshot => {
-        const userTests = snapshot.val();
-        if (!userTests || Object.keys(userTests).length === 0) {
-          alert('You have no tests to delete.');
-          return;
-        }
-
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-          <div class="modal-content">
-            <h3>Select Tests to Delete</h3>
-            <div class="test-selection"></div>
-            <div class="modal-buttons">
-              <button id="cancelDelete" class="secondary-btn">Cancel</button>
-              <button id="confirmDelete" class="danger-btn">Delete Selected</button>
-            </div>
-          </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        const testSelection = modal.querySelector('.test-selection');
-        const checkboxes = [];
-
-        Object.entries(userTests).forEach(([id, test]) => {
-          const testItem = document.createElement('div');
-          testItem.className = 'test-item';
-          const checkboxId = `test-${id}`;
-          testItem.innerHTML = `
-            <input type="checkbox" id="${checkboxId}" checked>
-            <label for="${checkboxId}">${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></label>
-          `;
-          testSelection.appendChild(testItem);
-          checkboxes.push({id, checkbox: testItem.querySelector('input')});
-        });
-
-        modal.querySelector('#cancelDelete').addEventListener('click', () => {
-          document.body.removeChild(modal);
-        });
-
-        modal.querySelector('#confirmDelete').addEventListener('click', () => {
-          const selectedTests = checkboxes
-            .filter(item => item.checkbox.checked)
-            .map(item => item.id);
-
-          if (selectedTests.length === 0) {
-            alert('Please select at least one test to delete.');
-            return;
-          }
-
-          const updates = {};
-          selectedTests.forEach(id => {
-            updates[id] = null;
-          });
-
-          database.ref('tests').update(updates)
-            .then(() => {
-              alert(`${selectedTests.length} test(s) deleted successfully.`);
-              document.body.removeChild(modal);
-              loadGlobalTests();
-            })
-            .catch(error => {
-              console.error('Error deleting tests:', error);
-              alert('Failed to delete tests. Please try again.');
-            });
-        });
-      })
-      .catch(error => {
-        console.error('Error fetching user tests:', error);
-        alert('Failed to fetch your tests. Please try again.');
-      });
-  });
-
+  
   function startTimer(minutes) {
     endTime = new Date();
     endTime.setMinutes(endTime.getMinutes() + minutes);
-
+    
     updateTimerDisplay();
-
+    
     timerInterval = setInterval(() => {
       updateTimerDisplay();
-
+      
       const now = new Date();
       if (now >= endTime) {
         stopTimer();
@@ -914,12 +632,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }, 1000);
   }
-
+  
   function stopTimer() {
     clearInterval(timerInterval);
     timerDisplay.classList.add('hidden');
   }
-
+  
   function disableTimerOptions() {
     timerButtons.forEach(btn => {
       btn.disabled = true;
@@ -927,56 +645,56 @@ document.addEventListener('DOMContentLoaded', function() {
       btn.style.cursor = 'not-allowed';
     });
   }
-
+  
   function updateTimerDisplay() {
     const now = new Date();
     const remaining = endTime - now;
-
+    
     if (remaining <= 0) return;
-
+    
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-
+    
     timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
-
+  
   function lockTest() {
     userTextEl.readOnly = true;
     userTextEl.classList.add('locked-textarea');
     compareBtn.disabled = true;
     closeResultsBtn.classList.remove('hidden');
   }
-
+  
   function compareTexts() {
     const originalText = originalTextEl.value;
     const userText = userTextEl.value;
-
+    
     if (!originalText || !userText) {
       alert('Please enter both original text and your transcription.');
       return;
     }
-
+    
     let testTitle = "Custom Test";
     const selectedTestCard = document.querySelector('.test-card.selected');
     if (selectedTestCard) {
-      testTitle = selectedTestCard.querySelector('h4').textContent.split('<')[0].trim();
+        testTitle = selectedTestCard.querySelector('h4').textContent;
     }
-
+    
     const originalWords = processText(originalText);
     const userWords = processText(userText);
-
+    
     const comparison = compareParagraphs(originalWords, userWords);
-
+    
     displayComparison(comparison);
     displayStats(comparison.stats);
     displayFeedback(comparison.stats, originalWords, userWords);
     displayFullTexts(originalText, userText);
-
+    
     const now = new Date();
     resultDateEl.textContent = now.toLocaleString();
-
+    
     showResults();
-
+    
     if (testActive) {
       lockTest();
     }
@@ -997,17 +715,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => console.error('Error saving attempt:', error));
     }
   }
-
+  
   function showFullTexts() {
     resultsSection.classList.add('hidden');
     fullTextSection.classList.remove('hidden');
   }
-
+  
   function showResults() {
     fullTextSection.classList.add('hidden');
     resultsSection.classList.remove('hidden');
   }
-
+  
   function downloadAsPdf() {
     const resultsElement = document.getElementById('results');
 
@@ -1030,213 +748,4 @@ document.addEventListener('DOMContentLoaded', function() {
       while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save('transcription-comparison.pdf');
-    });
-  }
-
-  function processText(text) {
-    return text
-      .replace(/<[^>]*>/g, '')
-      .replace(/[\u2018\u2019]/g, "'")
-      .trim()
-      .split(/\s+/);
-  }
-
-  function isSimilar(wordA, wordB) {
-    const minLength = Math.min(wordA.length, wordB.length);
-    const maxLength = Math.max(wordA.length, wordB.length);
-    let similarCount = 0;
-    const threshold = 50;
-
-    for (let i = 0; i < minLength; i++) {
-      if (wordA[i] === wordB[i]) {
-        similarCount++;
-      }
-    }
-
-    const similarityPercentage = (similarCount / maxLength) * 100;
-    return similarityPercentage >= threshold;
-  }
-
-  function arraysAreEqual(arr1, arr2) {
-    if (arr1.length !== arr2.length) return false;
-    for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) return false;
-    }
-    return true;
-  }
-
-  function compareParagraphs(paragraphA, paragraphB) {
-    let comparedText = '';
-    let numHalfDiff = 0;
-    let numFullDiff = 0;
-    let wordAIndex = 0;
-    let wordBIndex = 0;
-
-    while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
-      const wordA = paragraphA[wordAIndex] || '';
-      const wordB = paragraphB[wordBIndex] || '';
-      const cleanWordA = wordA.replace(/[,\?\-\s]/g, '');
-      const cleanWordB = wordB.replace(/[,\?\-\s]/g, '');
-
-      if (cleanWordA === cleanWordB) {
-        comparedText += `<span class="correct">${wordA}</span> `;
-        wordAIndex++;
-        wordBIndex++;
-      } else if (cleanWordA.toLowerCase() === cleanWordB.toLowerCase()) {
-        comparedText += `<span class="capitalization">${wordA}</span> `;
-        comparedText += `<span class="capitalization-strike">${wordB}</span> `;
-        wordAIndex++;
-        wordBIndex++;
-        numHalfDiff++;
-      } else {
-        if (!wordA) {
-          comparedText += `<span class="addition">${wordB}</span> `;
-          wordBIndex++;
-          numFullDiff++;
-        } else if (!wordB) {
-          comparedText += `<span class="missing">${wordA}</span> `;
-          wordAIndex++;
-          numFullDiff++;
-        } else {
-          if (wordA === paragraphB[wordBIndex]) {
-            comparedText += `<span class="spelling">${wordA}</span> `;
-            wordAIndex++;
-            wordBIndex++;
-          } else if (wordB === paragraphA[wordAIndex]) {
-            comparedText += `<span class="spelling-strike">${wordB}</span> `;
-            wordAIndex++;
-            wordBIndex++;
-          } else if (isSimilar(wordA, wordB)) {
-            comparedText += `<span class="spelling">${wordA}</span> `;
-            comparedText += `<span class="spelling-strike">${wordB}</span> `;
-            wordAIndex++;
-            wordBIndex++;
-            numHalfDiff++;
-          } else {
-            const pairA = [wordA];
-            const pairB = [wordB];
-
-            for (let i = 1; i < 5 && (wordBIndex + i) < paragraphB.length; i++) {
-              pairB.push(paragraphB[wordBIndex + i]);
-            }
-
-            for (let i = 1; i < 5 && (wordAIndex + i) < paragraphA.length; i++) {
-              pairA.push(paragraphA[wordAIndex + i]);
-            }
-
-            let foundPairInA = false;
-            for (let i = 1; i <= 50 && (wordAIndex + i) < paragraphA.length; i++) {
-              const subarrayA = paragraphA.slice(wordAIndex + i, wordAIndex + i + pairB.length);
-              if (arraysAreEqual(subarrayA, pairB)) {
-                for (let j = 0; j < i; j++) {
-                  comparedText += `<span class="missing">${paragraphA[wordAIndex + j]}</span> `;
-                  wordAIndex++;
-                  numFullDiff++;
-                }
-                foundPairInA = true;
-                break;
-              }
-            }
-
-            let foundPairInB = false;
-            if (!foundPairInA) {
-              for (let i = 1; i <= 50 && (wordBIndex + i) < paragraphB.length; i++) {
-                const subarrayB = paragraphB.slice(wordBIndex + i, wordBIndex + i + pairA.length);
-                if (arraysAreEqual(subarrayB, pairA)) {
-                  for (let j = 0; j < i; j++) {
-                    comparedText += `<span class="addition">${paragraphB[wordBIndex + j]}</span> `;
-                    wordBIndex++;
-                    numFullDiff++;
-                  }
-                  foundPairInB = true;
-                  break;
-                }
-              }
-            }
-
-            if (!foundPairInA && !foundPairInB) {
-              comparedText += `<span class="missing">${wordA}</span> `;
-              comparedText += `<span class="addition">${wordB}</span> `;
-              wordAIndex++;
-              wordBIndex++;
-              numFullDiff++;
-            }
-          }
-        }
-      }
-    }
-
-    const totalWords = paragraphA.length;
-    const accuracy = totalWords > 0 ? ((totalWords - numFullDiff - numHalfDiff / 2) / totalWords * 100) : 0;
-    const wpm = startTime ? Math.round((paragraphB.length / ((new Date() - startTime) / 60000))) : 0;
-    const keystrokes = paragraphB.join(' ').length;
-
-    return {
-      text: comparedText,
-      stats: {
-        accuracy,
-        wpm,
-        totalOriginal: paragraphA.length,
-        totalUser: paragraphB.length,
-        halfMistakes: numHalfDiff,
-        fullMistakes: numFullDiff,
-        timeTaken: endTime ? Math.round((endTime - startTime) / 1000) : 0,
-        keystrokes
-      }
-    };
-  }
-
-  function displayComparison(comparison) {
-    comparisonResultEl.innerHTML = comparison.text;
-  }
-
-  function displayStats(stats) {
-    statsEl.innerHTML = `
-      <p><strong>Accuracy:</strong> ${stats.accuracy.toFixed(1)}%</p>
-      <p><strong>Speed:</strong> ${stats.wpm} WPM</p>
-      <p><strong>Original Words:</strong> ${stats.totalOriginal}</p>
-      <p><strong>Typed Words:</strong> ${stats.totalUser}</p>
-      <p><strong>Half Mistakes:</strong> ${stats.halfMistakes}</p>
-      <p><strong>Full Mistakes:</strong> ${stats.fullMistakes}</p>
-      <p><strong>Time Taken:</strong> ${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p>
-      <p><strong>Keystrokes:</strong> ${stats.keystrokes}</p>
-    `;
-  }
-
-  function displayFeedback(stats, originalWords, userWords) {
-    let feedback = '';
-    if (stats.accuracy >= 90) {
-      feedback += '<p>Excellent work! Your accuracy is outstanding.</p>';
-    } else if (stats.accuracy >= 70) {
-      feedback += '<p>Good effort! Try focusing on reducing spelling and capitalization errors.</p>';
-    } else {
-      feedback += '<p>Keep practicing! Pay attention to the original text to minimize mistakes.</p>';
-    }
-
-    if (stats.wpm >= 50) {
-      feedback += '<p>Impressive typing speed! You’re a fast typist.</p>';
-    } else if (stats.wpm >= 30) {
-      feedback += '<p>Decent typing speed. Practice regularly to improve.</p>';
-    } else {
-      feedback += '<p>Your typing speed could use some work. Try typing exercises to build speed.</p>';
-    }
-
-    if (stats.halfMistakes > stats.fullMistakes) {
-      feedback += '<p>Most of your errors are minor (e.g., capitalization). Double-check case sensitivity.</p>';
-    } else if (stats.fullMistakes > 0) {
-      feedback += '<p>You have several full mistakes (e.g., missing or added words). Review the text carefully.</p>';
-    }
-
-    feedbackEl.innerHTML = feedback;
-  }
-
-  function displayFullTexts(original, user) {
-    originalDisplayEl.textContent = original;
-    userDisplayEl.textContent = user;
-  }
-});
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth

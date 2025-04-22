@@ -8,8 +8,6 @@
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
@@ -35,12 +33,6 @@
         </div>
       </div>
     </header>
-
-    <nav class="main-nav">
-      <button id="homeLink" class="nav-link active">Home</button>
-      <button id="testsLink" class="nav-link">Community Tests</button>
-      <button id="leaderboardLink" class="nav-link">Leaderboard</button>
-    </nav>
 
     <main>
       <!-- Login Prompt -->
@@ -113,11 +105,7 @@
       <!-- Global Tests Section -->
       <section id="globalTestsSection" class="hidden global-tests-section">
         <h3>Community Tests</h3>
-        <div class="test-controls">
-          <div class="search-container">
-            <input type="text" id="testSearchInput" placeholder="Search tests...">
-            <button id="searchTestsBtn">Search</button>
-          </div>
+        <div class="test-filters">
           <select id="testCategoryFilter">
             <option value="all">All Categories</option>
             <option value="general">General Matter</option>
@@ -162,7 +150,7 @@
       </section>
 
       <!-- Main Input Section -->
-      <section id="mainSection" class="input-section">
+      <section class="input-section">
         <div class="input-group" id="originalTextGroup">
           <textarea id="originalText" placeholder=" "></textarea>
           <label for="originalText">Original Text</label>
@@ -171,10 +159,6 @@
         <div id="timerOptions" class="timer-options hidden">
           <button class="timer-option" data-minutes="40">40 Minutes</button>
           <button class="timer-option" data-minutes="50">50 Minutes</button>
-          <div class="custom-timer">
-            <input type="number" id="customTimerMinutes" min="1" max="120" placeholder="Min">
-            <button id="startCustomTimer">Start</button>
-          </div>
         </div>
 
         <div id="timerDisplay" class="timer-display hidden"></div>
@@ -234,7 +218,7 @@
         <div class="columns">
           <div class="column">
             <h3>Original Text</h3>
-            <div id="fullTextSection" class="text-display"></div>
+            <div id="originalDisplay" class="text-display"></div>
           </div>
           <div class="column">
             <h3>Your Transcription</h3>
@@ -250,5 +234,6 @@
   </div>
 
   <script src="script.js"></script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'933b3deff84abf9d',t:'MTc0NTIyMTMxNy4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9341ad634e3abf66',t:'MTc0NTI4ODc5Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+</body>
 </html>
