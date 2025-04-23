@@ -8,8 +8,9 @@
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- Firebase SDK (only database) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 </head>
 <body>
@@ -23,11 +24,59 @@
       </div>
       <h1>Steno Warriors</h1>
       <p class="subtitle">Advanced Transcription Comparison Tool</p>
+      <div id="authSection">
+        <button id="loginBtn" class="auth-btn">Login with Google</button>
+        <div id="userInfo" class="hidden">
+          <img id="userPhoto" class="user-photo">
+          <span id="userName"></span>
+          <button id="logoutBtn" class="auth-btn secondary-btn">Logout</button>
+        </div>
+      </div>
     </header>
 
     <main>
+      <!-- Login Prompt -->
+      <section id="loginPrompt" class="login-prompt">
+        <div id="loginForm">
+          <h3>Login to Steno Warriors</h3>
+          <div class="input-group">
+            <input type="email" id="loginEmail" placeholder=" ">
+            <label for="loginEmail">Email</label>
+          </div>
+          <div class="input-group">
+            <input type="password" id="loginPassword" placeholder=" ">
+            <label for="loginPassword">Password</label>
+          </div>
+          <button id="emailLoginBtn" class="auth-btn">Login</button>
+          <button id="googleLoginBtn" class="auth-btn secondary-btn">Login with Google</button>
+          <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
+        </div>
+
+        <div id="registerForm" class="hidden">
+          <h3>Create an Account</h3>
+          <div class="input-group">
+            <input type="text" id="registerName" placeholder=" ">
+            <label for="registerName">Full Name</label>
+          </div>
+          <div class="input-group">
+            <input type="email" id="registerEmail" placeholder=" ">
+            <label for="registerEmail">Email</label>
+          </div>
+          <div class="input-group">
+            <input type="password" id="registerPassword" placeholder=" ">
+            <label for="registerPassword">Password (min 6 characters)</label>
+          </div>
+          <div class="input-group">
+            <input type="password" id="confirmPassword" placeholder=" ">
+            <label for="confirmPassword">Confirm Password</label>
+          </div>
+          <button id="registerBtn" class="auth-btn">Register</button>
+          <button id="showLogin" class="auth-btn secondary-btn">Back to Login</button>
+        </div>
+      </section>
+
       <!-- Leaderboard Section -->
-      <section id="leaderboardSection" class="leaderboard-section">
+      <section id="leaderboardSection" class="hidden leaderboard-section">
         <h3>Leaderboard</h3>
         <div class="leaderboard-controls">
           <select id="leaderboardFilter">
@@ -38,6 +87,14 @@
           <select id="testNameFilter">
             <option value="all">All Tests</option>
           </select>
+          <select id="categoryFilter">
+            <option value="all">All Categories</option>
+            <option value="general">General Matter</option>
+            <option value="kailash">Kailash Chandra</option>
+            <option value="progressive">Progressive</option>
+            <option value="legal">Legal</option>
+            <option value="previous">Previous Year</option>
+          </select>
           <button id="prevPageBtn" class="secondary-btn" disabled>Previous</button>
           <button id="nextPageBtn" class="secondary-btn">Next</button>
         </div>
@@ -46,17 +103,37 @@
       </section>
 
       <!-- Global Tests Section -->
-      <section id="globalTestsSection" class="global-tests-section">
+      <section id="globalTestsSection" class="hidden global-tests-section">
         <h3>Community Tests</h3>
+        <div class="test-filters">
+          <select id="testCategoryFilter">
+            <option value="all">All Categories</option>
+            <option value="general">General Matter</option>
+            <option value="kailash">Kailash Chandra</option>
+            <option value="progressive">Progressive</option>
+            <option value="legal">Legal</option>
+            <option value="previous">Previous Year</option>
+          </select>
+        </div>
         <div id="globalTestsList" class="tests-list"></div>
       </section>
 
       <!-- Custom Test Section -->
-      <section id="customTestSection" class="custom-test-section">
+      <section id="customTestSection" class="hidden custom-test-section">
         <h3>Add Your Own Test</h3>
         <div class="input-group">
           <input type="text" id="customTitle" placeholder=" ">
           <label for="customTitle">Test Title</label>
+        </div>
+        <div class="input-group">
+          <select id="customCategory">
+            <option value="general">General Matter</option>
+            <option value="kailash">Kailash Chandra</option>
+            <option value="progressive">Progressive</option>
+            <option value="legal">Legal</option>
+            <option value="previous">Previous Year</option>
+          </select>
+          <label for="customCategory">Test Category</label>
         </div>
         <div class="input-group">
           <textarea id="customOriginal" placeholder=" "></textarea>
@@ -68,6 +145,7 @@
         </div>
         <div class="button-group">
           <button id="saveTestBtn">Save & Share Test</button>
+          <button id="clearTestsBtn" class="secondary-btn">Clear My Tests</button>
         </div>
       </section>
 
@@ -156,5 +234,6 @@
   </div>
 
   <script src="script.js"></script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'934ce15bbe6f452b',t:'MTc0NTQwNjI2OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
 </body>
 </html>
