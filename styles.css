@@ -758,19 +758,6 @@ body.dark-mode .leaderboard-section {
   flex-wrap: wrap;
 }
 
-.leaderboard-controls select {
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: 1px solid #e2e8f0;
-  background: white;
-}
-
-body.dark-mode .leaderboard-controls select {
-  background: #2a2a2a;
-  border-color: #444;
-  color: #e0e0e0;
-}
-
 .leaderboard-container {
   width: 100%;
   overflow-x: auto;
@@ -780,7 +767,7 @@ body.dark-mode .leaderboard-controls select {
 
 .leaderboard-table {
   width: 100%;
-  min-width: 1000px; /* Ensures horizontal scrolling when needed */
+  min-width: 1000px;
   border-collapse: collapse;
 }
 
@@ -808,6 +795,24 @@ body.dark-mode .leaderboard-table td {
 
 .leaderboard-table th:hover {
   background-color: var(--secondary);
+}
+
+.leaderboard-table th::after {
+  content: "↕";
+  position: absolute;
+  right: 0.5rem;
+  opacity: 0.5;
+  font-size: 0.8rem;
+}
+
+.leaderboard-table th.sorted-asc::after {
+  content: "↑";
+  opacity: 1;
+}
+
+.leaderboard-table th.sorted-desc::after {
+  content: "↓";
+  opacity: 1;
 }
 
 .leaderboard-table tr:nth-child(even) {
@@ -1024,7 +1029,7 @@ body.dark-mode .test-item {
 }
 
 .modal-buttons {
-  display:oauth2
+  display: flex;
   justify-content: flex-end;
   gap: 0.8rem;
   margin-top: 1.5rem;
