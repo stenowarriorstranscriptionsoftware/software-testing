@@ -4,7 +4,7 @@ const firebaseConfig = {
   authDomain: "stenowarriorsyoursteno.firebaseapp.com",
   databaseURL: "https://stenowarriorsyoursteno-default-rtdb.firebaseio.com",
   projectId: "stenowarriorsyoursteno",
-  storageBucket: "stenowarriorsyoursteno.firebasestorage.app",
+  storageBucket: "stenowarriorsyoursteno.appspot.com",
   messagingSenderId: "173103533896",
   appId: "1:173103533896:web:78bbe18e17ca8f5da5ad7d",
   measurementId: "G-Y3E0QVFSBB"
@@ -385,24 +385,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     let tableHTML = `
-      <div class="leaderboard-container">
-        <table class="leaderboard-table">
-          <thead>
-            <tr>
-              <th data-column="rank">Rank</th>
-              <th data-column="userName">User</th>
-              <th data-column="testTitle">Test</th>
-              <th data-column="accuracy">Accuracy</th>
-              <th data-column="wpm">Speed (WPM)</th>
-              <th data-column="totalOriginal">Original Words</th>
-              <th data-column="totalUser">Typed Words</th>
-              <th data-column="timeTaken">Time Taken</th>
-              <th data-column="halfMistakes">Half Mistakes</th>
-              <th data-column="fullMistakes">Full Mistakes</th>
-              <th data-column="date">Date</th>
-            </tr>
-          </thead>
-          <tbody>
+      <table>
+        <thead>
+          <tr>
+            <th data-column="rank">Rank</th>
+            <th data-column="userName">User</th>
+            <th data-column="testTitle">Test</th>
+            <th data-column="accuracy">Accuracy</th>
+            <th data-column="wpm">Speed (WPM)</th>
+            <th data-column="totalOriginal">Original Words</th>
+            <th data-column="totalUser">Typed Words</th>
+            <th data-column="timeTaken">Time Taken</th>
+            <th data-column="halfMistakes">Half Mistakes</th>
+            <th data-column="fullMistakes">Full Mistakes</th>
+            <th data-column="date">Date</th>
+          </tr>
+        </thead>
+        <tbody>
     `;
 
     attempts.forEach((attempt, index) => {
@@ -445,14 +444,14 @@ document.addEventListener('DOMContentLoaded', function() {
       `;
     });
 
-    tableHTML += `</tbody></table></div>`;
+    tableHTML += `</tbody></table>`;
     leaderboardList.innerHTML = tableHTML;
     
     makeTableSortable();
   }
 
   function makeTableSortable() {
-    const headers = document.querySelectorAll('.leaderboard-table th[data-column]');
+    const headers = document.querySelectorAll('.leaderboard-list th[data-column]');
     headers.forEach(header => {
       header.style.cursor = 'pointer';
       header.addEventListener('click', () => {

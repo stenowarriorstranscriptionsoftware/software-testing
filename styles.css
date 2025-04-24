@@ -758,46 +758,58 @@ body.dark-mode .leaderboard-section {
   flex-wrap: wrap;
 }
 
-.leaderboard-container {
-  width: 100%;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin-bottom: 1rem;
+.leaderboard-controls select {
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #e2e8f0;
+  background: white;
 }
 
-.leaderboard-table {
+body.dark-mode .leaderboard-controls select {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+/* Updated Leaderboard List Styles for Horizontal Scrolling */
+.leaderboard-list {
+  overflow-x: auto;
   width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.leaderboard-list table {
   min-width: 1000px;
+  width: 100%;
   border-collapse: collapse;
 }
 
-.leaderboard-table th, 
-.leaderboard-table td {
-  padding: 0.8rem;
+.leaderboard-list th, 
+.leaderboard-list td {
+  white-space: nowrap;
+  padding: 0.8rem 1rem;
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
-  white-space: nowrap;
 }
 
-body.dark-mode .leaderboard-table th,
-body.dark-mode .leaderboard-table td {
+body.dark-mode .leaderboard-list th,
+body.dark-mode .leaderboard-list td {
   border-bottom-color: #444;
 }
 
-.leaderboard-table th {
+.leaderboard-list th {
   background-color: var(--primary-light);
   color: white;
   font-weight: 500;
-  position: sticky;
-  top: 0;
-  z-index: 10;
+  position: relative;
+  cursor: pointer;
 }
 
-.leaderboard-table th:hover {
+.leaderboard-list th:hover {
   background-color: var(--secondary);
 }
 
-.leaderboard-table th::after {
+.leaderboard-list th::after {
   content: "↕";
   position: absolute;
   right: 0.5rem;
@@ -805,29 +817,29 @@ body.dark-mode .leaderboard-table td {
   font-size: 0.8rem;
 }
 
-.leaderboard-table th.sorted-asc::after {
+.leaderboard-list th.sorted-asc::after {
   content: "↑";
   opacity: 1;
 }
 
-.leaderboard-table th.sorted-desc::after {
+.leaderboard-list th.sorted-desc::after {
   content: "↓";
   opacity: 1;
 }
 
-.leaderboard-table tr:nth-child(even) {
+.leaderboard-list tr:nth-child(even) {
   background-color: #f8f9fa;
 }
 
-body.dark-mode .leaderboard-table tr:nth-child(even) {
+body.dark-mode .leaderboard-list tr:nth-child(even) {
   background-color: #2a2a2a;
 }
 
-.leaderboard-table tr:hover {
+.leaderboard-list tr:hover {
   background-color: #e9ecef;
 }
 
-body.dark-mode .leaderboard-table tr:hover {
+body.dark-mode .leaderboard-list tr:hover {
   background-color: #3a3a3a;
 }
 
