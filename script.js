@@ -200,9 +200,17 @@ document.addEventListener('DOMContentLoaded', function() {
     loginPrompt.classList.add('hidden');
 
     // ✅ Only allow this section for admin
-    if (user.email === "anishkumar18034@gmail.com") {
-      customTestSection.classList.remove('hidden');
-    }
+   
+   const adminEmails = [
+  "anishkumar18034@gmail.com",
+  "anishkumar1803@gmail.com",
+  "admin2@example.com"
+];
+
+if (adminEmails.includes(user.email)) {
+  customTestSection.classList.remove('hidden');
+}
+
 
     globalTestsSection.classList.remove('hidden');
     leaderboardSection.classList.remove('hidden');
