@@ -1,13 +1,13 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyB9vruL_f9KZPC-Ihdj3UuqcXSgy1Lzqm0",
-  authDomain: "score-collection.firebaseapp.com",
-  databaseURL: "https://score-collection-default-rtdb.firebaseio.com",
-  projectId: "score-collection",
-  storageBucket: "score-collection.firebasestorage.app",
-  messagingSenderId: "720795371551",
-  appId: "1:720795371551:web:78ff7863cbeaca0161ed2a",
-  measurementId: "G-L6MHY1KCZ0"
+  apiKey: "AIzaSyB5rvgi0KYB5N5waBSVZf7fvtl4sj3QRHc",
+  authDomain: "swtypingsoftware.firebaseapp.com",
+  databaseURL: "https://swtypingsoftware-default-rtdb.firebaseio.com",
+  projectId: "swtypingsoftware",
+  storageBucket: "swtypingsoftware.firebasestorage.app",
+  messagingSenderId: "416692712964",
+  appId: "1:416692712964:web:3f557f7935ad02b4fba751",
+  measurementId: "G-FWD5WNL48G"
 };
 
 // Initialize Firebase
