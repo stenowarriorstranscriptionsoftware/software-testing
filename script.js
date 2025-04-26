@@ -447,7 +447,8 @@ if (adminEmails.includes(user.email)) {
             <img src="${attempt.userPhoto}" alt="${attempt.userName}">
             <span>${attempt.userName}</span>
           </td>
-          <td>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
+           <td>${attempt.testTitle || 'Custom Test'}</td>
+      <td><span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span></td>
           <td class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</td>
           <td>${attempt.stats.wpm}</td>
           <td>${attempt.stats.totalOriginal}</td>
