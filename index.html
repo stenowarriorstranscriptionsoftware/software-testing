@@ -9,46 +9,61 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="container">
     <header>
-      <h1>Steno Warriors</h1>
-      <p class="subtitle">Advanced Transcription Comparison Tool</p>
-      <div class="auth-section">
-        <button id="loginBtn" class="secondary-btn">Login with Google</button>
-        <button id="logoutBtn" class="secondary-btn hidden">Logout</button>
-        <span id="userEmail" class="user-email"></span>
+      <div class="header-content">
+        <div>
+          <h1>Steno Warriors</h1>
+          <p class="subtitle">Advanced Transcription Comparison Tool</p>
+        </div>
+        <div id="authSection">
+          <button id="loginBtn" class="auth-btn">Admin Login</button>
+          <div id="userInfo" class="hidden">
+            <span id="userName"></span>
+            <button id="logoutBtn" class="auth-btn">Logout</button>
+          </div>
+        </div>
       </div>
     </header>
 
     <main>
+      <!-- Admin Panel (visible only to admin) -->
       <section id="adminPanel" class="hidden">
         <h2>Admin Panel</h2>
-        <div class="input-group">
-          <label for="testTitle">Test Title</label>
-          <input type="text" id="testTitle" placeholder="Enter test title...">
+        <div class="admin-controls">
+          <div class="input-group">
+            <label for="testTitle">Test Title</label>
+            <input type="text" id="testTitle" placeholder="Enter test title">
+          </div>
+          <div class="input-group">
+            <label for="adminOriginalText">Test Content</label>
+            <textarea id="adminOriginalText" placeholder="Enter the text for the test..."></textarea>
+          </div>
+          <button id="addTestBtn" class="admin-btn">Add Test</button>
         </div>
-        <div class="input-group">
-          <label for="testContent">Test Content</label>
-          <textarea id="testContent" placeholder="Enter test content..."></textarea>
+        
+        <div class="tests-list">
+          <h3>Existing Tests</h3>
+          <div id="testsContainer"></div>
         </div>
-        <button id="addTestBtn">Add Test</button>
       </section>
 
+      <!-- Test Selection (visible to all users) -->
+      <section id="testSelection">
+        <h2>Available Tests</h2>
+        <div id="availableTests" class="tests-grid"></div>
+      </section>
+
+      <!-- Transcription Tool (original content) -->
       <section class="input-section">
         <div class="input-group">
-          <label for="testSelector">Select Test</label>
-          <select id="testSelector">
-            <option value="">Choose a test...</option>
-          </select>
-        </div>
-        <div class="input-group">
           <label for="originalText">Original Text</label>
-          <textarea id="originalText" placeholder="Select a test or paste the original text here..." readonly></textarea>
+          <textarea id="originalText" placeholder="Paste the original text here..."></textarea>
         </div>
         
         <div class="input-group">
@@ -116,7 +131,7 @@
     </main>
 
     <footer>
-      <p>© 2025 Steno Warriors | Professional Transcription Tool</p>
+      <p>© 2023 Steno Warriors | Professional Transcription Tool</p>
     </footer>
   </div>
 

@@ -37,8 +37,13 @@ body {
 header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: white;
-  padding: 2rem;
-  text-align: center;
+  padding: 1.5rem 2rem;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 header h1 {
@@ -52,21 +57,48 @@ header h1 {
   opacity: 0.9;
 }
 
-.auth-section {
-  margin-top: 1rem;
-  display: flex;
-  gap: 0.8rem;
-  justify-content: center;
-  align-items: center;
-}
-
-.user-email {
-  font-size: 0.9rem;
+.auth-btn {
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
-  opacity: 0.9;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 0.9rem;
 }
 
-.input-section, #adminPanel {
+.auth-btn:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+#userInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+#userName {
+  font-size: 0.9rem;
+}
+
+.admin-btn {
+  background-color: var(--success);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.admin-btn:hover {
+  background-color: #3aa8d8;
+  transform: translateY(-2px);
+}
+
+.input-section {
   padding: 2rem;
 }
 
@@ -81,7 +113,23 @@ label {
   color: var(--dark);
 }
 
-textarea, input[type="text"], select {
+input[type="text"] {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  transition: all 0.3s;
+}
+
+input[type="text"]:focus {
+  border-color: var(--primary-light);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+}
+
+textarea {
   width: 100%;
   min-height: 150px;
   padding: 1rem;
@@ -89,20 +137,11 @@ textarea, input[type="text"], select {
   border-radius: 10px;
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
+  resize: vertical;
   transition: all 0.3s;
 }
 
-input[type="text"], select {
-  min-height: auto;
-  height: 40px;
-}
-
-textarea[readonly] {
-  background: #f8f9fa;
-  cursor: not-allowed;
-}
-
-textarea:focus, input[type="text"]:focus, select:focus {
+textarea:focus {
   border-color: var(--primary-light);
   outline: none;
   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
@@ -158,7 +197,7 @@ button:hover {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin inorganic-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
 }
@@ -213,7 +252,7 @@ button:hover {
   padding: 1.5rem;
   border-radius: 10px;
   margin-bottom: 1.5rem;
-  bank: 1px solid #e2e8f0;
+  border: 1px solid #e2e8f0;
 }
 
 .result-box {
@@ -287,6 +326,77 @@ button:hover {
   white-space: pre-wrap;
 }
 
+/* Admin Panel Styles */
+#adminPanel {
+  padding: 2rem;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-controls {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 2rem;
+  border: 1px solid #e2e8f0;
+}
+
+.tests-list {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+/* Test Selection Styles */
+#testSelection {
+  padding: 2rem;
+}
+
+.tests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.test-card {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 1.5rem;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.test-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.test-card h3 {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+}
+
+.test-card p {
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+.test-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.delete-btn {
+  background-color: var(--danger);
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+}
+
 footer {
   text-align: center;
   padding: 1.5rem;
@@ -296,6 +406,12 @@ footer {
 }
 
 @media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
   .button-group {
     flex-direction: column;
   }
@@ -327,8 +443,7 @@ footer {
     height: 300px;
   }
   
-  .auth-section {
-    flex-direction: column;
-    gap: 0.5rem;
+  .tests-grid {
+    grid-template-columns: 1fr;
   }
 }
