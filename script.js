@@ -13,9 +13,9 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const auth = firebase.auth();
+const app = firebase.initializeApp(firebaseConfig);
+const database = firebase.database.getDatabase(app);
+const auth = firebase.auth.getAuth(app);
 
 document.addEventListener('DOMContentLoaded', function() {
   // DOM elements
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
   ];
   
   // Firebase auth state listener
-  auth.onAuthStateChanged(user => {
+  firebase.auth.onAuthStateChanged(auth, user => {
     currentUser = user;
     if (user) {
       userEmailEl.textContent = user.email;
@@ -88,7 +88,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Load available tests
   function loadTests() {
-    database.ref('tests').once('value').then(snapshot => {
+    const testsRef = firebase.database.ref(database, 'tests');
+    firebase.database.onValue(testsRef, snapshot => {
       const tests = snapshot.val();
       testSelect.innerHTML = '<option value="">Select a test</option>';
       if (tests) {
@@ -99,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
           testSelect.appendChild(option);
         });
       }
-    });
+    }, { onlyOnce: true });
   }
 
   // Event listeners
@@ -111,9 +112,17 @@ document.addEventListener('DOMContentLoaded', function() {
   typingAreaEl.addEventListener('input', checkTypingProgress);
   loginBtn.addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider);
+    firebase.auth.signInWithPopup(auth, provider).catch(error => {
+      console.error('Login error:', error);
+      alert('Login failed. Check console for details.');
+    });
   });
-  logoutBtn.addEventListener('click', () => auth.signOut());
+  logoutBtn.addEventListener('click', () => {
+    firebase.auth.signOut(auth).catch(error => {
+      console.error('Logout error:', error);
+      alert('Logout failed. Check console for details.');
+    });
+  });
   addTestBtn.addEventListener('click', addNewTest);
   testSelect.addEventListener('change', loadSelectedTest);
   showLeaderboardBtn.addEventListener('click', showLeaderboard);
@@ -205,12 +214,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function loadSelectedTest() {
     const testId = testSelect.value;
     if (testId) {
-      database.ref(`tests/${testId}`).once('value').then(snapshot => {
+      const testRef = firebase.database.ref(database, `tests/${testId}`);
+      firebase.database.onValue(testRef, snapshot => {
         const test = snapshot.val();
         if (test) {
           originalTextEl.value = test.content;
         }
-      });
+      }, { onlyOnce: true });
     }
   }
 
@@ -236,9 +246,13 @@ document.addEventListener('DOMContentLoaded', function() {
       createdBy: currentUser.email
     };
 
-    database.ref('tests').push(test).then(() => {
+    const testsRef = firebase.database.ref(database, 'tests');
+    firebase.database.push(testsRef, test).then(() => {
       alert('Test added successfully!');
       loadTests();
+    }).catch(error => {
+      console.error('Error adding test:', error);
+      alert('Failed to add test. Check console for details.');
     });
   }
 
@@ -275,7 +289,10 @@ document.addEventListener('DOMContentLoaded', function() {
         testId: testSelect.value || 'custom'
       };
       
-      database.ref('leaderboard').push(score);
+      const leaderboardRef = firebase.database.ref(database, 'leaderboard');
+      firebase.database.push(leaderboardRef, score).catch(error => {
+        console.error('Error saving score:', error);
+      });
     }
     
     // Display results
@@ -297,7 +314,9 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function showLeaderboard() {
-    database.ref('leaderboard').orderByChild('wpm').limitToLast(10).once('value').then(snapshot => {
+    const leaderboardRef = firebase.database.ref(database, 'leaderboard');
+    const query = firebase.database.orderByChild(leaderboardRef, 'wpm').limitToLast(10);
+    firebase.database.onValue(query, snapshot => {
       const scores = [];
       snapshot.forEach(child => {
         scores.push(child.val());
@@ -334,7 +353,7 @@ document.addEventListener('DOMContentLoaded', function() {
       resultsSection.classList.add('hidden');
       typingSection.classList.add('hidden');
       leaderboardSection.classList.remove('hidden');
-    });
+    }, { onlyOnce: true });
   }
   
   function clearResults() {
@@ -409,6 +428,9 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       pdf.save('typing-results.pdf');
+    }).catch(error => {
+      console.error('PDF generation error:', error);
+      alert('Failed to generate PDF. Check console for details.');
     });
   }
   
