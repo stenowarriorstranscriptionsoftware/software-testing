@@ -6,30 +6,14 @@
   <title>Steno Warriors Typing Practice</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.3/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js';
-    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js';
-    import { getDatabase, ref, push, onValue, orderByChild, limitToLast } from 'https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js';
-
-    window.firebase = {
-      initializeApp,
-      auth: { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged },
-      database: { getDatabase, ref, push, onValue, orderByChild, limitToLast }
-    };
-  </script>
 </head>
 <body>
   <div class="container">
     <header>
       <h1>Steno Warriors</h1>
       <p class="subtitle">Typing Practice Tool</p>
-      <div class="auth-section">
-        <span id="userEmail"></span>
-        <button id="loginBtn" class="secondary-btn">Login</button>
-        <button id="logoutBtn" class="secondary-btn hidden">Logout</button>
-      </div>
     </header>
 
     <main>
@@ -56,13 +40,6 @@
         <div class="button-group">
           <button id="startTypingBtn">Start Typing</button>
           <button id="showSampleTextBtn" class="secondary-btn">Load Sample Text</button>
-          <button id="addTestBtn" class="secondary-btn hidden">Add Test</button>
-          <button id="showLeaderboardBtn" class="secondary-btn">Show Leaderboard</button>
-        </div>
-
-        <div id="testSelection" class="test-selection">
-          <label for="testSelect">Select Test:</label>
-          <select id="testSelect"></select>
         </div>
       </section>
 
@@ -125,12 +102,6 @@
             <div id="feedback" class="feedback-box"></div>
           </div>
         </div>
-      </section>
-
-      <section id="leaderboardSection" class="hidden">
-        <h2>Leaderboard</h2>
-        <div id="leaderboard" class="leaderboard-box"></div>
-        <button id="backToMainBtn" class="secondary-btn">Back to Main</button>
       </section>
     </main>
 

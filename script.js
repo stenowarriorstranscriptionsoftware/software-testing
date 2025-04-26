@@ -1,21 +1,5 @@
+// Initialize jsPDF
 const { jsPDF } = window.jspdf;
-
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyB5rvgi0KYB5N5waBSVZf7fvtl4sj3QRHc",
-  authDomain: "swtypingsoftware.firebaseapp.com",
-  databaseURL: "https://swtypingsoftware-default-rtdb.firebaseio.com",
-  projectId: "swtypingsoftware",
-  storageBucket: "swtypingsoftware.firebasestorage.app",
-  messagingSenderId: "416692712964",
-  appId: "1:416692712964:web:3f557f7935ad02b4fba751",
-  measurementId: "G-FWD5WNL48G"
-};
-
-// Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const database = firebase.database.getDatabase(app);
-const auth = firebase.auth.getAuth(app);
 
 document.addEventListener('DOMContentLoaded', function() {
   // DOM elements
@@ -27,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const downloadPdfBtn = document.getElementById('downloadPdfBtn');
   const typingSection = document.getElementById('typingSection');
   const resultsSection = document.getElementById('results');
-  const leaderboardSection = document.getElementById('leaderboardSection');
   const textToTypeEl = document.getElementById('textToType');
   const typingAreaEl = document.getElementById('typingArea');
   const timerEl = document.getElementById('timer');
@@ -39,14 +22,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const feedbackEl = document.getElementById('feedback');
   const resultDateEl = document.getElementById('resultDate');
   const timeOptions = document.querySelectorAll('.time-option');
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const userEmailEl = document.getElementById('userEmail');
-  const addTestBtn = document.getElementById('addTestBtn');
-  const testSelect = document.getElementById('testSelect');
-  const showLeaderboardBtn = document.getElementById('showLeaderboardBtn');
-  const backToMainBtn = document.getElementById('backToMainBtn');
-  const leaderboardEl = document.getElementById('leaderboard');
   
   // Typing session variables
   let startTime = null;
@@ -57,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function() {
   let correctChars = 0;
   let totalChars = 0;
   let errors = 0;
-  let currentUser = null;
   
   // Sample texts
   const sampleTexts = [
@@ -68,41 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
     "In the middle of difficulty lies opportunity. The important thing is not to stop questioning. Curiosity has its own reason for existing."
   ];
   
-  // Firebase auth state listener
-  firebase.auth.onAuthStateChanged(auth, user => {
-    currentUser = user;
-    if (user) {
-      userEmailEl.textContent = user.email;
-      loginBtn.classList.add('hidden');
-      logoutBtn.classList.remove('hidden');
-      if (user.email === 'anishkumar18034@gmail.com') {
-        addTestBtn.classList.remove('hidden');
-      }
-    } else {
-      userEmailEl.textContent = '';
-      loginBtn.classList.remove('hidden');
-      logoutBtn.classList.add('hidden');
-      addTestBtn.classList.add('hidden');
-    }
-  });
-
-  // Load available tests
-  function loadTests() {
-    const testsRef = firebase.database.ref(database, 'tests');
-    firebase.database.onValue(testsRef, snapshot => {
-      const tests = snapshot.val();
-      testSelect.innerHTML = '<option value="">Select a test</option>';
-      if (tests) {
-        Object.entries(tests).forEach(([id, test]) => {
-          const option = document.createElement('option');
-          option.value = id;
-          option.textContent = test.title || `Test ${id}`;
-          testSelect.appendChild(option);
-        });
-      }
-    }, { onlyOnce: true });
-  }
-
   // Event listeners
   startTypingBtn.addEventListener('click', startTypingSession);
   showSampleTextBtn.addEventListener('click', loadSampleText);
@@ -110,26 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
   clearResultsBtn.addEventListener('click', clearResults);
   downloadPdfBtn.addEventListener('click', downloadAsPdf);
   typingAreaEl.addEventListener('input', checkTypingProgress);
-  loginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    firebase.auth.signInWithPopup(auth, provider).catch(error => {
-      console.error('Login error:', error);
-      alert('Login failed. Check console for details.');
-    });
-  });
-  logoutBtn.addEventListener('click', () => {
-    firebase.auth.signOut(auth).catch(error => {
-      console.error('Logout error:', error);
-      alert('Logout failed. Check console for details.');
-    });
-  });
-  addTestBtn.addEventListener('click', addNewTest);
-  testSelect.addEventListener('change', loadSelectedTest);
-  showLeaderboardBtn.addEventListener('click', showLeaderboard);
-  backToMainBtn.addEventListener('click', () => {
-    leaderboardSection.classList.add('hidden');
-    document.querySelector('.input-section').classList.remove('hidden');
-  });
   
   // Time selection buttons
   timeOptions.forEach(option => {
@@ -143,9 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
   // Set default time selection
   document.querySelector('.time-option[data-minutes="1"]').classList.add('active');
   
-  // Initial load of tests
-  loadTests();
-
   function startTypingSession() {
     const originalText = originalTextEl.value.trim();
     
@@ -177,9 +93,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelector('.input-section').classList.add('hidden');
     typingSection.classList.remove('hidden');
     resultsSection.classList.add('hidden');
-    leaderboardSection.classList.add('hidden');
     
-    // Hide WPM and accuracy during typing
+    // Hide WPM and accuracy during typing (only show time left)
     wpmDisplayEl.style.display = 'none';
     accuracyDisplayEl.style.display = 'none';
   }
@@ -211,51 +126,6 @@ document.addEventListener('DOMContentLoaded', function() {
     originalTextEl.value = sampleTexts[randomIndex];
   }
   
-  function loadSelectedTest() {
-    const testId = testSelect.value;
-    if (testId) {
-      const testRef = firebase.database.ref(database, `tests/${testId}`);
-      firebase.database.onValue(testRef, snapshot => {
-        const test = snapshot.val();
-        if (test) {
-          originalTextEl.value = test.content;
-        }
-      }, { onlyOnce: true });
-    }
-  }
-
-  function addNewTest() {
-    if (!currentUser || currentUser.email !== 'anishkumar18034@gmail.com') {
-      alert('Only the admin can add tests.');
-      return;
-    }
-
-    const testText = originalTextEl.value.trim();
-    if (!testText) {
-      alert('Please enter test text.');
-      return;
-    }
-
-    const testTitle = prompt('Enter test title:');
-    if (!testTitle) return;
-
-    const test = {
-      title: testTitle,
-      content: testText,
-      createdAt: firebase.database.ServerValue.TIMESTAMP,
-      createdBy: currentUser.email
-    };
-
-    const testsRef = firebase.database.ref(database, 'tests');
-    firebase.database.push(testsRef, test).then(() => {
-      alert('Test added successfully!');
-      loadTests();
-    }).catch(error => {
-      console.error('Error adding test:', error);
-      alert('Failed to add test. Check console for details.');
-    });
-  }
-
   function submitTypingTest() {
     clearInterval(countdownInterval);
     endTypingSession();
@@ -279,22 +149,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Compare words
     const comparison = compareParagraphs(originalWords, userWords);
     
-    // Save to leaderboard if user is logged in
-    if (currentUser) {
-      const score = {
-        userEmail: currentUser.email,
-        wpm: comparison.stats.wpm,
-        accuracy: comparison.stats.accuracy,
-        date: new Date().toISOString(),
-        testId: testSelect.value || 'custom'
-      };
-      
-      const leaderboardRef = firebase.database.ref(database, 'leaderboard');
-      firebase.database.push(leaderboardRef, score).catch(error => {
-        console.error('Error saving score:', error);
-      });
-    }
-    
     // Display results
     displayComparison(comparison);
     displayStats(comparison.stats);
@@ -311,49 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show WPM and accuracy in results
     wpmDisplayEl.style.display = '';
     accuracyDisplayEl.style.display = '';
-  }
-
-  function showLeaderboard() {
-    const leaderboardRef = firebase.database.ref(database, 'leaderboard');
-    const query = firebase.database.orderByChild(leaderboardRef, 'wpm').limitToLast(10);
-    firebase.database.onValue(query, snapshot => {
-      const scores = [];
-      snapshot.forEach(child => {
-        scores.push(child.val());
-      });
-      
-      scores.sort((a, b) => b.wpm - a.wpm || b.accuracy - a.accuracy);
-      
-      leaderboardEl.innerHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Rank</th>
-              <th>User</th>
-              <th>WPM</th>
-              <th>Accuracy</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${scores.map((score, index) => `
-              <tr>
-                <td>${index + 1}</td>
-                <td>${score.userEmail}</td>
-                <td>${score.wpm}</td>
-                <td>${score.accuracy.toFixed(1)}%</td>
-                <td>${new Date(score.date).toLocaleDateString()}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-      
-      document.querySelector('.input-section').classList.add('hidden');
-      resultsSection.classList.add('hidden');
-      typingSection.classList.add('hidden');
-      leaderboardSection.classList.remove('hidden');
-    }, { onlyOnce: true });
   }
   
   function clearResults() {
@@ -378,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
     correctChars = newCorrectChars;
     errors = totalChars - correctChars;
     
-    // Calculate WPM and accuracy
+    // Calculate WPM and accuracy (used in results)
     updateRealTimeStats();
   }
   
@@ -428,9 +239,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       pdf.save('typing-results.pdf');
-    }).catch(error => {
-      console.error('PDF generation error:', error);
-      alert('Failed to generate PDF. Check console for details.');
     });
   }
   

@@ -1,4 +1,4 @@
-:root {
+ :root {
   --primary: #4361ee;
   --primary-light: #4895ef;
   --secondary: #3f37c9;
@@ -50,14 +50,6 @@ header h1 {
 .subtitle {
   font-size: 1.1rem;
   opacity: 0.9;
-}
-
-.auth-section {
-  margin-top: 1rem;
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  align-items: center;
 }
 
 .input-section {
@@ -135,7 +127,6 @@ textarea:focus {
   display: flex;
   gap: 0.8rem;
   margin-top: 1rem;
-  flex-wrap: wrap;
 }
 
 button {
@@ -148,6 +139,7 @@ button {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
+  flex: 1;
 }
 
 button:hover {
@@ -159,33 +151,24 @@ button:hover {
   background-color: var(--gray);
   padding: 0.4rem 1rem;
   font-size: 0.9rem;
+  flex: initial;
 }
 
 .submit-btn {
   background-color: var(--warning);
   padding: 0.4rem 1rem;
   font-size: 0.9rem;
+  flex: initial;
 }
 
 .download-btn {
   background-color: var(--success);
   padding: 0.4rem 1rem;
   font-size: 0.9rem;
+  flex: initial;
 }
 
-.test-selection {
-  margin-top: 1.5rem;
-}
-
-.test-selection select {
-  width: 100%;
-  padding: 0.5rem;
-  border-radius: 5px;
-  border: 1px solid #e2e8f0;
-  font-size: 1rem;
-}
-
-#typingSection, #results, #leaderboardSection {
+#typingSection, #results {
   padding: 0 2rem 2rem;
 }
 
@@ -266,28 +249,12 @@ button:hover {
   font-size: 1.2rem;
 }
 
-.result-box, .stats-box, .feedback-box, .leaderboard-box {
+.result-box, .stats-box, .feedback-box {
   background: white;
   padding: 1.5rem;
   border-radius: 10px;
   margin-bottom: 1.5rem;
   border: 1px solid #e2e8f0;
-}
-
-.leaderboard-box table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.leaderboard-box th, .leaderboard-box td {
-  padding: 0.8rem;
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.leaderboard-box th {
-  background: var(--light);
-  font-weight: 600;
 }
 
 .comparison-section {
