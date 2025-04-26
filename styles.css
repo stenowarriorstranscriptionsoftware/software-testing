@@ -351,52 +351,41 @@ footer {
   margin-top: 0.3rem;
 }
 
-/* Modal Styles */
+/* Modal positioning fix */
 .modal {
-  display: none;
   position: fixed;
-  z-index: 1;
-  left: 0;
   top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
-  overflow: auto;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal.hidden {
+  display: none;
 }
 
 .modal-content {
-  background-color: #fefefe;
-  margin: 10% auto;
+  background: white;
   padding: 2rem;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  width: 80%;
+  border-radius: 8px;
   max-width: 600px;
-}
-
-.close-modal {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-}
-
-.close-modal:hover {
-  color: black;
-}
-
-.test-list {
-  margin-top: 1rem;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
 }
 
 .test-item {
   padding: 1rem;
+  margin-bottom: 0.5rem;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  margin-bottom: 0.5rem;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s;
 }
 
 .test-item:hover {
