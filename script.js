@@ -7,7 +7,7 @@ const firebaseConfig = {
   authDomain: "swtypingsoftware.firebaseapp.com",
   databaseURL: "https://swtypingsoftware-default-rtdb.firebaseio.com",
   projectId: "swtypingsoftware",
-  storageBucket: "swtypingsoftware.firebasestorage.app",
+  storageBucket: "swtypingsoftware.appspot.com",
   messagingSenderId: "416692712964",
   appId: "1:416692712964:web:3f557f7935ad02b4fba751",
   measurementId: "G-FWD5WNL48G"
@@ -170,6 +170,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Show saved tests in modal
   function showSavedTests() {
+    if (!firebase.auth().currentUser) {
+      alert('Please login to view saved tests');
+      return;
+    }
+
     testSelectionModal.classList.remove('hidden');
     testList.innerHTML = '<p>Loading tests...</p>';
     
@@ -218,7 +223,9 @@ document.addEventListener('DOMContentLoaded', function() {
     scoresRef.on('value', (snapshot) => {
       const scores = [];
       snapshot.forEach((childSnapshot) => {
-        scores.push(childSnapshot.val());
+        const score = childSnapshot.val();
+        score.id = childSnapshot.key;
+        scores.push(score);
       });
       
       // Sort by WPM (descending)
@@ -226,17 +233,24 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // Display leaderboard
       let leaderboardHTML = '';
-      scores.forEach((score, index) => {
-        leaderboardHTML += `
-          <div class="stat-item">
-            <h4>#${index + 1} ${score.userName || 'Anonymous'}</h4>
-            <p>${score.wpm} WPM (${score.accuracy.toFixed(1)}%)</p>
-            <small>${new Date(score.timestamp).toLocaleString()}</small>
-          </div>
-        `;
-      });
+      if (scores.length === 0) {
+        leaderboardHTML = '<p>No scores yet. Be the first!</p>';
+      } else {
+        scores.forEach((score, index) => {
+          leaderboardHTML += `
+            <div class="stat-item">
+              <h4>#${index + 1} ${score.userName || 'Anonymous'}</h4>
+              <p>${score.wpm} WPM (${score.accuracy.toFixed(1)}%)</p>
+              <small>${new Date(score.timestamp).toLocaleString()}</small>
+            </div>
+          `;
+        });
+      }
       
-      leaderboardContent.innerHTML = leaderboardHTML || '<p>No scores yet. Be the first!</p>';
+      leaderboardContent.innerHTML = leaderboardHTML;
+    }, (error) => {
+      console.error("Leaderboard load error:", error);
+      leaderboardContent.innerHTML = '<p>Error loading leaderboard. Please try again.</p>';
     });
   }
 
@@ -306,12 +320,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
   function submitTypingTest() {
     clearInterval(countdownInterval);
-    endTypingSession();
-  }
-  
-  function endTypingSession() {
-    clearInterval(timerInterval);
-    clearInterval(countdownInterval);
     
     const userText = typingAreaEl.value;
     const originalText = originalTextEl.value;
@@ -347,6 +355,10 @@ document.addEventListener('DOMContentLoaded', function() {
         accuracy: comparison.stats.accuracy,
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         userId: user.uid
+      })
+      .then(() => {
+        console.log("Score saved successfully");
+        loadLeaderboard(); // Refresh leaderboard after new score
       })
       .catch((error) => {
         console.error("Error saving score:", error);
