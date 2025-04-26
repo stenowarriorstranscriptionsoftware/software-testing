@@ -8,12 +8,20 @@
   <link rel="stylesheet" href="styles.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 </head>
 <body>
   <div class="container">
     <header>
       <h1>Steno Warriors</h1>
       <p class="subtitle">Typing Practice Tool</p>
+      <div id="authButtons" style="margin-top: 1rem;">
+        <button id="loginBtn" class="secondary-btn">Login with Google</button>
+        <button id="logoutBtn" class="secondary-btn hidden">Logout</button>
+      </div>
     </header>
 
     <main>
@@ -40,7 +48,20 @@
         <div class="button-group">
           <button id="startTypingBtn">Start Typing</button>
           <button id="showSampleTextBtn" class="secondary-btn">Load Sample Text</button>
+          <button id="loadSavedTestsBtn" class="secondary-btn hidden">Load Saved Tests</button>
         </div>
+      </section>
+
+      <section id="adminSection" class="hidden">
+        <div class="input-group">
+          <label for="testName">Test Name</label>
+          <input type="text" id="testName" placeholder="Enter test name">
+        </div>
+        <div class="input-group">
+          <label for="adminText">Test Content</label>
+          <textarea id="adminText" placeholder="Enter test content"></textarea>
+        </div>
+        <button id="saveTestBtn" class="secondary-btn">Save Test</button>
       </section>
 
       <section id="typingSection" class="hidden">
@@ -103,6 +124,19 @@
           </div>
         </div>
       </section>
+
+      <section id="leaderboard" class="hidden">
+        <h2>Leaderboard</h2>
+        <div id="leaderboardContent" class="stats-box"></div>
+      </section>
+
+      <div id="testSelectionModal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close-modal">&times;</span>
+          <h2>Select a Test</h2>
+          <div id="testList" class="test-list"></div>
+        </div>
+      </div>
     </main>
 
     <footer>

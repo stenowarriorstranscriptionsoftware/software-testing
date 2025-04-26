@@ -1,11 +1,27 @@
 // Initialize jsPDF
 const { jsPDF } = window.jspdf;
 
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyB5rvgi0KYB5N5waBSVZf7fvtl4sj3QRHc",
+  authDomain: "swtypingsoftware.firebaseapp.com",
+  databaseURL: "https://swtypingsoftware-default-rtdb.firebaseio.com",
+  projectId: "swtypingsoftware",
+  storageBucket: "swtypingsoftware.firebasestorage.app",
+  messagingSenderId: "416692712964",
+  appId: "1:416692712964:web:3f557f7935ad02b4fba751",
+  measurementId: "G-FWD5WNL48G"
+};
+
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
 document.addEventListener('DOMContentLoaded', function() {
   // DOM elements
   const originalTextEl = document.getElementById('originalText');
   const startTypingBtn = document.getElementById('startTypingBtn');
   const showSampleTextBtn = document.getElementById('showSampleTextBtn');
+  const loadSavedTestsBtn = document.getElementById('loadSavedTestsBtn');
   const submitTestBtn = document.getElementById('submitTestBtn');
   const clearResultsBtn = document.getElementById('clearResultsBtn');
   const downloadPdfBtn = document.getElementById('downloadPdfBtn');
@@ -22,7 +38,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const feedbackEl = document.getElementById('feedback');
   const resultDateEl = document.getElementById('resultDate');
   const timeOptions = document.querySelectorAll('.time-option');
-  
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const adminSection = document.getElementById('adminSection');
+  const saveTestBtn = document.getElementById('saveTestBtn');
+  const testNameEl = document.getElementById('testName');
+  const adminTextEl = document.getElementById('adminText');
+  const leaderboard = document.getElementById('leaderboard');
+  const leaderboardContent = document.getElementById('leaderboardContent');
+  const testSelectionModal = document.getElementById('testSelectionModal');
+  const closeModalBtn = document.querySelector('.close-modal');
+  const testList = document.getElementById('testList');
+
   // Typing session variables
   let startTime = null;
   let timerInterval = null;
@@ -45,10 +72,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // Event listeners
   startTypingBtn.addEventListener('click', startTypingSession);
   showSampleTextBtn.addEventListener('click', loadSampleText);
+  loadSavedTestsBtn.addEventListener('click', showSavedTests);
   submitTestBtn.addEventListener('click', submitTypingTest);
   clearResultsBtn.addEventListener('click', clearResults);
   downloadPdfBtn.addEventListener('click', downloadAsPdf);
   typingAreaEl.addEventListener('input', checkTypingProgress);
+  loginBtn.addEventListener('click', signInWithGoogle);
+  logoutBtn.addEventListener('click', signOut);
+  saveTestBtn.addEventListener('click', saveTest);
+  closeModalBtn.addEventListener('click', () => testSelectionModal.classList.add('hidden'));
   
   // Time selection buttons
   timeOptions.forEach(option => {
@@ -62,6 +94,152 @@ document.addEventListener('DOMContentLoaded', function() {
   // Set default time selection
   document.querySelector('.time-option[data-minutes="1"]').classList.add('active');
   
+  // Auth state listener
+  firebase.auth().onAuthStateChanged((user) => {
+    if (user) {
+      // User is signed in
+      loginBtn.classList.add('hidden');
+      logoutBtn.classList.remove('hidden');
+      loadSavedTestsBtn.classList.remove('hidden');
+      
+      // Check if admin (anishkumar18034@gmail.com)
+      if (user.email === 'anishkumar18034@gmail.com') {
+        adminSection.classList.remove('hidden');
+      }
+      
+      // Show leaderboard for all logged in users
+      leaderboard.classList.remove('hidden');
+      loadLeaderboard();
+    } else {
+      // User is signed out
+      loginBtn.classList.remove('hidden');
+      logoutBtn.classList.add('hidden');
+      adminSection.classList.add('hidden');
+      leaderboard.classList.add('hidden');
+      loadSavedTestsBtn.classList.add('hidden');
+    }
+  });
+
+  // Google Sign-In
+  function signInWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+      .catch((error) => {
+        console.error("Error signing in:", error);
+        alert("Error signing in: " + error.message);
+      });
+  }
+
+  // Sign Out
+  function signOut() {
+    firebase.auth().signOut()
+      .catch((error) => {
+        console.error("Error signing out:", error);
+      });
+  }
+
+  // Save Test (Admin only)
+  function saveTest() {
+    const testName = testNameEl.value.trim();
+    const testContent = adminTextEl.value.trim();
+    
+    if (!testName || !testContent) {
+      alert('Please enter both test name and content');
+      return;
+    }
+    
+    const testsRef = database.ref('tests');
+    const newTestRef = testsRef.push();
+    
+    newTestRef.set({
+      name: testName,
+      content: testContent,
+      createdBy: firebase.auth().currentUser.email,
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    })
+    .then(() => {
+      alert('Test saved successfully!');
+      testNameEl.value = '';
+      adminTextEl.value = '';
+    })
+    .catch((error) => {
+      console.error("Error saving test:", error);
+      alert("Error saving test: " + error.message);
+    });
+  }
+
+  // Show saved tests in modal
+  function showSavedTests() {
+    testSelectionModal.classList.remove('hidden');
+    testList.innerHTML = '<p>Loading tests...</p>';
+    
+    const testsRef = database.ref('tests');
+    testsRef.once('value')
+      .then((snapshot) => {
+        const tests = [];
+        snapshot.forEach((childSnapshot) => {
+          tests.push({
+            id: childSnapshot.key,
+            ...childSnapshot.val()
+          });
+        });
+        
+        if (tests.length === 0) {
+          testList.innerHTML = '<p>No tests available yet.</p>';
+          return;
+        }
+        
+        testList.innerHTML = '';
+        tests.forEach(test => {
+          const testItem = document.createElement('div');
+          testItem.className = 'test-item';
+          testItem.innerHTML = `
+            <h3>${test.name}</h3>
+            <p>Created by: ${test.createdBy}</p>
+            <small>${new Date(test.createdAt).toLocaleString()}</small>
+          `;
+          testItem.addEventListener('click', () => {
+            originalTextEl.value = test.content;
+            testSelectionModal.classList.add('hidden');
+          });
+          testList.appendChild(testItem);
+        });
+      })
+      .catch((error) => {
+        console.error("Error loading tests:", error);
+        testList.innerHTML = '<p>Error loading tests. Please try again.</p>';
+      });
+  }
+
+  // Load Leaderboard
+  function loadLeaderboard() {
+    const scoresRef = database.ref('scores').orderByChild('wpm').limitToLast(10);
+    
+    scoresRef.on('value', (snapshot) => {
+      const scores = [];
+      snapshot.forEach((childSnapshot) => {
+        scores.push(childSnapshot.val());
+      });
+      
+      // Sort by WPM (descending)
+      scores.sort((a, b) => b.wpm - a.wpm);
+      
+      // Display leaderboard
+      let leaderboardHTML = '';
+      scores.forEach((score, index) => {
+        leaderboardHTML += `
+          <div class="stat-item">
+            <h4>#${index + 1} ${score.userName || 'Anonymous'}</h4>
+            <p>${score.wpm} WPM (${score.accuracy.toFixed(1)}%)</p>
+            <small>${new Date(score.timestamp).toLocaleString()}</small>
+          </div>
+        `;
+      });
+      
+      leaderboardContent.innerHTML = leaderboardHTML || '<p>No scores yet. Be the first!</p>';
+    });
+  }
+
   function startTypingSession() {
     const originalText = originalTextEl.value.trim();
     
@@ -118,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateTimeRemaining(seconds) {
     const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
     const secs = (seconds % 60).toString().padStart(2, '0');
-    timeRemainingEl.textContent = `${mins}:${secs}`;
+    timeRemainingEl.textContent = `Time left: ${mins}:${secs}`;
   }
   
   function loadSampleText() {
@@ -157,6 +335,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set current date and time
     const now = new Date();
     resultDateEl.textContent = now.toLocaleString();
+    
+    // Save to leaderboard if user is logged in
+    if (firebase.auth().currentUser) {
+      const user = firebase.auth().currentUser;
+      const scoresRef = database.ref('scores').push();
+      
+      scoresRef.set({
+        userName: user.displayName || user.email.split('@')[0],
+        wpm: comparison.stats.wpm,
+        accuracy: comparison.stats.accuracy,
+        timestamp: firebase.database.ServerValue.TIMESTAMP,
+        userId: user.uid
+      })
+      .catch((error) => {
+        console.error("Error saving score:", error);
+      });
+    }
     
     // Show results section
     typingSection.classList.add('hidden');
