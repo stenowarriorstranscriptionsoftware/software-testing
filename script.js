@@ -1,20 +1,18 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
-  authDomain: "setup-login-page.firebaseapp.com",
-  databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
-  projectId: "setup-login-page",
-  storageBucket: "setup-login-page.firebasestorage.app",
-  messagingSenderId: "341251531099",
-  appId: "1:341251531099:web:f4263621455541ffdc3a7e",
-  measurementId: "G-ZXFC7NR9HV"
+  apiKey: "AIzaSyDNdovILjmsBQxGuXx4iOOw1JgCL2_3TLI",
+  authDomain: "stenowarriorsyoursteno.firebaseapp.com",
+  databaseURL: "https://stenowarriorsyoursteno-default-rtdb.firebaseio.com",
+  projectId: "stenowarriorsyoursteno",
+  storageBucket: "stenowarriorsyoursteno.appspot.com",
+  messagingSenderId: "173103533896",
+  appId: "1:173103533896:web:78bbe18e17ca8f5da5ad7d",
+  measurementId: "G-Y3E0QVFSBB"
 };
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
-
-// Initialize jsPDF
 const { jsPDF } = window.jspdf;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -74,6 +72,26 @@ document.addEventListener('DOMContentLoaded', function() {
   const registerEmail = document.getElementById('registerEmail');
   const registerPassword = document.getElementById('registerPassword');
   const confirmPassword = document.getElementById('confirmPassword');
+  const homeLink = document.getElementById('homeLink');
+  const testsLink = document.getElementById('testsLink');
+  const leaderboardLink = document.getElementById('leaderboardLink');
+  const profileLink = document.getElementById('profileLink');
+  const profileSection = document.getElementById('profileSection');
+  const profileName = document.getElementById('profileName');
+  const profilePhoto = document.getElementById('profilePhoto');
+  const testsCompleted = document.getElementById('testsCompleted');
+  const bestAccuracy = document.getElementById('bestAccuracy');
+  const bestWPM = document.getElementById('bestWPM');
+  const achievementsContainer = document.getElementById('achievementsContainer');
+  const testHistory = document.getElementById('testHistory');
+  const categoriesList = document.getElementById('categoriesList');
+  const newCategoryName = document.getElementById('newCategoryName');
+  const addCategoryBtn = document.getElementById('addCategoryBtn');
+  const testSearchInput = document.getElementById('testSearchInput');
+  const searchTestsBtn = document.getElementById('searchTestsBtn');
+  const customTimerMinutes = document.getElementById('customTimerMinutes');
+  const startCustomTimer = document.getElementById('startCustomTimer');
+  const mainSection = document.getElementById('mainSection');
 
   // Timer variables
   let timerInterval;
@@ -98,142 +116,490 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Toggle between login and register forms
-  showRegister.addEventListener('click', (e) => {
-    e.preventDefault();
-    loginForm.classList.add('hidden');
-    registerForm.classList.remove('hidden');
-  });
+  // Initialize navigation
+  initNavigation();
 
-  showLogin.addEventListener('click', (e) => {
-    e.preventDefault();
-    registerForm.classList.add('hidden');
-    loginForm.classList.remove('hidden');
-  });
+  // Initialize authentication
+  initAuth();
 
-  // Email/password login handler
-  emailLoginBtn.addEventListener('click', () => {
-    const email = loginEmail.value.trim();
-    const password = loginPassword.value.trim();
-    
-    if (!email || !password) {
-      alert('Please enter both email and password');
-      return;
-    }
-    
-    auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        console.log('Login successful');
-      })
-      .catch(error => {
-        console.error('Login error:', error);
-        alert('Login failed: ' + error.message);
-      });
-  });
+  // Initialize timer functionality
+  initTimer();
 
-  // Registration handler
-  registerBtn.addEventListener('click', () => {
-    const name = registerName.value.trim();
-    const email = registerEmail.value.trim();
-    const password = registerPassword.value.trim();
-    const confirm = confirmPassword.value.trim();
-    
-    if (!name || !email || !password || !confirm) {
-      alert('Please fill in all fields');
-      return;
-    }
-    
-    if (password !== confirm) {
-      alert('Passwords do not match');
-      return;
-    }
-    
-    if (password.length < 6) {
-      alert('Password should be at least 6 characters');
-      return;
-    }
-    
-    auth.createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        return userCredential.user.updateProfile({
-          displayName: name
-        });
-      })
-      .then(() => {
-        alert('Registration successful! You are now logged in.');
-        registerName.value = '';
-        registerEmail.value = '';
-        registerPassword.value = '';
-        confirmPassword.value = '';
-        registerForm.classList.add('hidden');
-        loginForm.classList.remove('hidden');
-      })
-      .catch(error => {
-        console.error('Registration error:', error);
-        alert('Registration failed: ' + error.message);
-      });
-  });
+  // Initialize profile functionality
+  initProfile();
 
-  // Google login handler
-  googleLoginBtn.addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-      .catch(error => {
-        console.error('Google login error:', error);
-        alert('Google login failed. Please try again.');
-      });
-  });
+  // Initialize search functionality
+  initSearch();
 
-  // Auth state listener
-  auth.onAuthStateChanged(user => {
-  if (user) {
-    loginBtn.classList.add('hidden');
-    userInfo.classList.remove('hidden');
-
-    if (user.photoURL) {
-      userPhoto.src = user.photoURL;
-    } else {
-      userPhoto.src = 'https://www.gravatar.com/avatar/' + user.uid + '?d=identicon';
-    }
-
-    userName.textContent = user.displayName || 'User';
-    loginPrompt.classList.add('hidden');
-
-    // ✅ Only allow this section for admin
-   
-   const adminEmails = [
-  "anishkumar18034@gmail.com",
-  "anishkumar1803@gmail.com",
-  "admin2@example.com"
-];
-
-if (adminEmails.includes(user.email)) {
-  customTestSection.classList.remove('hidden');
-}
-
-
-    globalTestsSection.classList.remove('hidden');
-    leaderboardSection.classList.remove('hidden');
-
-    loadGlobalTests();
-    loadLeaderboard();
-    cleanupOldData();
-  } else {
-    loginBtn.classList.remove('hidden');
-    userInfo.classList.add('hidden');
-    loginPrompt.classList.remove('hidden');
-    customTestSection.classList.add('hidden');
-    globalTestsSection.classList.add('hidden');
-    leaderboardSection.classList.add('hidden');
-    loginForm.classList.remove('hidden');
-    registerForm.classList.add('hidden');
+  function initNavigation() {
+    homeLink.addEventListener('click', () => showSection(mainSection));
+    testsLink.addEventListener('click', () => {
+      showSection(globalTestsSection);
+      loadGlobalTests();
+    });
+    leaderboardLink.addEventListener('click', () => {
+      showSection(leaderboardSection);
+      loadLeaderboard();
+    });
+    profileLink.addEventListener('click', () => {
+      showSection(profileSection);
+      loadProfilePage();
+    });
   }
-});
 
-  // Logout handler
-  logoutBtn.addEventListener('click', () => {
-    auth.signOut();
-  });
+  function showSection(section) {
+    [mainSection, globalTestsSection, leaderboardSection, profileSection, resultsSection, fullTextSection].forEach(sec => {
+      sec.classList.add('hidden');
+    });
+    section.classList.remove('hidden');
+    
+    // Update active nav link
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.classList.remove('active');
+    });
+    
+    if (section === mainSection) homeLink.classList.add('active');
+    if (section === globalTestsSection) testsLink.classList.add('active');
+    if (section === leaderboardSection) leaderboardLink.classList.add('active');
+    if (section === profileSection) profileLink.classList.add('active');
+  }
+
+  function initAuth() {
+    // Toggle between login and register forms
+    showRegister.addEventListener('click', (e) => {
+      e.preventDefault();
+      loginForm.classList.add('hidden');
+      registerForm.classList.remove('hidden');
+    });
+
+    showLogin.addEventListener('click', (e) => {
+      e.preventDefault();
+      registerForm.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+    });
+
+    // Email/password login handler
+    emailLoginBtn.addEventListener('click', () => {
+      const email = loginEmail.value.trim();
+      const password = loginPassword.value.trim();
+      
+      if (!email || !password) {
+        alert('Please enter both email and password');
+        return;
+      }
+      
+      auth.signInWithEmailAndPassword(email, password)
+        .then(() => {
+          console.log('Login successful');
+        })
+        .catch(error => {
+          console.error('Login error:', error);
+          alert('Login failed: ' + error.message);
+        });
+    });
+
+    // Registration handler
+    registerBtn.addEventListener('click', () => {
+      const name = registerName.value.trim();
+      const email = registerEmail.value.trim();
+      const password = registerPassword.value.trim();
+      const confirm = confirmPassword.value.trim();
+      
+      if (!name || !email || !password || !confirm) {
+        alert('Please fill in all fields');
+        return;
+      }
+      
+      if (password !== confirm) {
+        alert('Passwords do not match');
+        return;
+      }
+      
+      if (password.length < 6) {
+        alert('Password should be at least 6 characters');
+        return;
+      }
+      
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          return userCredential.user.updateProfile({
+            displayName: name
+          }).then(() => {
+            // Initialize user data
+            return database.ref(`users/${userCredential.user.uid}`).set({
+              name: name,
+              photoURL: '',
+              stats: {
+                testsCompleted: 0,
+                bestAccuracy: 0,
+                bestWPM: 0,
+                totalKeystrokes: 0
+              },
+              achievements: [],
+              testHistory: {},
+              customCategories: {}
+            });
+          });
+        })
+        .then(() => {
+          alert('Registration successful! You are now logged in.');
+          registerName.value = '';
+          registerEmail.value = '';
+          registerPassword.value = '';
+          confirmPassword.value = '';
+          registerForm.classList.add('hidden');
+          loginForm.classList.remove('hidden');
+        })
+        .catch(error => {
+          console.error('Registration error:', error);
+          alert('Registration failed: ' + error.message);
+        });
+    });
+
+    // Google login handler
+    googleLoginBtn.addEventListener('click', () => {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .catch(error => {
+          console.error('Google login error:', error);
+          alert('Google login failed. Please try again.');
+        });
+    });
+
+    // Auth state listener
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        loginBtn.classList.add('hidden');
+        userInfo.classList.remove('hidden');
+        if (user.photoURL) {
+          userPhoto.src = user.photoURL;
+        } else {
+          userPhoto.src = 'https://www.gravatar.com/avatar/' + user.uid + '?d=identicon';
+        }
+        userName.textContent = user.displayName || 'User';
+        loginPrompt.classList.add('hidden');
+        customTestSection.classList.remove('hidden');
+        globalTestsSection.classList.remove('hidden');
+        leaderboardSection.classList.remove('hidden');
+        profileLink.classList.remove('hidden');
+        
+        // Initialize user data if doesn't exist
+        database.ref(`users/${user.uid}`).once('value').then(snapshot => {
+          if (!snapshot.exists()) {
+            database.ref(`users/${user.uid}`).set({
+              name: user.displayName,
+              photoURL: user.photoURL || '',
+              stats: {
+                testsCompleted: 0,
+                bestAccuracy: 0,
+                bestWPM: 0,
+                totalKeystrokes: 0
+              },
+              achievements: [],
+              testHistory: {},
+              customCategories: {}
+            });
+          }
+        });
+        
+        loadGlobalTests();
+        loadLeaderboard();
+      } else {
+        loginBtn.classList.remove('hidden');
+        userInfo.classList.add('hidden');
+        loginPrompt.classList.remove('hidden');
+        customTestSection.classList.add('hidden');
+        globalTestsSection.classList.add('hidden');
+        leaderboardSection.classList.add('hidden');
+        profileLink.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+        registerForm.classList.add('hidden');
+      }
+    });
+
+    // Logout handler
+    logoutBtn.addEventListener('click', () => {
+      auth.signOut();
+    });
+  }
+
+  function initTimer() {
+    // Timer option click handler
+    timerButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const minutes = parseInt(this.dataset.minutes);
+        startTimer(minutes);
+        timerOptions.classList.add('hidden');
+        timerDisplay.classList.remove('hidden');
+        testActive = true;
+      });
+    });
+    
+    // Custom timer handler
+    startCustomTimer.addEventListener('click', () => {
+      const minutes = parseInt(customTimerMinutes.value);
+      if (minutes > 0) {
+        startTimer(minutes);
+        timerOptions.classList.add('hidden');
+        timerDisplay.classList.remove('hidden');
+        testActive = true;
+      }
+    });
+  }
+
+  function initProfile() {
+    addCategoryBtn.addEventListener('click', addCustomCategory);
+  }
+
+  function initSearch() {
+    searchTestsBtn.addEventListener('click', () => loadGlobalTests(testSearchInput.value));
+    testSearchInput.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') loadGlobalTests(testSearchInput.value);
+    });
+  }
+
+  function loadProfilePage() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // Show basic profile info
+    profileName.textContent = user.displayName;
+    profilePhoto.src = user.photoURL || 'https://www.gravatar.com/avatar/default';
+
+    // Load stats
+    database.ref(`users/${user.uid}/stats`).once('value').then(snapshot => {
+      const stats = snapshot.val() || {};
+      testsCompleted.textContent = stats.testsCompleted || 0;
+      bestAccuracy.textContent = stats.bestAccuracy ? `${stats.bestAccuracy.toFixed(1)}%` : '0%';
+      bestWPM.textContent = stats.bestWPM || 0;
+    });
+
+    // Load achievements
+    database.ref(`users/${user.uid}/achievements`).once('value').then(snapshot => {
+      achievementsContainer.innerHTML = '';
+      const achievements = snapshot.val() || [];
+      if (achievements.length === 0) {
+        achievementsContainer.innerHTML = '<p>No achievements yet. Complete more tests to earn some!</p>';
+      } else {
+        achievements.forEach(achievement => {
+          const badge = document.createElement('div');
+          badge.className = 'achievement-badge';
+          badge.textContent = getAchievementName(achievement);
+          achievementsContainer.appendChild(badge);
+        });
+      }
+    });
+
+    // Load test history
+    database.ref(`users/${user.uid}/testHistory`).once('value').then(snapshot => {
+      testHistory.innerHTML = `
+        <tr>
+          <th>Date</th>
+          <th>Test</th>
+          <th>Accuracy</th>
+          <th>Speed</th>
+        </tr>
+      `;
+      
+      const history = snapshot.val() || {};
+      Object.entries(history).forEach(([testId, result]) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${new Date(result.date).toLocaleDateString()}</td>
+          <td>${result.testTitle || 'Custom Test'}</td>
+          <td>${result.accuracy}%</td>
+          <td>${result.wpm} WPM</td>
+        `;
+        testHistory.appendChild(row);
+      });
+    });
+
+    // Load custom categories
+    loadCustomCategories();
+
+    // Render progress chart
+    renderProgressChart();
+  }
+
+  function loadCustomCategories() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    database.ref(`users/${user.uid}/customCategories`).once('value').then(snapshot => {
+      categoriesList.innerHTML = '';
+      const categories = snapshot.val() || {};
+      
+      if (Object.keys(categories).length === 0) {
+        categoriesList.innerHTML = '<p>No custom categories yet.</p>';
+        return;
+      }
+
+      Object.entries(categories).forEach(([id, name]) => {
+        const categoryEl = document.createElement('div');
+        categoryEl.className = 'category-item';
+        categoryEl.innerHTML = `
+          <span>${name}</span>
+          <button class="delete-category" data-id="${id}">Delete</button>
+        `;
+        categoriesList.appendChild(categoryEl);
+      });
+
+      // Add delete handlers
+      document.querySelectorAll('.delete-category').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const categoryId = e.target.dataset.id;
+          database.ref(`users/${user.uid}/customCategories/${categoryId}`).remove();
+        });
+      });
+    });
+  }
+
+  function addCustomCategory() {
+    const name = newCategoryName.value.trim();
+    if (!name) return;
+
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const categoryId = name.toLowerCase().replace(/\s+/g, '-');
+    database.ref(`users/${user.uid}/customCategories/${categoryId}`).set(name)
+      .then(() => {
+        newCategoryName.value = '';
+        loadCustomCategories();
+      });
+  }
+
+  function renderProgressChart() {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    database.ref(`users/${user.uid}/testHistory`).once('value').then(snapshot => {
+      const history = snapshot.val() || {};
+      const historyArray = Object.values(history).sort((a, b) => a.date - b.date);
+      
+      const ctx = document.getElementById('progressChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: historyArray.map((_, i) => `Test ${i + 1}`),
+          datasets: [
+            {
+              label: 'Accuracy (%)',
+              data: historyArray.map(test => test.accuracy),
+              borderColor: '#4361ee',
+              tension: 0.1
+            },
+            {
+              label: 'Speed (WPM)',
+              data: historyArray.map(test => test.wpm),
+              borderColor: '#4cc9f0',
+              tension: 0.1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    });
+  }
+
+  function getAchievementName(key) {
+    const achievements = {
+      'fast-typer': '⚡ Fast Typer (50+ WPM)',
+      'accuracy-master': '🎯 Accuracy Master (95%+)',
+      'veteran': '🏆 Veteran (100 Tests)'
+    };
+    return achievements[key] || key;
+  }
+
+  function loadGlobalTests(searchTerm = '') {
+    // Show loading state
+    globalTestsList.innerHTML = '<div class="loader"></div>';
+    
+    database.ref('tests').once('value').then(snapshot => {
+      const tests = snapshot.val() || {};
+      const category = testCategoryFilter.value;
+      
+      const filteredTests = Object.entries(tests)
+        .map(([id, test]) => ({ id, ...test }))
+        .filter(test => {
+          const matchesCategory = category === 'all' || test.category === category;
+          const matchesSearch = searchTerm === '' || 
+                              test.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                              test.text.toLowerCase().includes(searchTerm.toLowerCase());
+          return matchesCategory && matchesSearch;
+        })
+        .sort((a, b) => b.timestamp - a.timestamp);
+
+      renderTestCards(filteredTests);
+    });
+  }
+
+  function renderTestCards(tests) {
+    globalTestsList.innerHTML = '';
+    
+    if (tests.length === 0) {
+      globalTestsList.innerHTML = '<p>No tests found matching your criteria.</p>';
+      return;
+    }
+
+    tests.forEach(test => {
+      const testCard = document.createElement('div');
+      testCard.className = 'test-card';
+      testCard.dataset.category = test.category;
+      testCard.innerHTML = `
+        <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
+        <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
+        ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
+        <div class="test-author">
+          <img src="${test.userPhoto}" alt="${test.userName}">
+          <span>Added by ${test.userName}</span>
+        </div>
+      `;
+      
+      testCard.addEventListener('click', () => {
+        document.querySelectorAll('.test-card').forEach(card => {
+          card.classList.remove('selected');
+        });
+        testCard.classList.add('selected');
+        
+        originalTextEl.value = test.text;
+        originalTextGroup.classList.add('hidden');
+        timerOptions.classList.remove('hidden');
+        timerButtons.forEach(btn => {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        });
+        
+        if (test.videoUrl) {
+          embedVideo(test.videoUrl);
+        } else {
+          const existingVideo = document.getElementById('testVideoPlayer');
+          if (existingVideo) existingVideo.remove();
+        }
+      });
+      
+      globalTestsList.appendChild(testCard);
+    });
+  }
+
+  function getCategoryName(category) {
+    const categories = {
+      'general': 'General Matter',
+      'kailash': 'Kailash Chandra',
+      'progressive': 'Progressive',
+      'legal': 'Legal',
+      'previous': 'Previous Year'
+    };
+    return categories[category] || 'General';
+  }
 
   // Leaderboard filter change handlers
   leaderboardFilter.addEventListener('change', () => {
@@ -499,24 +865,33 @@ if (adminEmails.includes(user.email)) {
 
   // Auto-delete old data function
   function cleanupOldData() {
-  const sixMonthsAgo = new Date();
-  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-  const timestampThreshold = sixMonthsAgo.getTime();
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+    const timestampThreshold = threeMonthsAgo.getTime();
 
-  database.ref('attempts').once('value').then(snapshot => {
-    const updates = {};
-    snapshot.forEach(child => {
-      if (child.val().timestamp < timestampThreshold) {
-        updates[child.key] = null;
+    database.ref('attempts').once('value').then(snapshot => {
+      const updates = {};
+      snapshot.forEach(child => {
+        if (child.val().timestamp < timestampThreshold) {
+          updates[child.key] = null;
+        }
+      });
+      if (Object.keys(updates).length > 0) {
+        database.ref('attempts').update(updates);
       }
     });
-    if (Object.keys(updates).length > 0) {
-      database.ref('attempts').update(updates);
-    }
-  });
 
-  // Do not delete test entries; they should remain untouched
-
+    database.ref('tests').once('value').then(snapshot => {
+      const updates = {};
+      snapshot.forEach(child => {
+        if (child.val().timestamp < timestampThreshold) {
+          updates[child.key] = null;
+        }
+      });
+      if (Object.keys(updates).length > 0) {
+        database.ref('tests').update(updates);
+      }
+    });
   }
 
   // Run cleanup weekly
@@ -672,9 +1047,61 @@ if (adminEmails.includes(user.email)) {
         timestamp: Date.now()
       };
 
+      // Save to attempts
       database.ref('attempts').push(attemptData)
         .then(() => loadLeaderboard())
         .catch(error => console.error('Error saving attempt:', error));
+
+      // Update user stats and history
+      const userRef = database.ref(`users/${user.uid}`);
+      
+      // Update test history
+      userRef.child('testHistory').push({
+        date: Date.now(),
+        testTitle: testTitle,
+        accuracy: comparison.stats.accuracy,
+        wpm: comparison.stats.wpm
+      });
+
+      // Update stats
+      userRef.child('stats').transaction(stats => {
+        if (!stats) {
+          stats = { testsCompleted: 0, bestAccuracy: 0, bestWPM: 0, totalKeystrokes: 0 };
+        }
+        
+        stats.testsCompleted = (stats.testsCompleted || 0) + 1;
+        stats.bestAccuracy = Math.max(stats.bestAccuracy || 0, comparison.stats.accuracy);
+        stats.bestWPM = Math.max(stats.bestWPM || 0, comparison.stats.wpm);
+        stats.totalKeystrokes = (stats.totalKeystrokes || 0) + comparison.stats.keystrokes;
+        
+        // Check for achievements
+        const achievements = [];
+        if (comparison.stats.wpm >= 50 && !user.achievements?.includes('fast-typer')) {
+          achievements.push('fast-typer');
+        }
+        if (comparison.stats.accuracy >= 95 && !user.achievements?.includes('accuracy-master')) {
+          achievements.push('accuracy-master');
+        }
+        if (stats.testsCompleted >= 100 && !user.achievements?.includes('veteran')) {
+          achievements.push('veteran');
+        }
+        
+        if (achievements.length > 0) {
+          userRef.child('achievements').transaction(ach => {
+            ach = ach || [];
+            return [...new Set([...ach, ...achievements])];
+          });
+
+          // Show confetti for achievements
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
+        }
+        
+        return stats;
+      });
     }
   }
   
@@ -1125,136 +1552,7 @@ if (adminEmails.includes(user.email)) {
     originalTextGroup.insertAdjacentElement('afterend', videoContainer);
   }
 
-  function loadGlobalTests() {
-    const category = testCategoryFilter.value;
-    
-    database.ref('tests').orderByChild('timestamp').once('value')
-      .then(snapshot => {
-        globalTestsList.innerHTML = '';
-        const tests = snapshot.val();
-        
-        if (!tests) {
-          globalTestsList.innerHTML = '<p>No community tests yet. Be the first to share one!</p>';
-          return;
-        }
-        
-        const testsArray = Object.entries(tests).map(([id, test]) => ({
-          id,
-          ...test
-        })).sort((a, b) => b.timestamp - a.timestamp);
-        
-        // Filter by category if not "all"
-        const filteredTests = category === 'all' 
-          ? testsArray 
-          : testsArray.filter(test => test.category === category);
-        
-        const recentTests = filteredTests.slice(0, 6);
-        
-        recentTests.forEach(test => {
-          const testCard = document.createElement('div');
-          testCard.className = 'test-card';
-          testCard.dataset.category = test.category;
-          testCard.innerHTML = `
-            <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
-            <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
-            ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
-            <div class="test-author">
-              <img src="${test.userPhoto}" alt="${test.userName}">
-              <span>Added by ${test.userName}</span>
-            </div>
-          `;
-          testCard.addEventListener('click', () => {
-            document.querySelectorAll('.test-card').forEach(card => {
-              card.classList.remove('selected');
-            });
-            testCard.classList.add('selected');
-            
-            originalTextEl.value = test.text;
-            originalTextGroup.classList.add('hidden');
-            timerOptions.classList.remove('hidden');
-            timerButtons.forEach(btn => {
-              btn.disabled = false;
-              btn.style.opacity = '1';
-            });
-            
-            if (test.videoUrl) {
-              embedVideo(test.videoUrl);
-            } else {
-              const existingVideo = document.getElementById('testVideoPlayer');
-              if (existingVideo) existingVideo.remove();
-            }
-          });
-          globalTestsList.appendChild(testCard);
-        });
-        
-        if (filteredTests.length > 6) {
-          const showMoreBtn = document.createElement('button');
-          showMoreBtn.className = 'secondary-btn';
-          showMoreBtn.textContent = 'Show More Tests';
-          showMoreBtn.style.marginTop = '1rem';
-          showMoreBtn.addEventListener('click', () => {
-            globalTestsList.innerHTML = '';
-            filteredTests.forEach(test => {
-              const testCard = document.createElement('div');
-              testCard.className = 'test-card';
-              testCard.dataset.category = test.category;
-              testCard.innerHTML = `
-                <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
-                <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
-                ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
-                <div class="test-author">
-                  <img src="${test.userPhoto}" alt="${test.userName}">
-                  <span>Added by ${test.userName}</span>
-                </div>
-              `;
-              testCard.addEventListener('click', () => {
-                document.querySelectorAll('.test-card').forEach(card => {
-                  card.classList.remove('selected');
-                });
-                testCard.classList.add('selected');
-                originalTextEl.value = test.text;
-                originalTextGroup.classList.add('hidden');
-                timerOptions.classList.remove('hidden');
-                timerButtons.forEach(btn => {
-                  btn.disabled = false;
-                  btn.style.opacity = '1';
-                });
-                
-                if (test.videoUrl) {
-                  embedVideo(test.videoUrl);
-                } else {
-                  const existingVideo = document.getElementById('testVideoPlayer');
-                  if (existingVideo) existingVideo.remove();
-                }
-              });
-              globalTestsList.appendChild(testCard);
-            });
-            
-            showMoreBtn.textContent = 'Show Less';
-            showMoreBtn.onclick = () => {
-              loadGlobalTests();
-            };
-          });
-          globalTestsList.parentNode.appendChild(showMoreBtn);
-        }
-      })
-      .catch(error => {
-        console.error('Error loading tests:', error);
-        globalTestsList.innerHTML = '<p>Error loading community tests. Please try again later.</p>';
-      });
-  }
-
-  function getCategoryName(category) {
-    const categories = {
-      'general': 'General Matter',
-      'kailash': 'Kailash Chandra',
-      'progressive': 'Progressive',
-      'legal': 'Legal',
-      'previous': 'Previous Year'
-    };
-    return categories[category] || 'General';
-  }
-
+  // Save test handler
   saveBtn.addEventListener('click', () => {
     const user = auth.currentUser;
     if (!user) {
@@ -1296,6 +1594,7 @@ if (adminEmails.includes(user.email)) {
       });
   });
 
+  // Clear tests handler
   clearBtn.addEventListener('click', () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -1374,34 +1673,16 @@ if (adminEmails.includes(user.email)) {
         alert('Failed to fetch your tests. Please try again.');
       });
   });
-});
 
-// Dark mode toggle
-document.getElementById('darkModeToggle').addEventListener('change', function() {
-  document.body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', this.checked);
-});
+  // Dark mode toggle
+  document.getElementById('darkModeToggle').addEventListener('change', function() {
+    document.body.classList.toggle('dark-mode');
+    localStorage.setItem('darkMode', this.checked);
+  });
 
-// Check for saved user preference
-if (localStorage.getItem('darkMode') === 'true') {
-  document.getElementById('darkModeToggle').checked = true;
-  document.body.classList.add('dark-mode');
-}
-const leaderboardSearch = document.getElementById('leaderboardSearch');
-const jumpToMyRankBtn = document.getElementById('jumpToMyRankBtn');
-
-leaderboardSearch.addEventListener('input', () => {
-  currentPage = 1;
-  updatePagination();
-});
-
-jumpToMyRankBtn.addEventListener('click', () => {
-  const myRow = document.querySelector('.highlight-user');
-  if (myRow) {
-    myRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  } else {
-    alert('You are not currently listed on the leaderboard.');
+  // Check for saved user preference
+  if (localStorage.getItem('darkMode') === 'true') {
+    document.getElementById('darkModeToggle').checked = true;
+    document.body.classList.add('dark-mode');
   }
 });
-
-// Modify updatePagination and renderLeaderboardTable accordingly as mentioned before

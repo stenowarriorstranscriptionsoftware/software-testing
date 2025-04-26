@@ -8,6 +8,8 @@
   <link rel="stylesheet" href="styles.css"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
@@ -33,6 +35,13 @@
         </div>
       </div>
     </header>
+
+    <nav class="main-nav">
+      <button id="homeLink" class="nav-link active">Home</button>
+      <button id="testsLink" class="nav-link">Community Tests</button>
+      <button id="leaderboardLink" class="nav-link">Leaderboard</button>
+      <button id="profileLink" class="nav-link hidden">My Profile</button>
+    </nav>
 
     <main>
       <!-- Login Prompt -->
@@ -75,15 +84,53 @@
         </div>
       </section>
 
+      <!-- Profile Section -->
+      <section id="profileSection" class="hidden">
+        <div class="profile-header">
+          <img id="profilePhoto" class="user-photo-large">
+          <h3 id="profileName"></h3>
+        </div>
+        
+        <div class="stats-grid">
+          <div class="stat-card">
+            <h4>Tests Completed</h4>
+            <p id="testsCompleted">0</p>
+          </div>
+          <div class="stat-card">
+            <h4>Best Accuracy</h4>
+            <p id="bestAccuracy">0%</p>
+          </div>
+          <div class="stat-card">
+            <h4>Best Speed</h4>
+            <p id="bestWPM">0 WPM</p>
+          </div>
+        </div>
+
+        <div class="progress-dashboard">
+          <h4>Your Progress</h4>
+          <div class="chart-container">
+            <canvas id="progressChart"></canvas>
+          </div>
+        </div>
+
+        <h4>Achievements</h4>
+        <div id="achievementsContainer" class="achievements-grid"></div>
+
+        <h4>Test History</h4>
+        <div id="testHistory" class="history-table"></div>
+
+        <div class="custom-categories">
+          <h4>Your Categories</h4>
+          <div id="categoriesList"></div>
+          <div class="add-category">
+            <input type="text" id="newCategoryName" placeholder="New category name">
+            <button id="addCategoryBtn">Add Category</button>
+          </div>
+        </div>
+      </section>
+
       <!-- Leaderboard Section -->
       <section id="leaderboardSection" class="hidden leaderboard-section">
-
-<!-- Add this inside leaderboardSection, just above leaderboard-controls -->
-<div class="leaderboard-extra-controls">
-  <input type="text" id="leaderboardSearch" placeholder="Search user or test..." />
-  <button id="jumpToMyRankBtn" class="secondary-btn">Jump to My Rank</button>
-</div>
-
         <h3>Leaderboard</h3>
         <div class="leaderboard-controls">
           <select id="leaderboardFilter">
@@ -112,7 +159,11 @@
       <!-- Global Tests Section -->
       <section id="globalTestsSection" class="hidden global-tests-section">
         <h3>Community Tests</h3>
-        <div class="test-filters">
+        <div class="test-controls">
+          <div class="search-container">
+            <input type="text" id="testSearchInput" placeholder="Search tests...">
+            <button id="searchTestsBtn">Search</button>
+          </div>
           <select id="testCategoryFilter">
             <option value="all">All Categories</option>
             <option value="general">General Matter</option>
@@ -157,7 +208,7 @@
       </section>
 
       <!-- Main Input Section -->
-      <section class="input-section">
+      <section id="mainSection" class="input-section">
         <div class="input-group" id="originalTextGroup">
           <textarea id="originalText" placeholder=" "></textarea>
           <label for="originalText">Original Text</label>
@@ -166,6 +217,10 @@
         <div id="timerOptions" class="timer-options hidden">
           <button class="timer-option" data-minutes="40">40 Minutes</button>
           <button class="timer-option" data-minutes="50">50 Minutes</button>
+          <div class="custom-timer">
+            <input type="number" id="customTimerMinutes" min="1" max="120" placeholder="Min">
+            <button id="startCustomTimer">Start</button>
+          </div>
         </div>
 
         <div id="timerDisplay" class="timer-display hidden"></div>
