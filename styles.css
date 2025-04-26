@@ -355,3 +355,45 @@ footer {
     text-align: center;
   }
 }
+#adminPanel {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+#leaderboard {
+  margin-top: 2rem;
+}
+
+#leaderboardList {
+  list-style: none;
+  padding: 0;
+}
+
+#leaderboardList li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+#leaderboardList li .rank {
+  font-weight: bold;
+  width: 30px;
+}
+
+#leaderboardList li .name {
+  flex: 2;
+}
+
+#leaderboardList li .wpm {
+  flex: 1;
+  text-align: right;
+  font-weight: bold;
+}
+
+#leaderboardList li .accuracy {
+  flex: 1;
+  text-align: right;
+}
