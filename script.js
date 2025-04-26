@@ -13,8 +13,27 @@ const firebaseConfig = {
   measurementId: "G-FWD5WNL48G"
 };
 
-firebase.initializeApp(firebaseConfig);
+// Verify Firebase initialization
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+} else {
+  firebase.app(); // if already initialized, use that one
+}
+
 const database = firebase.database();
+
+// Verify database connection
+try {
+  database.ref('.info/connected').on('value', (snap) => {
+    if (snap.val() === true) {
+      console.log("Connected to Firebase database");
+    } else {
+      console.log("Not connected to Firebase database");
+    }
+  });
+} catch (e) {
+  console.error("Firebase connection error:", e);
+}
 
 document.addEventListener('DOMContentLoaded', function() {
   // DOM elements
@@ -124,6 +143,9 @@ document.addEventListener('DOMContentLoaded', function() {
   function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
     firebase.auth().signInWithPopup(provider)
+      .then((result) => {
+        console.log("Signed in as:", result.user.email);
+      })
       .catch((error) => {
         console.error("Error signing in:", error);
         alert("Error signing in: " + error.message);
@@ -133,6 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Sign Out
   function signOut() {
     firebase.auth().signOut()
+      .then(() => {
+        console.log("User signed out");
+      })
       .catch((error) => {
         console.error("Error signing out:", error);
       });
@@ -216,16 +241,25 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
 
-  // Load Leaderboard
+  // Load Leaderboard with realtime updates
   function loadLeaderboard() {
+    console.log("Loading leaderboard...");
+    
     const scoresRef = database.ref('scores').orderByChild('wpm').limitToLast(10);
     
     scoresRef.on('value', (snapshot) => {
+      console.log("Leaderboard data received:", snapshot.val());
+      
       const scores = [];
       snapshot.forEach((childSnapshot) => {
         const score = childSnapshot.val();
-        score.id = childSnapshot.key;
-        scores.push(score);
+        scores.push({
+          id: childSnapshot.key,
+          userName: score.userName || 'Anonymous',
+          wpm: score.wpm || 0,
+          accuracy: score.accuracy || 0,
+          timestamp: score.timestamp || Date.now()
+        });
       });
       
       // Sort by WPM (descending)
@@ -239,7 +273,7 @@ document.addEventListener('DOMContentLoaded', function() {
         scores.forEach((score, index) => {
           leaderboardHTML += `
             <div class="stat-item">
-              <h4>#${index + 1} ${score.userName || 'Anonymous'}</h4>
+              <h4>#${index + 1} ${score.userName}</h4>
               <p>${score.wpm} WPM (${score.accuracy.toFixed(1)}%)</p>
               <small>${new Date(score.timestamp).toLocaleString()}</small>
             </div>
@@ -347,22 +381,23 @@ document.addEventListener('DOMContentLoaded', function() {
     // Save to leaderboard if user is logged in
     if (firebase.auth().currentUser) {
       const user = firebase.auth().currentUser;
-      const scoresRef = database.ref('scores').push();
+      const newScoreRef = database.ref('scores').push();
       
-      scoresRef.set({
+      const scoreData = {
         userName: user.displayName || user.email.split('@')[0],
         wpm: comparison.stats.wpm,
         accuracy: comparison.stats.accuracy,
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         userId: user.uid
-      })
-      .then(() => {
-        console.log("Score saved successfully");
-        loadLeaderboard(); // Refresh leaderboard after new score
-      })
-      .catch((error) => {
-        console.error("Error saving score:", error);
-      });
+      };
+      
+      newScoreRef.set(scoreData)
+        .then(() => {
+          console.log("Score saved successfully:", scoreData);
+        })
+        .catch((error) => {
+          console.error("Error saving score:", error);
+        });
     }
     
     // Show results section
