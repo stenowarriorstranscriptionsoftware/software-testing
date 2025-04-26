@@ -447,8 +447,7 @@ if (adminEmails.includes(user.email)) {
             <img src="${attempt.userPhoto}" alt="${attempt.userName}">
             <span>${attempt.userName}</span>
           </td>
-           <td>${attempt.testTitle || 'Custom Test'}</td>
-      <td><span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span></td>
+          <td>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
           <td class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</td>
           <td>${attempt.stats.wpm}</td>
           <td>${attempt.stats.totalOriginal}</td>
@@ -1388,3 +1387,21 @@ if (localStorage.getItem('darkMode') === 'true') {
   document.getElementById('darkModeToggle').checked = true;
   document.body.classList.add('dark-mode');
 }
+const leaderboardSearch = document.getElementById('leaderboardSearch');
+const jumpToMyRankBtn = document.getElementById('jumpToMyRankBtn');
+
+leaderboardSearch.addEventListener('input', () => {
+  currentPage = 1;
+  updatePagination();
+});
+
+jumpToMyRankBtn.addEventListener('click', () => {
+  const myRow = document.querySelector('.highlight-user');
+  if (myRow) {
+    myRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } else {
+    alert('You are not currently listed on the leaderboard.');
+  }
+});
+
+// Modify updatePagination and renderLeaderboardTable accordingly as mentioned before

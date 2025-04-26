@@ -77,6 +77,13 @@
 
       <!-- Leaderboard Section -->
       <section id="leaderboardSection" class="hidden leaderboard-section">
+
+<!-- Add this inside leaderboardSection, just above leaderboard-controls -->
+<div class="leaderboard-extra-controls">
+  <input type="text" id="leaderboardSearch" placeholder="Search user or test..." />
+  <button id="jumpToMyRankBtn" class="secondary-btn">Jump to My Rank</button>
+</div>
+
         <h3>Leaderboard</h3>
         <div class="leaderboard-controls">
           <select id="leaderboardFilter">
@@ -169,7 +176,7 @@
         </div>
 
         <div class="button-group test-controls">
-          <button id="compareBtn">Show Result</button>
+          <button id="compareBtn">Compare Texts</button>
           <button id="showFullTextBtn" class="secondary-btn">View Full Texts</button>
           <button id="closeResultsBtn" class="close-results-btn hidden">Close Results</button>
         </div>
