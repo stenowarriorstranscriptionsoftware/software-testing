@@ -491,33 +491,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Auto-delete old data function
   function cleanupOldData() {
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-    const timestampThreshold = threeMonthsAgo.getTime();
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+  const timestampThreshold = sixMonthsAgo.getTime();
 
-    database.ref('attempts').once('value').then(snapshot => {
-      const updates = {};
-      snapshot.forEach(child => {
-        if (child.val().timestamp < timestampThreshold) {
-          updates[child.key] = null;
-        }
-      });
-      if (Object.keys(updates).length > 0) {
-        database.ref('attempts').update(updates);
+  database.ref('attempts').once('value').then(snapshot => {
+    const updates = {};
+    snapshot.forEach(child => {
+      if (child.val().timestamp < timestampThreshold) {
+        updates[child.key] = null;
       }
     });
+    if (Object.keys(updates).length > 0) {
+      database.ref('attempts').update(updates);
+    }
+  });
 
-    database.ref('tests').once('value').then(snapshot => {
-      const updates = {};
-      snapshot.forEach(child => {
-        if (child.val().timestamp < timestampThreshold) {
-          updates[child.key] = null;
-        }
-      });
-      if (Object.keys(updates).length > 0) {
-        database.ref('tests').update(updates);
-      }
-    });
+  // Do not delete test entries; they should remain untouched
+
   }
 
   // Run cleanup weekly
