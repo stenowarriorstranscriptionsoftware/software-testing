@@ -93,7 +93,7 @@ label {
   font-size: 1.05rem;
 }
 
-textarea, input[type="text"] {
+textarea, input[type="text"], input[type="email"], input[type="password"] {
   width: 100%;
   min-height: 150px;
   padding: 1.25rem;
@@ -106,7 +106,12 @@ textarea, input[type="text"] {
   background: white;
 }
 
-textarea:focus, input[type="text"]:focus {
+input[type="email"], input[type="password"] {
+  min-height: auto;
+  padding: 0.8rem 1.25rem;
+}
+
+textarea:focus, input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus {
   border-color: var(--primary-light);
   outline: none;
   box-shadow: 0 0 0 3px rgba(72, 149, 239, 0.2);
@@ -461,7 +466,7 @@ footer {
   transform: translateY(0);
 }
 
-.close-modal {
+.close-modal, .close-auth-modal {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
@@ -471,7 +476,7 @@ footer {
   transition: var(--transition);
 }
 
-.close-modal:hover {
+.close-modal:hover, .close-auth-modal:hover {
   color: var(--dark);
   transform: rotate(90deg);
 }
@@ -530,6 +535,81 @@ footer {
 
 .delete-test-btn:hover {
   background-color: #d91a3d;
+}
+
+/* Auth Form Styles */
+.auth-form {
+  padding: 1.5rem 0;
+}
+
+.auth-form h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.auth-btn {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 1rem;
+}
+
+.google-auth {
+  background-color: white;
+  color: var(--dark);
+  border: 1px solid var(--light-gray);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.google-auth img {
+  width: 20px;
+  height: 20px;
+}
+
+.google-auth:hover {
+  background-color: var(--light);
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--gray);
+}
+
+.auth-switch a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 1.5rem 0;
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--light-gray);
+}
+
+.auth-divider::before {
+  margin-right: 0.5rem;
+}
+
+.auth-divider::after {
+  margin-left: 0.5rem;
 }
 
 /* Loading spinner and messages */
@@ -637,7 +717,7 @@ footer {
     width: 95%;
   }
   
-  .close-modal {
+  .close-modal, .close-auth-modal {
     top: 1rem;
     right: 1rem;
   }
