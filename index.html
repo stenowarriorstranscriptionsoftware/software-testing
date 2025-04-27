@@ -32,13 +32,89 @@
         </div>
       </div>
     </header>
+
     <main>
-      <!-- ... truncated for brevity, same as explained ... -->
+      <section id="loginPrompt" class="login-prompt"></section>
+      <section id="leaderboardSection" class="hidden leaderboard-section">
+        <h3>Leaderboard</h3>
+        <div class="leaderboard-controls">
+          <select id="leaderboardFilter">
+            <option value="all">All Tests</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+          </select>
+          <select id="testNameFilter">
+            <option value="all">All Tests</option>
+          </select>
+          <select id="categoryFilter">
+            <option value="all">All Categories</option>
+            <option value="general">General Matter</option>
+            <option value="kailash">Kailash Chandra</option>
+            <option value="progressive">Progressive</option>
+            <option value="legal">Legal</option>
+            <option value="previous">Previous Year</option>
+            <option value="test">Test</option>
+          </select>
+          <button id="prevPageBtn" class="secondary-btn" disabled>Previous</button>
+          <button id="nextPageBtn" class="secondary-btn">Next</button>
+        </div>
+        <div id="leaderboardList" class="leaderboard-list"></div>
+        <div id="leaderboardPagination" class="pagination-info"></div>
+      </section>
+
+      <section id="globalTestsSection" class="hidden global-tests-section">
+        <h3>Community Tests</h3>
+        <div class="test-filters">
+          <select id="testCategoryFilter">
+            <option value="all">All Categories</option>
+            <option value="general">General Matter</option>
+            <option value="kailash">Kailash Chandra</option>
+            <option value="progressive">Progressive</option>
+            <option value="legal">Legal</option>
+            <option value="previous">Previous Year</option>
+            <option value="test">Test</option>
+          </select>
+        </div>
+        <div id="globalTestsList" class="tests-list"></div>
+      </section>
+
+      <section id="customTestSection" class="hidden custom-test-section">
+        <h3>Add Your Own Test</h3>
+        <div class="input-group">
+          <input type="text" id="customTitle" placeholder=" ">
+          <label for="customTitle">Test Title</label>
+        </div>
+        <div class="input-group">
+          <select id="customCategory">
+            <option value="general">General Matter</option>
+            <option value="kailash">Kailash Chandra</option>
+            <option value="progressive">Progressive</option>
+            <option value="legal">Legal</option>
+            <option value="previous">Previous Year</option>
+            <option value="test">Test</option>
+          </select>
+          <label for="customCategory">Test Category</label>
+        </div>
+        <div class="input-group">
+          <textarea id="customOriginal" placeholder=" "></textarea>
+          <label for="customOriginal">Original Text</label>
+        </div>
+        <div class="input-group">
+          <input type="url" id="customVideoUrl" placeholder=" ">
+          <label for="customVideoUrl">Video URL (Optional)</label>
+        </div>
+        <div class="button-group">
+          <button id="saveTestBtn">Save & Share Test</button>
+          <button id="clearTestsBtn" class="secondary-btn">Clear My Tests</button>
+        </div>
+      </section>
     </main>
+
     <footer>
       <p>© 2023 Steno Warriors | Professional Transcription Tool</p>
     </footer>
   </div>
+
   <script src="script.js"></script>
 </body>
 </html>
