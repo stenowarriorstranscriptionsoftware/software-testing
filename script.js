@@ -212,7 +212,6 @@ document.addEventListener('DOMContentLoaded', function() {
       loadLeaderboard();
       cleanupOldData();
     } else {
-      isAdmin = false;
       loginBtn.classList.remove('hidden');
       userInfo.classList.add('hidden');
       loginPrompt.classList.remove('hidden');
@@ -324,7 +323,7 @@ document.addEventListener('DOMContentLoaded', function() {
         case 'totalOriginal':
         case 'totalUser':
         case 'halfMistakes':
-        case26' : 'fullMistakes':
+        case 'fullMistakes':
         case 'timeTaken':
           aValue = a.stats[column];
           bValue = b.stats[column];
@@ -510,6 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Auto-delete old data function
   function cleanupOldData() {
     const threeMonthsAgo = new Date();
     threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
@@ -540,8 +540,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Run cleanup weekly
   setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
 
+  // Original text paste handler
   originalTextEl.addEventListener('paste', function() {
     document.querySelectorAll('.test-card').forEach(card => {
       card.classList.remove('selected');
@@ -559,6 +561,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 0);
   });
   
+  // Timer option click handler
   timerButtons.forEach(button => {
     button.addEventListener('click', function() {
       const minutes = parseInt(this.dataset.minutes);
@@ -569,18 +572,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
   
+  // Compare button click handler
   compareBtn.addEventListener('click', function() {
     stopTimer();
     compareTexts();
     disableTimerOptions();
   });
   
+  // Show full text button click handler
   showFullTextBtn.addEventListener('click', showFullTexts);
   
+  // Back to results button click handler
   backToResultsBtn.addEventListener('click', showResults);
   
+  // Download PDF button click handler
   downloadPdfBtn.addEventListener('click', downloadAsPdf);
   
+  // Close results button click handler
   closeResultsBtn.addEventListener('click', function() {
     const existingVideo = document.getElementById('testVideoPlayer');
     if (existingVideo) existingVideo.remove();
