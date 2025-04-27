@@ -53,6 +53,22 @@ document.addEventListener('DOMContentLoaded', function() {
   const testSelectionModal = document.getElementById('testSelectionModal');
   const closeModalBtn = document.querySelector('.close-modal');
   const testList = document.getElementById('testList');
+  
+  // New Auth elements
+  const authModal = document.getElementById('authModal');
+  const closeAuthModalBtn = document.querySelector('.close-auth-modal');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const showRegisterLink = document.getElementById('showRegister');
+  const showLoginLink = document.getElementById('showLogin');
+  const loginWithEmailBtn = document.getElementById('loginWithEmailBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const googleLoginBtn = document.getElementById('googleLoginBtn');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+  const registerEmail = document.getElementById('registerEmail');
+  const registerPassword = document.getElementById('registerPassword');
+  const confirmPassword = document.getElementById('confirmPassword');
 
   // Typing session variables
   let startTime = null;
@@ -81,13 +97,33 @@ document.addEventListener('DOMContentLoaded', function() {
   clearResultsBtn.addEventListener('click', clearResults);
   downloadPdfBtn.addEventListener('click', downloadAsPdf);
   typingAreaEl.addEventListener('input', checkTypingProgress);
-  loginBtn.addEventListener('click', signInWithGoogle);
+  loginBtn.addEventListener('click', () => {
+    authModal.classList.add('show');
+    loginForm.classList.remove('hidden');
+    registerForm.classList.add('hidden');
+  });
   logoutBtn.addEventListener('click', signOut);
   saveTestBtn.addEventListener('click', saveTest);
-  closeModalBtn.addEventListener('click', () => {
-    testSelectionModal.classList.remove('show');
+  closeModalBtn.addEventListener('click', () => testSelectionModal.classList.remove('show'));
+  closeAuthModalBtn.addEventListener('click', () => authModal.classList.remove('show'));
+  
+  // Auth form event listeners
+  showRegisterLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
   });
   
+  showLoginLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    registerForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+  });
+  
+  loginWithEmailBtn.addEventListener('click', loginWithEmail);
+  registerBtn.addEventListener('click', registerWithEmail);
+  googleLoginBtn.addEventListener('click', signInWithGoogle);
+
   // Time selection buttons
   timeOptions.forEach(option => {
     option.addEventListener('click', function() {
@@ -121,16 +157,116 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
+  // Email/Password Login
+  function loginWithEmail() {
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value.trim();
+
+    if (!email || !password) {
+      alert('Please enter both email and password');
+      return;
+    }
+
+    loginWithEmailBtn.innerHTML = '<span class="spinner"></span> Logging in...';
+    loginWithEmailBtn.disabled = true;
+
+    firebase.auth().signInWithEmailAndPassword(email, password)
+      .then(() => {
+        authModal.classList.remove('show');
+      })
+      .catch((error) => {
+        let errorMessage = "Login failed";
+        switch(error.code) {
+          case 'auth/invalid-email':
+            errorMessage = "Invalid email address";
+            break;
+          case 'auth/user-disabled':
+            errorMessage = "Account disabled";
+            break;
+          case 'auth/user-not-found':
+            errorMessage = "User not found";
+            break;
+          case 'auth/wrong-password':
+            errorMessage = "Incorrect password";
+            break;
+        }
+        alert(errorMessage);
+      })
+      .finally(() => {
+        loginWithEmailBtn.innerHTML = 'Login';
+        loginWithEmailBtn.disabled = false;
+      });
+  }
+
+  // Email/Password Registration
+  function registerWithEmail() {
+    const email = registerEmail.value.trim();
+    const password = registerPassword.value.trim();
+    const confirm = confirmPassword.value.trim();
+
+    if (!email || !password || !confirm) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirm) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      alert('Password should be at least 6 characters');
+      return;
+    }
+
+    registerBtn.innerHTML = '<span class="spinner"></span> Registering...';
+    registerBtn.disabled = true;
+
+    firebase.auth().createUserWithEmailAndPassword(email, password)
+      .then(() => {
+        authModal.classList.remove('show');
+      })
+      .catch((error) => {
+        let errorMessage = "Registration failed";
+        switch(error.code) {
+          case 'auth/email-already-in-use':
+            errorMessage = "Email already in use";
+            break;
+          case 'auth/invalid-email':
+            errorMessage = "Invalid email address";
+            break;
+          case 'auth/weak-password':
+            errorMessage = "Password is too weak";
+            break;
+        }
+        alert(errorMessage);
+      })
+      .finally(() => {
+        registerBtn.innerHTML = 'Register';
+        registerBtn.disabled = false;
+      });
+  }
+
   // Google Sign-In
   function signInWithGoogle() {
     const provider = new firebase.auth.GoogleAuthProvider();
+    googleLoginBtn.innerHTML = '<span class="spinner"></span> Continuing with Google...';
+    googleLoginBtn.disabled = true;
+    
     firebase.auth().signInWithPopup(provider)
-      .then((result) => {
-        console.log("Signed in as:", result.user.email);
+      .then(() => {
+        authModal.classList.remove('show');
       })
       .catch((error) => {
         console.error("Error signing in:", error);
-        alert("Error signing in: " + error.message);
+        alert("Error signing in with Google: " + error.message);
+      })
+      .finally(() => {
+        googleLoginBtn.innerHTML = `
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google logo">
+          Continue with Google
+        `;
+        googleLoginBtn.disabled = false;
       });
   }
 
