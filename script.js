@@ -84,7 +84,9 @@ document.addEventListener('DOMContentLoaded', function() {
   loginBtn.addEventListener('click', signInWithGoogle);
   logoutBtn.addEventListener('click', signOut);
   saveTestBtn.addEventListener('click', saveTest);
-  closeModalBtn.addEventListener('click', () => testSelectionModal.classList.add('hidden'));
+  closeModalBtn.addEventListener('click', () => {
+    testSelectionModal.classList.remove('show');
+  });
   
   // Time selection buttons
   timeOptions.forEach(option => {
@@ -156,6 +158,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const testsRef = database.ref('tests');
     const newTestRef = testsRef.push();
     
+    saveTestBtn.innerHTML = '<span class="spinner"></span> Saving...';
+    saveTestBtn.disabled = true;
+    
     newTestRef.set({
       name: testName,
       content: testContent,
@@ -169,7 +174,15 @@ document.addEventListener('DOMContentLoaded', function() {
     })
     .catch((error) => {
       console.error("Error saving test:", error);
-      alert("Error saving test: " + error.message);
+      let errorMessage = "Error saving test";
+      if (error.code === 'PERMISSION_DENIED') {
+        errorMessage = "You don't have permission to save tests";
+      }
+      alert(errorMessage);
+    })
+    .finally(() => {
+      saveTestBtn.innerHTML = 'Save Test';
+      saveTestBtn.disabled = false;
     });
   }
 
@@ -182,7 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const testRef = database.ref('tests/' + testId);
     testRef.remove()
       .then(() => {
-        alert('Test deleted successfully!');
         showSavedTests(); // Refresh the test list
       })
       .catch((error) => {
@@ -198,8 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    testSelectionModal.classList.remove('hidden');
-    testList.innerHTML = '<p>Loading tests...</p>';
+    testSelectionModal.classList.add('show');
+    testList.innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading tests...</p></div>';
     
     const testsRef = database.ref('tests');
     testsRef.once('value')
@@ -213,7 +225,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (tests.length === 0) {
-          testList.innerHTML = '<p>No tests available yet.</p>';
+          testList.innerHTML = '<p class="no-tests">No tests available yet.</p>';
           return;
         }
         
@@ -240,7 +252,8 @@ document.addEventListener('DOMContentLoaded', function() {
           // Add load test functionality
           testItem.querySelector('.load-test-btn').addEventListener('click', () => {
             originalTextEl.value = test.content;
-            testSelectionModal.classList.add('hidden');
+            testSelectionModal.classList.remove('show');
+            originalTextEl.focus();
           });
           
           // Add delete functionality for admin
@@ -256,7 +269,11 @@ document.addEventListener('DOMContentLoaded', function() {
       })
       .catch((error) => {
         console.error("Error loading tests:", error);
-        testList.innerHTML = '<p>Error loading tests. Please try again.</p>';
+        testList.innerHTML = '<p class="error-message">Error loading tests. Please try again.</p>';
+      })
+      .finally(() => {
+        loadSavedTestsBtn.innerHTML = 'Load Saved Tests';
+        loadSavedTestsBtn.disabled = false;
       });
   }
 
