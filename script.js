@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Process texts
     const userWords = processText(userText);
     
-    // Compare words
+    // Compare words - this will now calculate word-based accuracy
     const comparison = compareParagraphs(originalWords, userWords);
     
     // Display results
@@ -354,9 +354,8 @@ document.addEventListener('DOMContentLoaded', function() {
     typingSection.classList.add('hidden');
     resultsSection.classList.remove('hidden');
     
-    // Show WPM and accuracy in results
+    // Show WPM in results (accuracy is shown in stats)
     wpmDisplayEl.style.display = '';
-    accuracyDisplayEl.style.display = '';
   }
   
   function clearResults() {
@@ -364,24 +363,8 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   function checkTypingProgress() {
-    const userText = typingAreaEl.value;
-    const originalText = originalTextEl.value;
-    
-    // Update character count
-    totalChars = userText.length;
-    
-    // Count correct characters
-    let newCorrectChars = 0;
-    for (let i = 0; i < Math.min(userText.length, originalText.length); i++) {
-      if (userText[i] === originalText[i]) {
-        newCorrectChars++;
-      }
-    }
-    
-    correctChars = newCorrectChars;
-    errors = totalChars - correctChars;
-    
-    // Calculate WPM and accuracy (used in results)
+    // We don't need character-based accuracy anymore
+    // Just update the timer and WPM
     updateRealTimeStats();
   }
   
@@ -392,10 +375,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const wordsTyped = typingAreaEl.value.split(/\s+/).filter(word => word.length > 0).length;
     const wpm = timeElapsed > 0 ? Math.round(wordsTyped / timeElapsed) : 0;
     
-    const accuracy = totalChars > 0 ? Math.round((correctChars / totalChars) * 100) : 100;
-    
     wpmDisplayEl.textContent = `${wpm} WPM`;
-    accuracyDisplayEl.textContent = `${accuracy}% Accuracy`;
+    // Remove accuracy display during typing since we can't calculate it in real-time
+    accuracyDisplayEl.style.display = 'none';
   }
   
   function updateTimer() {
@@ -442,36 +424,13 @@ document.addEventListener('DOMContentLoaded', function() {
       .split(/\s+/);
   }
   
-  function isSimilar(wordA, wordB) {
-    const minLength = Math.min(wordA.length, wordB.length);
-    const maxLength = Math.max(wordA.length, wordB.length);
-    let similarCount = 0;
-    const threshold = 50;
-    
-    for (let i = 0; i < minLength; i++) {
-      if (wordA[i] === wordB[i]) {
-        similarCount++;
-      }
-    }
-    
-    const similarityPercentage = (similarCount / maxLength) * 100;
-    return similarityPercentage >= threshold;
-  }
-  
-  function arraysAreEqual(arr1, arr2) {
-    if (arr1.length !== arr2.length) return false;
-    for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) return false;
-    }
-    return true;
-  }
-  
   function compareParagraphs(paragraphA, paragraphB) {
     let comparedText = '';
     let numHalfDiff = 0;
     let numFullDiff = 0;
     let wordAIndex = 0;
     let wordBIndex = 0;
+    let correctWords = 0; // Track correct words count
 
     while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
       const wordA = paragraphA[wordAIndex] || '';
@@ -483,6 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
         comparedText += `<span class="correct">${wordA}</span> `;
         wordAIndex++;
         wordBIndex++;
+        correctWords++; // Count as correct word
       } else if (cleanWordA.toLowerCase() === cleanWordB.toLowerCase()) {
         comparedText += `<span class="capitalization">${wordA}</span> `;
         comparedText += `<span class="capitalization-strike">${wordB}</span> `;
@@ -573,30 +533,54 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Calculate statistics
     const keystrokesCount = typingAreaEl.value.length;
-    const errorPercentage = paragraphA.length > 0 ? 
-      Math.min(100, ((numHalfDiff / 2) + numFullDiff) / paragraphA.length * 100) : 0;
-    const accuracyPercentage = Math.max(0, 100 - errorPercentage);
+    const totalWordsTyped = paragraphB.length; // Total words in user's text
+    const accuracyPercentage = totalWordsTyped > 0 ? 
+        Math.round((correctWords / totalWordsTyped) * 100) : 0;
     
     // Calculate WPM
     const endTime = new Date();
     const typingTimeSeconds = startTime ? (endTime - startTime) / 1000 : 60;
     const typingTimeMinutes = typingTimeSeconds / 60;
-    const wordsTyped = paragraphB.length;
-    const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
+    const wpm = typingTimeMinutes > 0 ? Math.round(totalWordsTyped / typingTimeMinutes) : 0;
 
     return {
       html: comparedText,
       stats: {
         totalOriginal: paragraphA.length,
-        totalUser: paragraphB.length,
+        totalUser: totalWordsTyped,
+        correctWords: correctWords,
         halfMistakes: numHalfDiff,
         fullMistakes: numFullDiff,
         keystrokes: keystrokesCount,
         wpm: wpm,
         accuracy: accuracyPercentage,
-        errorRate: errorPercentage
+        errorRate: 100 - accuracyPercentage
       }
     };
+  }
+  
+  function isSimilar(wordA, wordB) {
+    const minLength = Math.min(wordA.length, wordB.length);
+    const maxLength = Math.max(wordA.length, wordB.length);
+    let similarCount = 0;
+    const threshold = 50;
+    
+    for (let i = 0; i < minLength; i++) {
+      if (wordA[i] === wordB[i]) {
+        similarCount++;
+      }
+    }
+    
+    const similarityPercentage = (similarCount / maxLength) * 100;
+    return similarityPercentage >= threshold;
+  }
+  
+  function arraysAreEqual(arr1, arr2) {
+    if (arr1.length !== arr2.length) return false;
+    for (let i = 0; i < arr1.length; i++) {
+      if (arr1[i] !== arr2[i]) return false;
+    }
+    return true;
   }
   
   function displayComparison(comparison) {
@@ -614,6 +598,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <p>${stats.totalUser}</p>
       </div>
       <div class="stat-item">
+        <h4>Correct Words</h4>
+        <p>${stats.correctWords}</p>
+      </div>
+      <div class="stat-item">
         <h4>Half Mistakes</h4>
         <p>${stats.halfMistakes}</p>
       </div>
@@ -622,16 +610,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <p>${stats.fullMistakes}</p>
       </div>
       <div class="stat-item">
-        <h4>Keystrokes</h4>
-        <p>${stats.keystrokes}</p>
-      </div>
-      <div class="stat-item">
         <h4>Typing Speed (WPM)</h4>
         <p>${stats.wpm}</p>
       </div>
       <div class="stat-item">
         <h4>Accuracy</h4>
-        <p>${stats.accuracy.toFixed(1)}%</p>
+        <p>${stats.accuracy}%</p>
       </div>
     `;
   }
