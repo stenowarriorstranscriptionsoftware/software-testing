@@ -15,6 +15,10 @@
     <h2>Admin Panel</h2>
     <p id="admin-status" style="color: red;"></p>
 
+    <div style="text-align: right; margin-bottom: 10px;">
+      <a href="index.html" style="text-decoration:none; background-color:#4361ee; color:white; padding:8px 16px; border-radius:8px;">Home</a>
+    </div>
+
     <h3>Add Test</h3>
     <input id="test-number" placeholder="Test Number" type="number">
     <input id="test-text" placeholder="Test Text">
@@ -67,6 +71,12 @@
       document.getElementById('admin-status').innerText = 'Access Denied';
       document.querySelector('.main').style.display = 'none';
       return;
+    } else {
+      const adminBtn = document.createElement('a');
+      adminBtn.href = 'admin.html';
+      adminBtn.innerText = 'Admin Panel';
+      adminBtn.style = 'margin-left: 10px; background-color: #f72585; padding: 8px 16px; color: white; border-radius: 8px; text-decoration: none;';
+      document.getElementById('user-info').appendChild(adminBtn);
     }
   });
 
@@ -117,19 +127,3 @@
 </script>
 </body>
 </html>
-
-<!-- JSON Import Sample -->
-<!-- Save the following content as "firebase-import.json" to import basic setup -->
-<!-- Paste into Firebase > Realtime Database > Import JSON -->
-
-{
-  "volumes": {
-    "1": "Test 1-50 (General Matter)",
-    "2": "Test 51-100 (KC Mix Transcription)"
-  },
-  "textLookup": {
-    "1": "Education is very important for the growth of a country...",
-    "2": "Natural disasters are events that cause great damage..."
-  },
-  "leaderboard": {}
-}
