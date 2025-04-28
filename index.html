@@ -1694,9 +1694,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // State variables
   let timerInterval;
-  let endTime;
+  let timerDuration = 0; // Store selected timer duration in seconds
+  let endTime; // Timestamp when timer should end
   let testActive = false; // Is a timed test currently running?
-  let startTime = null; // For tracking typing start time if timer isn't used
+  let startTime = null; // Timestamp when user starts typing or timer starts
   let isAdmin = false;
   let selectedTestInternal = { // Store selected test data internally
       text: null,
@@ -1724,7 +1725,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Initialize typing timer
   userTextEl.addEventListener('input', function() {
-    if (!testActive && !startTime) { // Start timer only if not already started and not in a timed test
+    // Record start time on first input *only if* a timed test is not active
+    if (!testActive && !startTime) {
       startTime = new Date();
     }
   });
@@ -2209,21 +2211,12 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelectorAll('.timer-option').forEach(button => {
     button.addEventListener('click', function() {
       const minutes = parseInt(this.dataset.minutes);
-      startTimer(minutes);
-      timerOptions.classList.add('hidden');
-      timerDisplay.classList.remove('hidden');
-      // Hide original text group only if a test was NOT selected (i.e., user pasted text)
-      if (!selectedTestInternal.text) {
-          originalTextGroup.classList.add('hidden');
-      }
-      testActive = true;
-      startTime = new Date();
+      startTimer(minutes); // Pass minutes to startTimer
     });
   });
 
   // Compare button click handler
   compareBtn.addEventListener('click', function() {
-    // Check if we have original text either from selection or pasted
     const hasOriginal = selectedTestInternal.text || originalTextEl.value.trim();
     if (!hasOriginal) {
         alert("Please select a test or paste original text first.");
@@ -2233,10 +2226,10 @@ document.addEventListener('DOMContentLoaded', function() {
         alert("Please enter your transcription before comparing.");
         return;
     }
-
-    if (!testActive && !startTime) { // If compare is clicked before typing anything (and no timer)
-        alert("Please start typing or select a timer.");
-        return;
+    // If compare is clicked before typing anything (and no timer), startTime might be null
+    if (!testActive && !startTime) {
+        // Set startTime now if user clicks compare without typing first (edge case)
+        startTime = new Date();
     }
 
     stopTimer(); // Stop timer if running
@@ -2269,6 +2262,7 @@ document.addEventListener('DOMContentLoaded', function() {
     timerDisplay.classList.remove('timer-ended');
     testActive = false;
     startTime = null;
+    stopTimer(); // Ensure any lingering timer interval is cleared
     resetTestSelection(); // Clear internal test selection
 
     const existingVideo = document.getElementById('testVideoPlayer');
@@ -2277,9 +2271,21 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   function startTimer(minutes) {
-    endTime = new Date();
-    endTime.setMinutes(endTime.getMinutes() + minutes);
-    updateTimerDisplay();
+    timerDuration = minutes * 60; // Store duration in seconds
+    endTime = new Date(new Date().getTime() + timerDuration * 1000); // Calculate end time
+    startTime = new Date(); // Record the precise start time
+    testActive = true; // Set test as active
+
+    timerOptions.classList.add('hidden');
+    timerDisplay.classList.remove('hidden');
+    // Hide original text group only if a test was NOT selected (i.e., user pasted text)
+    if (!selectedTestInternal.text) {
+        originalTextGroup.classList.add('hidden');
+    }
+
+    updateTimerDisplay(); // Initial display
+    // Clear any existing interval before starting a new one
+    if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
       updateTimerDisplay();
       const now = new Date();
@@ -2287,7 +2293,7 @@ document.addEventListener('DOMContentLoaded', function() {
         stopTimer();
         timerDisplay.classList.add('timer-ended');
         timerDisplay.textContent = "TIME'S UP!";
-        compareTexts();
+        compareTexts(); // Automatically compare when time is up
         lockTest();
         disableTimerOptions();
       }
@@ -2296,6 +2302,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function stopTimer() {
     clearInterval(timerInterval);
+    timerInterval = null; // Reset interval variable
   }
 
   function disableTimerOptions() {
@@ -2308,7 +2315,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function updateTimerDisplay() {
     const now = new Date();
-    const remaining = endTime - now;
+    // Ensure endTime is valid before calculating remaining time
+    const remaining = endTime instanceof Date && !isNaN(endTime) ? endTime - now : 0;
+
     if (remaining <= 0) {
         timerDisplay.textContent = "00:00";
         return;
@@ -2326,55 +2335,41 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function compareTexts() {
-    // Determine the original text source
     const originalText = selectedTestInternal.text ? selectedTestInternal.text : originalTextEl.value;
-    const userText = userTextEl.value; // Always from the user textarea
-
-    // Use selected test title/category if available, otherwise default
+    const userText = userTextEl.value;
     const testTitle = selectedTestInternal.title || "Custom Test";
     const testCategory = selectedTestInternal.category || "general";
 
-
-    if (!originalText) {
-      alert('Original text is missing. Please select a test or paste text.');
-      return;
-    }
-     if (!userText) {
-      alert('Please enter your transcription.');
+    if (!originalText || !userText) {
+      // Checks already done in compareBtn listener, but keep as safeguard
+      console.error("Comparison called without original or user text.");
       return;
     }
 
-    // Calculate time taken
-    let timeTakenSeconds;
-    if (testActive && endTime) { // Timer was used
-        // Calculate actual time spent if timer was stopped early or ran out
-        const totalDurationSeconds = parseInt(document.querySelector('.timer-option[disabled]')?.dataset.minutes || '0') * 60;
-        const timeRemainingText = timerDisplay.textContent;
-        let secondsElapsed = 0;
-        if (timeRemainingText && timeRemainingText !== "TIME'S UP!") {
-            const parts = timeRemainingText.split(':');
-            const secondsRemaining = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-            secondsElapsed = totalDurationSeconds - secondsRemaining;
-        } else { // Timer finished or wasn't displayed properly
-            secondsElapsed = totalDurationSeconds;
-        }
-         timeTakenSeconds = Math.max(0, secondsElapsed); // Ensure non-negative
+    // --- Accurate Time Calculation ---
+    let timeTakenSeconds = 0;
+    const comparisonEndTime = new Date(); // Time when comparison is triggered
 
-    } else if (startTime) { // Timer not used, but user typed
-        timeTakenSeconds = Math.round((new Date() - startTime) / 1000);
-    } else { // Fallback, should ideally not happen if checks above work
-        timeTakenSeconds = 0;
+    if (startTime) { // startTime should be set either by timer or first input
+        timeTakenSeconds = Math.round((comparisonEndTime - startTime) / 1000);
     }
+
+    // If it was a timed test, cap the time at the timer duration
+    if (testActive && timerDuration > 0) {
+        timeTakenSeconds = Math.min(timeTakenSeconds, timerDuration);
+    }
+    timeTakenSeconds = Math.max(0, timeTakenSeconds); // Ensure non-negative
+    // --- End Time Calculation ---
 
     const originalWords = processText(originalText);
     const userWords = processText(userText);
 
-    const comparison = compareParagraphs(originalWords, userWords, timeTakenSeconds);
+    const comparison = compareParagraphs(originalWords, userWords, timeTakenSeconds); // Pass calculated time
 
     displayComparison(comparison);
     displayStats(comparison.stats);
     displayFeedback(comparison.stats, originalWords, userWords);
-    displayFullTexts(originalText, userText); // Show original text in the results view
+    displayFullTexts(originalText, userText);
 
     const now = new Date();
     resultDateEl.textContent = now.toLocaleString();
@@ -2390,7 +2385,7 @@ document.addEventListener('DOMContentLoaded', function() {
         userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`,
         testTitle: testTitle,
         category: testCategory,
-        stats: comparison.stats,
+        stats: comparison.stats, // Save calculated stats
         timestamp: Date.now()
       };
       database.ref('attempts').push(attemptData)
@@ -2402,7 +2397,6 @@ document.addEventListener('DOMContentLoaded', function() {
   function showFullTexts() {
     resultsSection.classList.add('hidden');
     fullTextSection.classList.remove('hidden');
-    // Populate the full text display here, using the correct original source
     originalDisplayEl.textContent = selectedTestInternal.text ? selectedTestInternal.text : originalTextEl.value;
     userDisplayEl.textContent = userTextEl.value;
   }
@@ -2513,7 +2507,7 @@ document.addEventListener('DOMContentLoaded', function() {
         accuracy = Math.min(100, accuracy);
     }
     const errorRate = 100 - accuracy;
-    const typingTimeMinutes = timeTakenSeconds / 60;
+    const typingTimeMinutes = timeTakenSeconds > 0 ? timeTakenSeconds / 60 : 0; // Avoid division by zero
     const wpm = typingTimeMinutes > 0 ? Math.round((keystrokes / 5) / typingTimeMinutes) : 0;
 
     return {
@@ -2622,10 +2616,9 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected'));
             testCard.classList.add('selected');
 
-            // Store selected test data internally, DO NOT populate textarea
             selectedTestInternal = { text: test.text, title: test.title, category: test.category };
-            originalTextEl.value = ''; // Clear the textarea
-            originalTextGroup.classList.add('hidden'); // Hide the original text group
+            originalTextEl.value = '';
+            originalTextGroup.classList.add('hidden');
 
             timerOptions.classList.remove('hidden');
             document.querySelectorAll('.timer-option').forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; });
@@ -2634,7 +2627,7 @@ document.addEventListener('DOMContentLoaded', function() {
             compareBtn.disabled = false; resultsSection.classList.add('hidden');
             fullTextSection.classList.add('hidden'); closeResultsBtn.classList.add('hidden');
             timerDisplay.classList.add('hidden'); timerDisplay.classList.remove('timer-ended');
-            testActive = false; startTime = null;
+            testActive = false; startTime = null; // Reset start time when selecting a test
 
             if (test.videoUrl) embedVideo(test.videoUrl);
             else { const v = document.getElementById('testVideoPlayer'); if (v) v.remove(); }
@@ -2882,7 +2875,7 @@ function handleInputFocusBlur() {
 }
 document.addEventListener('DOMContentLoaded', handleInputFocusBlur);
 document.addEventListener('DOMContentLoaded', () => {
-    const editModalObserver = new MutationObserver(() => { if (editTestModal.classList.contains('show')) handleInputFocusBlur(); });
+    const editModalObserver = new MutationObserver(() => { if (editTestModal && editTestModal.classList.contains('show')) handleInputFocusBlur(); });
     if (editTestModal) editModalObserver.observe(editTestModal, { attributes: true, attributeFilter: ['class'] });
 });
 
