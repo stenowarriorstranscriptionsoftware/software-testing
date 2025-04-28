@@ -1186,8 +1186,14 @@ body.dark-mode .test-item {
 
   .close-results-btn {
     margin-left: 0;
-    width: 100%;
+    width: 100%; /* Ensure close button takes full width when stacked */
   }
+  #closeResultsBtnEnd { /* Style new button on mobile too */
+      width: calc(100% - 4rem); /* Match padding of section */
+      margin-left: auto;
+      margin-right: auto;
+  }
+
 
   .leaderboard-controls {
     flex-direction: column;
@@ -1529,7 +1535,7 @@ body.dark-mode .selected-row {
         <div class="button-group test-controls">
           <button id="compareBtn">Compare Texts</button>
           <button id="showFullTextBtn" class="secondary-btn hidden">View Full Texts</button>
-          <button id="closeResultsBtn" class="close-results-btn hidden">Close Results</button>
+          <button id="closeResultsBtn" class="close-results-btn hidden">Close Results & Refresh</button>
         </div>
       </section>
 
@@ -1584,6 +1590,9 @@ body.dark-mode .selected-row {
           </div>
         </div>
       </section>
+
+      <button id="closeResultsBtnEnd" class="close-results-btn hidden" style="margin: 2rem auto; display: block; width: fit-content;">Close Results & Refresh</button>
+
     </main>
 
     <footer>
@@ -1620,7 +1629,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const showFullTextBtn = document.getElementById('showFullTextBtn');
   const backToResultsBtn = document.getElementById('backToResultsBtn');
   const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-  const closeResultsBtn = document.getElementById('closeResultsBtn');
+  const closeResultsBtn = document.getElementById('closeResultsBtn'); // Existing button in controls
+  const closeResultsBtnEnd = document.getElementById('closeResultsBtnEnd'); // NEW button at the end
   const resultsSection = document.getElementById('results');
   const fullTextSection = document.getElementById('fullTextSection');
   const comparisonResultEl = document.getElementById('comparisonResult');
@@ -1677,7 +1687,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Global state ---
   let currentUser = null;
-  const adminEmails = ["anishkumar18034@gmail.com", "anishkumar1803@gmail.com", "admin2@example.com"]; // Add admin emails here
+  const adminEmails = ["anishkumar18034@gmail.com", "anishkumar1803@gmail.com", "admin2@example.com"];
   let allFetchedTests = [];
   let timerInterval;
   let endTime;
@@ -1688,8 +1698,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let allAttempts = [];
   let filteredAttempts = [];
   let uniqueTestNames = new Set();
-  let currentSortColumn = 'accuracy'; // Default sort column
-  let currentSortDirection = 'desc'; // Default sort direction
+  let currentSortColumn = 'accuracy';
+  let currentSortDirection = 'desc';
   let selectedLeaderboardRows = [];
   let carouselTrack;
   let carouselDotsContainer;
@@ -1748,8 +1758,8 @@ document.addEventListener('DOMContentLoaded', function() {
           userName.textContent = user.displayName || 'User';
           loginPrompt.classList.add('hidden');
           const isAdmin = adminEmails.includes(user.email);
-          customTestSection.classList.remove('hidden'); // All logged-in users can add tests
-          deleteLeaderboardBtn.classList.toggle('hidden', !isAdmin); // Only admins see delete button
+          customTestSection.classList.remove('hidden');
+          deleteLeaderboardBtn.classList.toggle('hidden', !isAdmin);
           globalTestsSection.classList.remove('hidden'); leaderboardSection.classList.remove('hidden');
           fetchAndDisplayGlobalTests(); loadLeaderboard(); cleanupOldData();
       } else {
@@ -1757,7 +1767,7 @@ document.addEventListener('DOMContentLoaded', function() {
           loginBtn.classList.remove('hidden'); userInfo.classList.add('hidden'); loginPrompt.classList.remove('hidden');
           customTestSection.classList.add('hidden'); globalTestsSection.classList.add('hidden'); leaderboardSection.classList.add('hidden');
           loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); deleteLeaderboardBtn.classList.add('hidden');
-          resetComparisonUI();
+          resetComparisonUI(); // Use the reset function
           if(carouselTrack) carouselTrack.innerHTML = ''; if(carouselDotsContainer) carouselDotsContainer.innerHTML = '';
           if(leaderboardList) leaderboardList.innerHTML = ''; allFetchedTests = []; allAttempts = []; filteredAttempts = []; selectedLeaderboardRows = [];
       }
@@ -1800,12 +1810,19 @@ document.addEventListener('DOMContentLoaded', function() {
   showFullTextBtn.addEventListener('click', showFullTexts);
   backToResultsBtn.addEventListener('click', showResults);
   downloadPdfBtn.addEventListener('click', downloadAsPdf);
-  closeResultsBtn.addEventListener('click', resetComparisonUI);
+
+  // MODIFIED: Both close buttons now refresh the page
+  closeResultsBtn.addEventListener('click', function() {
+    location.reload();
+  });
+  closeResultsBtnEnd.addEventListener('click', function() {
+    location.reload();
+  });
 
   // Custom test form buttons
   saveTestBtn.addEventListener('click', saveOrUpdateTest);
   clearCustomFormBtn.addEventListener('click', resetCustomTestForm);
-  clearTestsBtn.addEventListener('click', showManageTestsModalHandler); // Changed name for clarity
+  clearTestsBtn.addEventListener('click', showManageTestsModalHandler);
 
   // --- Helper Functions ---
 
@@ -1818,6 +1835,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const existingVideo = document.getElementById('testVideoPlayer'); if (existingVideo) existingVideo.remove();
       originalTextEl.value = ''; userTextEl.value = ''; comparisonResultEl.innerHTML = ''; statsEl.innerHTML = ''; feedbackEl.innerHTML = '';
       resultsSection.classList.add('hidden'); fullTextSection.classList.add('hidden'); showFullTextBtn.classList.add('hidden');
+      closeResultsBtn.classList.add('hidden'); // Hide original close button
+      closeResultsBtnEnd.classList.add('hidden'); // Hide new close button
       originalTextGroup.classList.remove('hidden'); userTextEl.readOnly = false; userTextEl.classList.remove('locked-textarea');
       compareBtn.disabled = false; testActive = false; startTime = null;
       stopTimer(); // Ensure timer is stopped
@@ -1826,138 +1845,30 @@ document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected')); // Deselect test cards
   }
 
-  // --- Leaderboard Functions ---
-  function loadLeaderboard() {
-      const filter = leaderboardFilter.value; const category = categoryFilter.value; let query = database.ref('attempts').orderByChild('timestamp');
-      if (filter === 'week') { const d=new Date(); d.setDate(d.getDate()-7); query = query.startAt(d.getTime()); }
-      else if (filter === 'month') { const d=new Date(); d.setMonth(d.getMonth()-1); query = query.startAt(d.getTime()); }
-      query.once('value').then(snapshot => {
-          const attempts = snapshot.val() || {}; allAttempts = Object.entries(attempts).map(([id, attempt]) => ({ id, ...attempt }));
-          sortAttempts(currentSortColumn, currentSortDirection); updateTestNameFilter(allAttempts);
-          filteredAttempts = allAttempts.filter(att => (testNameFilter.value==='all' || att.testTitle===testNameFilter.value) && (category==='all' || att.category===category));
-          updatePagination();
-      }).catch(error => { console.error('Leaderboard load error:', error); leaderboardList.innerHTML = '<p>Error loading.</p>'; });
-  }
-
-  function sortAttempts(column, direction) {
-      if (!Array.isArray(allAttempts)) { allAttempts = []; }
-      allAttempts.sort((a, b) => {
-          const statsA = a.stats || {}; const statsB = b.stats || {}; let aValue, bValue;
-          switch (column) {
-              case 'accuracy': case 'wpm': case 'totalOriginal': case 'totalUser': case 'totalMistakes': case 'timeTaken': aValue = statsA[column] ?? 0; bValue = statsB[column] ?? 0; break;
-              case 'userName': aValue = (a.userName || '').toLowerCase(); bValue = (b.userName || '').toLowerCase(); break;
-              case 'testTitle': aValue = (a.testTitle || 'Custom').toLowerCase(); bValue = (b.testTitle || 'Custom').toLowerCase(); break;
-              case 'date': aValue = a.timestamp || 0; bValue = b.timestamp || 0; break;
-              default: return 0;
-          }
-          if (typeof aValue === 'number') return direction === 'asc' ? aValue - bValue : bValue - aValue;
-          if (typeof aValue === 'string') return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-          return 0;
-      });
-  }
-
-  function updateTestNameFilter(attempts) {
-      uniqueTestNames = new Set(attempts.map(att => att.testTitle || 'Custom Test')); const current = testNameFilter.value;
-      testNameFilter.innerHTML = '<option value="all">All Tests</option>';
-      Array.from(uniqueTestNames).sort().forEach(name => testNameFilter.add(new Option(name, name)));
-      testNameFilter.value = uniqueTestNames.has(current) ? current : 'all';
-  }
-
-  function updatePagination() {
-      const totalEntries = filteredAttempts.length; const totalPages = Math.ceil(totalEntries / entriesPerPage); currentPage = Math.max(1, Math.min(currentPage, totalPages));
-      const startIdx = (currentPage - 1) * entriesPerPage; const endIdx = Math.min(startIdx + entriesPerPage, totalEntries);
-      prevPageBtn.disabled = currentPage === 1; nextPageBtn.disabled = currentPage >= totalPages;
-      leaderboardPagination.textContent = totalEntries > 0 ? `Showing ${startIdx + 1}-${endIdx} of ${totalEntries}` : 'No entries found.';
-      renderLeaderboardTable(filteredAttempts.slice(startIdx, endIdx), startIdx + 1);
-  }
-
-  function renderLeaderboardTable(attempts, startRank) {
-      if (attempts.length === 0) { leaderboardList.innerHTML = '<p>No attempts match filters.</p>'; return; }
-      const isAdmin = currentUser && adminEmails.includes(currentUser.email);
-      let tableHTML = `<table><thead><tr> ${isAdmin?'<th>Sel</th>':''} <th data-column="rank">#</th> <th data-column="userName">User</th> <th data-column="testTitle">Test</th> <th data-column="accuracy">Acc%</th> <th data-column="wpm">WPM</th> <th data-column="totalOriginal">Orig</th> <th data-column="totalUser">Typed</th> <th data-column="timeTaken">Time</th> <th data-column="totalMistakes">Mistakes</th> <th data-column="date">Date</th> </tr></thead><tbody>`;
-      attempts.forEach((att, idx) => {
-          const d = new Date(att.timestamp); const s = att.stats || {}; const acc = s.accuracy ?? 0; const time = s.timeTaken ?? 0;
-          const accClass = acc>=95?'accuracy-high':acc>=85?'accuracy-medium':'accuracy-low';
-          const timeFmt = `${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}`;
-          const rank = startRank + idx; let badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
-          const isSel = selectedLeaderboardRows.includes(att.id);
-          tableHTML += `<tr data-id="${att.id}" class="${isAdmin?'leaderboard-row-selectable':''} ${isSel?'selected-row':''}">
-              ${isAdmin?`<td><input type="checkbox" class="delete-checkbox" data-id="${att.id}" ${isSel?'checked':''}></td>`:''}
-              <td>${rank}${badge}</td>
-              <td class="leaderboard-user"><img src="${att.userPhoto||`https://www.gravatar.com/avatar/${att.id}?d=identicon&s=30`}" alt=""><span>${att.userName||'User'}</span></td>
-              <td>${att.testTitle||'Custom'} ${att.category?`<span class="category-badge category-${att.category}">${getCategoryName(att.category)}</span>`:''}</td>
-              <td class="accuracy-cell ${accClass}">${acc.toFixed(1)}</td> <td>${s.wpm??0}</td> <td>${s.totalOriginal??0}</td> <td>${s.totalUser??0}</td> <td>${timeFmt}</td> <td>${s.totalMistakes??0}</td> <td>${d.toLocaleDateString()}</td>
-          </tr>`;
-      });
-      tableHTML += `</tbody></table>`; leaderboardList.innerHTML = tableHTML;
-      makeTableSortable(); addLeaderboardRowSelectionListeners(); updateDeleteButtonState();
-  }
-
-  function makeTableSortable() {
-      document.querySelectorAll('.leaderboard-list th[data-column]').forEach(header => {
-          header.style.cursor = 'pointer'; header.replaceWith(header.cloneNode(true)); // Re-attach to clear old listeners
-          const newHeader = document.querySelector(`.leaderboard-list th[data-column="${header.dataset.column}"]`);
-          newHeader.addEventListener('click', () => {
-              const column = newHeader.dataset.column; if (!column) return;
-              if (currentSortColumn === column) { currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc'; }
-              else { currentSortColumn = column; currentSortDirection = (column === 'accuracy' || column === 'wpm') ? 'desc' : 'asc'; } // Sensible defaults
-              sortAttempts(currentSortColumn, currentSortDirection); currentPage = 1; updatePagination();
-          });
-          if (newHeader.dataset.column === currentSortColumn) { newHeader.classList.add(`sorted-${currentSortDirection}`); }
-      });
-  }
-
-  function addLeaderboardRowSelectionListeners() {
-      if (!currentUser || !adminEmails.includes(currentUser.email)) return;
-      document.querySelectorAll('.leaderboard-list .delete-checkbox').forEach(cb => {
-          cb.addEventListener('change', (e) => { const id = e.target.dataset.id; const row = e.target.closest('tr'); if (e.target.checked) { selectedLeaderboardRows.push(id); row.classList.add('selected-row'); } else { selectedLeaderboardRows = selectedLeaderboardRows.filter(rId => rId !== id); row.classList.remove('selected-row'); } updateDeleteButtonState(); });
-      });
-      document.querySelectorAll('.leaderboard-list tr.leaderboard-row-selectable').forEach(row => {
-          row.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { const cb = row.querySelector('.delete-checkbox'); if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); } } });
-      });
-  }
-
-  function updateDeleteButtonState() {
-      deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0;
-  }
-
-  function cleanupOldData() {
-      const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
-      database.ref('attempts').orderByChild('timestamp').endAt(sixMonthsAgo.getTime()).once('value')
-          .then(snapshot => { const updates = {}; let count = 0; snapshot.forEach(child => { updates[child.key] = null; count++; }); if (count > 0) { console.log(`Cleaning up ${count} old entries.`); database.ref('attempts').update(updates); } });
-  }
-  setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000); // Weekly cleanup
+  // --- Leaderboard Functions (unchanged) ---
+  function loadLeaderboard() { const filter = leaderboardFilter.value; const category = categoryFilter.value; let query = database.ref('attempts').orderByChild('timestamp'); if (filter === 'week') { const d=new Date(); d.setDate(d.getDate()-7); query = query.startAt(d.getTime()); } else if (filter === 'month') { const d=new Date(); d.setMonth(d.getMonth()-1); query = query.startAt(d.getTime()); } query.once('value').then(snapshot => { const attempts = snapshot.val() || {}; allAttempts = Object.entries(attempts).map(([id, attempt]) => ({ id, ...attempt })); sortAttempts(currentSortColumn, currentSortDirection); updateTestNameFilter(allAttempts); filteredAttempts = allAttempts.filter(att => (testNameFilter.value==='all' || att.testTitle===testNameFilter.value) && (category==='all' || att.category===category)); updatePagination(); }).catch(error => { console.error('Leaderboard load error:', error); leaderboardList.innerHTML = '<p>Error loading.</p>'; }); }
+  function sortAttempts(column, direction) { if (!Array.isArray(allAttempts)) { allAttempts = []; } allAttempts.sort((a, b) => { const statsA = a.stats || {}; const statsB = b.stats || {}; let aValue, bValue; switch (column) { case 'accuracy': case 'wpm': case 'totalOriginal': case 'totalUser': case 'totalMistakes': case 'timeTaken': aValue = statsA[column] ?? 0; bValue = statsB[column] ?? 0; break; case 'userName': aValue = (a.userName || '').toLowerCase(); bValue = (b.userName || '').toLowerCase(); break; case 'testTitle': aValue = (a.testTitle || 'Custom').toLowerCase(); bValue = (b.testTitle || 'Custom').toLowerCase(); break; case 'date': aValue = a.timestamp || 0; bValue = b.timestamp || 0; break; default: return 0; } if (typeof aValue === 'number') return direction === 'asc' ? aValue - bValue : bValue - aValue; if (typeof aValue === 'string') return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue); return 0; }); }
+  function updateTestNameFilter(attempts) { uniqueTestNames = new Set(attempts.map(att => att.testTitle || 'Custom Test')); const current = testNameFilter.value; testNameFilter.innerHTML = '<option value="all">All Tests</option>'; Array.from(uniqueTestNames).sort().forEach(name => testNameFilter.add(new Option(name, name))); testNameFilter.value = uniqueTestNames.has(current) ? current : 'all'; }
+  function updatePagination() { const totalEntries = filteredAttempts.length; const totalPages = Math.ceil(totalEntries / entriesPerPage); currentPage = Math.max(1, Math.min(currentPage, totalPages || 1)); const startIdx = (currentPage - 1) * entriesPerPage; const endIdx = Math.min(startIdx + entriesPerPage, totalEntries); prevPageBtn.disabled = currentPage === 1; nextPageBtn.disabled = currentPage >= totalPages; leaderboardPagination.textContent = totalEntries > 0 ? `Showing ${startIdx + 1}-${endIdx} of ${totalEntries}` : 'No entries found.'; renderLeaderboardTable(filteredAttempts.slice(startIdx, endIdx), startIdx + 1); }
+  function renderLeaderboardTable(attempts, startRank) { if (attempts.length === 0) { leaderboardList.innerHTML = '<p>No attempts match filters.</p>'; return; } const isAdmin = currentUser && adminEmails.includes(currentUser.email); let tableHTML = `<table><thead><tr> ${isAdmin?'<th>Sel</th>':''} <th data-column="rank">#</th> <th data-column="userName">User</th> <th data-column="testTitle">Test</th> <th data-column="accuracy">Acc%</th> <th data-column="wpm">WPM</th> <th data-column="totalOriginal">Orig</th> <th data-column="totalUser">Typed</th> <th data-column="timeTaken">Time</th> <th data-column="totalMistakes">Mistakes</th> <th data-column="date">Date</th> </tr></thead><tbody>`; attempts.forEach((att, idx) => { const d = new Date(att.timestamp); const s = att.stats || {}; const acc = s.accuracy ?? 0; const time = s.timeTaken ?? 0; const accClass = acc>=95?'accuracy-high':acc>=85?'accuracy-medium':'accuracy-low'; const timeFmt = `${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}`; const rank = startRank + idx; let badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':''; const isSel = selectedLeaderboardRows.includes(att.id); tableHTML += `<tr data-id="${att.id}" class="${isAdmin?'leaderboard-row-selectable':''} ${isSel?'selected-row':''}"> ${isAdmin?`<td><input type="checkbox" class="delete-checkbox" data-id="${att.id}" ${isSel?'checked':''}></td>`:''} <td>${rank}${badge}</td> <td class="leaderboard-user"><img src="${att.userPhoto||`https://www.gravatar.com/avatar/${att.id}?d=identicon&s=30`}" alt=""><span>${att.userName||'User'}</span></td> <td>${att.testTitle||'Custom'} ${att.category?`<span class="category-badge category-${att.category}">${getCategoryName(att.category)}</span>`:''}</td> <td class="accuracy-cell ${accClass}">${acc.toFixed(1)}</td> <td>${s.wpm??0}</td> <td>${s.totalOriginal??0}</td> <td>${s.totalUser??0}</td> <td>${timeFmt}</td> <td>${s.totalMistakes??0}</td> <td>${d.toLocaleDateString()}</td> </tr>`; }); tableHTML += `</tbody></table>`; leaderboardList.innerHTML = tableHTML; makeTableSortable(); addLeaderboardRowSelectionListeners(); updateDeleteButtonState(); }
+  function makeTableSortable() { document.querySelectorAll('.leaderboard-list th[data-column]').forEach(header => { header.style.cursor = 'pointer'; header.replaceWith(header.cloneNode(true)); const newHeader = document.querySelector(`.leaderboard-list th[data-column="${header.dataset.column}"]`); newHeader.addEventListener('click', () => { const column = newHeader.dataset.column; if (!column) return; if (currentSortColumn === column) { currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc'; } else { currentSortColumn = column; currentSortDirection = (column === 'accuracy' || column === 'wpm') ? 'desc' : 'asc'; } sortAttempts(currentSortColumn, currentSortDirection); currentPage = 1; updatePagination(); }); if (newHeader.dataset.column === currentSortColumn) { newHeader.classList.add(`sorted-${currentSortDirection}`); } }); }
+  function addLeaderboardRowSelectionListeners() { if (!currentUser || !adminEmails.includes(currentUser.email)) return; document.querySelectorAll('.leaderboard-list .delete-checkbox').forEach(cb => { cb.addEventListener('change', (e) => { const id = e.target.dataset.id; const row = e.target.closest('tr'); if (e.target.checked) { selectedLeaderboardRows.push(id); row.classList.add('selected-row'); } else { selectedLeaderboardRows = selectedLeaderboardRows.filter(rId => rId !== id); row.classList.remove('selected-row'); } updateDeleteButtonState(); }); }); document.querySelectorAll('.leaderboard-list tr.leaderboard-row-selectable').forEach(row => { row.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { const cb = row.querySelector('.delete-checkbox'); if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); } } }); }); }
+  function updateDeleteButtonState() { deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0; }
+  function cleanupOldData() { const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6); database.ref('attempts').orderByChild('timestamp').endAt(sixMonthsAgo.getTime()).once('value').then(snapshot => { const updates = {}; let count = 0; snapshot.forEach(child => { updates[child.key] = null; count++; }); if (count > 0) { console.log(`Cleaning up ${count} old entries.`); database.ref('attempts').update(updates); } }); }
+  setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
 
   // --- Timer Functions ---
   function startTimer(minutes) {
-      if (testActive) stopTimer(); // Clear any existing timer
+      if (testActive) stopTimer();
       endTime = new Date(); endTime.setMinutes(endTime.getMinutes() + minutes);
       testActive = true;
       timerOptions.classList.add('hidden'); timerDisplay.classList.remove('hidden', 'timer-ended');
-      updateTimerDisplay(); // Initial display
-      timerInterval = setInterval(updateTimerDisplay, 1000);
+      updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000);
   }
-
-  function stopTimer() {
-      clearInterval(timerInterval); testActive = false;
-      timerDisplay.classList.add('hidden'); timerDisplay.classList.remove('timer-ended');
-  }
-
+  function stopTimer() { clearInterval(timerInterval); testActive = false; timerDisplay.classList.add('hidden'); timerDisplay.classList.remove('timer-ended'); }
   function disableTimerOptions() { timerButtons.forEach(btn => { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }); }
-
-  function updateTimerDisplay() {
-      const now = new Date(); const remaining = endTime - now;
-      if (remaining <= 0) {
-          stopTimer(); timerDisplay.textContent = "TIME'S UP!"; timerDisplay.classList.remove('hidden'); timerDisplay.classList.add('timer-ended');
-          compareTexts(); lockTest(); disableTimerOptions(); // Auto-compare and lock when time's up
-          return;
-      }
-      const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
-      timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-  }
-
-  function lockTest() { userTextEl.readOnly = true; userTextEl.classList.add('locked-textarea'); compareBtn.disabled = true; closeResultsBtn.classList.remove('hidden'); }
+  function updateTimerDisplay() { const now = new Date(); const remaining = endTime - now; if (remaining <= 0) { stopTimer(); timerDisplay.textContent = "TIME'S UP!"; timerDisplay.classList.remove('hidden'); timerDisplay.classList.add('timer-ended'); compareTexts(); lockTest(); disableTimerOptions(); return; } const minutes = Math.floor((remaining % 3600000) / 60000); const seconds = Math.floor((remaining % 60000) / 1000); timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`; }
+  function lockTest() { userTextEl.readOnly = true; userTextEl.classList.add('locked-textarea'); compareBtn.disabled = true; closeResultsBtn.classList.remove('hidden'); closeResultsBtnEnd.classList.remove('hidden'); } // Show both close buttons when locking
 
   // --- Core Comparison Logic ---
   function compareTexts() {
@@ -1969,220 +1880,62 @@ document.addEventListener('DOMContentLoaded', function() {
       const originalWords = processText(originalTextRaw); const userWords = processText(userTextRaw);
       const comparison = compareParagraphsLCS(originalWords, userWords);
       displayComparison(comparison); displayStats(comparison.stats); displayFeedback(comparison.stats, comparison.punctuationMistakes); displayFullTexts(originalTextRaw, userTextRaw);
-      resultDateEl.textContent = new Date().toLocaleString(); showResults(); showFullTextBtn.classList.remove('hidden');
-      if (testActive) lockTest();
+      resultDateEl.textContent = new Date().toLocaleString();
+      showResults(); // Show results section
+      showFullTextBtn.classList.remove('hidden');
+      closeResultsBtn.classList.remove('hidden'); // Show original close button
+      closeResultsBtnEnd.classList.remove('hidden'); // Show NEW close button
+      if (testActive) lockTest(); // Lock if timer was running
       if (currentUser) saveAttemptToFirebase(testTitle, testCategory, comparison.stats);
   }
 
-  function saveAttemptToFirebase(testTitle, category, stats) {
-      const attemptData = { userId: currentUser.uid, userName: currentUser.displayName || 'User', userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=30`, testTitle, category, stats, timestamp: firebase.database.ServerValue.TIMESTAMP };
-      database.ref('attempts').push(attemptData).then(() => { console.log('Attempt saved.'); loadLeaderboard(); }).catch(error => console.error('Error saving attempt:', error));
-  }
+  function saveAttemptToFirebase(testTitle, category, stats) { const attemptData = { userId: currentUser.uid, userName: currentUser.displayName || 'User', userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=30`, testTitle, category, stats, timestamp: firebase.database.ServerValue.TIMESTAMP }; database.ref('attempts').push(attemptData).then(() => { console.log('Attempt saved.'); loadLeaderboard(); }).catch(error => console.error('Error saving attempt:', error)); }
 
   // --- Result Display Toggles ---
   function showFullTexts() { resultsSection.classList.add('hidden'); fullTextSection.classList.remove('hidden'); }
   function showResults() { fullTextSection.classList.add('hidden'); resultsSection.classList.remove('hidden'); }
 
   // --- PDF Download ---
-  function downloadAsPdf() {
-      const resultsElement = document.getElementById('results');
-      html2canvas(resultsElement, { scale: 1.5, useCORS: true }).then(canvas => {
-          const imgData = canvas.toDataURL('image/jpeg', 0.8); const pdf = new jsPDF('p', 'mm', 'a4');
-          const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = pdf.internal.pageSize.getHeight();
-          const ratio = canvas.width / canvas.height; const imgWidth = pdfWidth - 20; const imgHeight = imgWidth / ratio;
-          let heightLeft = imgHeight; let position = 10;
-          pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20);
-          while (heightLeft > 0) { position = heightLeft - imgHeight + 10; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); }
-          pdf.save('steno-warriors-results.pdf');
-      }).catch(err => { console.error("PDF generation error:", err); alert("Could not generate PDF."); });
-  }
+  function downloadAsPdf() { const resultsElement = document.getElementById('results'); html2canvas(resultsElement, { scale: 1.5, useCORS: true }).then(canvas => { const imgData = canvas.toDataURL('image/jpeg', 0.8); const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = pdf.internal.pageSize.getHeight(); const ratio = canvas.width / canvas.height; const imgWidth = pdfWidth - 20; const imgHeight = imgWidth / ratio; let heightLeft = imgHeight; let position = 10; pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); while (heightLeft > 0) { position = heightLeft - imgHeight + 10; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); } pdf.save('steno-warriors-results.pdf'); }).catch(err => { console.error("PDF generation error:", err); alert("Could not generate PDF."); }); }
 
   // --- Text Processing ---
-  function processText(text) {
-      return text.replace(/<[^>]*>/g, '').replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"')
-          .trim().split(/\s+/).filter(word => word.length > 0);
-  }
-
-  function getWordBase(word) {
-      return word ? word.replace(/[.,]$/, '') : ""; // Remove trailing comma or period
-  }
-
-  function getPunctuation(word) {
-      if (!word) return '';
-      const lastChar = word.slice(-1);
-      return (lastChar === '.' || lastChar === ',') ? lastChar : '';
-  }
+  function processText(text) { return text.replace(/<[^>]*>/g, '').replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').trim().split(/\s+/).filter(word => word.length > 0); }
+  function getWordBase(word) { return word ? word.replace(/[.,]$/, '') : ""; }
+  function getPunctuation(word) { if (!word) return ''; const lastChar = word.slice(-1); return (lastChar === '.' || lastChar === ',') ? lastChar : ''; }
 
   // --- LCS Comparison ---
-  function getLcsTable(arr1, arr2) {
-      const m = arr1.length; const n = arr2.length; const dp = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0));
-      for (let i = 1; i <= m; i++) {
-          for (let j = 1; j <= n; j++) {
-              if (getWordBase(arr1[i - 1]).toLowerCase() === getWordBase(arr2[j - 1]).toLowerCase()) { dp[i][j] = dp[i - 1][j - 1] + 1; }
-              else { dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]); }
-          }
-      } return dp;
-  }
-
-  function compareParagraphsLCS(originalWords, userWords) {
-      const m = originalWords.length; const n = userWords.length; const lcsTable = getLcsTable(originalWords, userWords);
-      let i = m; let j = n; const diffResult = [];
-      while (i > 0 || j > 0) {
-          const origWord = i > 0 ? originalWords[i - 1] : ''; const userWord = j > 0 ? userWords[j - 1] : '';
-          const origBase = getWordBase(origWord); const userBase = getWordBase(userWord);
-          const origPunc = getPunctuation(origWord); const userPunc = getPunctuation(userWord);
-          if (i > 0 && j > 0 && origBase.toLowerCase() === userBase.toLowerCase()) {
-              if (origPunc !== userPunc) { diffResult.push({ type: 'punctuation', originalWord: origWord, userWord: userWord }); }
-              else if (origBase !== userBase) { diffResult.push({ type: 'capitalization', originalWord: origWord, userWord: userWord }); }
-              else { diffResult.push({ type: 'correct', word: origWord }); }
-              i--; j--;
-          } else if (j > 0 && (i === 0 || lcsTable[i][j - 1] >= lcsTable[i - 1][j])) { diffResult.push({ type: 'addition', word: userWord }); j--; }
-          else if (i > 0 && (j === 0 || lcsTable[i][j - 1] < lcsTable[i - 1][j])) { diffResult.push({ type: 'missing', word: origWord }); i--; }
-          else { break; }
-      } diffResult.reverse();
-      let html = '', totalMistakes = 0, capMistakes = 0, puncMistakes = 0, correctCount = 0;
-      diffResult.forEach(diff => {
-          switch (diff.type) {
-              case 'correct': html += `<span class="correct">${diff.word}</span> `; correctCount++; break;
-              case 'capitalization': html += `<span class="capitalization">${diff.originalWord}</span> `; totalMistakes++; capMistakes++; correctCount++; break;
-              case 'punctuation': html += `<span class="missing">${diff.originalWord}</span> `; totalMistakes++; puncMistakes++; break; // Highlight original word red
-              case 'missing': html += `<span class="missing">${diff.word}</span> `; totalMistakes++; break;
-              case 'addition': html += `<span class="addition">${diff.word}</span> `; totalMistakes++; break;
-          }
-      });
-      const totalOrig = originalWords.length; const effectiveCorrect = correctCount - (capMistakes / 2);
-      const accuracy = totalOrig > 0 ? Math.max(0, Math.min(100, (effectiveCorrect / totalOrig) * 100)) : (userWords.length === 0 ? 100 : 0);
-      const timeTaken = startTime ? Math.round((new Date() - startTime) / 1000) : 0; const timeMins = timeTaken / 60;
-      const wpm = timeMins > 0 ? Math.round(userWords.length / timeMins) : 0;
-      return { html: html.trim(), stats: { totalOriginal: totalOrig, totalUser: userWords.length, totalMistakes, keystrokes: userTextEl.value.length, wpm, accuracy, errorRate: 100 - accuracy, timeTaken }, punctuationMistakes: puncMistakes };
-  }
+  function getLcsTable(arr1, arr2) { const m = arr1.length; const n = arr2.length; const dp = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0)); for (let i = 1; i <= m; i++) { for (let j = 1; j <= n; j++) { if (getWordBase(arr1[i - 1]).toLowerCase() === getWordBase(arr2[j - 1]).toLowerCase()) { dp[i][j] = dp[i - 1][j - 1] + 1; } else { dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]); } } } return dp; }
+  function compareParagraphsLCS(originalWords, userWords) { const m = originalWords.length; const n = userWords.length; const lcsTable = getLcsTable(originalWords, userWords); let i = m; let j = n; const diffResult = []; while (i > 0 || j > 0) { const origWord = i > 0 ? originalWords[i - 1] : ''; const userWord = j > 0 ? userWords[j - 1] : ''; const origBase = getWordBase(origWord); const userBase = getWordBase(userWord); const origPunc = getPunctuation(origWord); const userPunc = getPunctuation(userWord); if (i > 0 && j > 0 && origBase.toLowerCase() === userBase.toLowerCase()) { if (origPunc !== userPunc) { diffResult.push({ type: 'punctuation', originalWord: origWord, userWord: userWord }); } else if (origBase !== userBase) { diffResult.push({ type: 'capitalization', originalWord: origWord, userWord: userWord }); } else { diffResult.push({ type: 'correct', word: origWord }); } i--; j--; } else if (j > 0 && (i === 0 || lcsTable[i][j - 1] >= lcsTable[i - 1][j])) { diffResult.push({ type: 'addition', word: userWord }); j--; } else if (i > 0 && (j === 0 || lcsTable[i][j - 1] < lcsTable[i - 1][j])) { diffResult.push({ type: 'missing', word: origWord }); i--; } else { break; } } diffResult.reverse(); let html = '', totalMistakes = 0, capMistakes = 0, puncMistakes = 0, correctCount = 0; diffResult.forEach(diff => { switch (diff.type) { case 'correct': html += `<span class="correct">${diff.word}</span> `; correctCount++; break; case 'capitalization': html += `<span class="capitalization">${diff.originalWord}</span> `; totalMistakes++; capMistakes++; correctCount++; break; case 'punctuation': html += `<span class="missing">${diff.originalWord}</span> `; totalMistakes++; puncMistakes++; break; case 'missing': html += `<span class="missing">${diff.word}</span> `; totalMistakes++; break; case 'addition': html += `<span class="addition">${diff.word}</span> `; totalMistakes++; break; } }); const totalOrig = originalWords.length; const effectiveCorrect = correctCount - (capMistakes / 2); const accuracy = totalOrig > 0 ? Math.max(0, Math.min(100, (effectiveCorrect / totalOrig) * 100)) : (userWords.length === 0 ? 100 : 0); const timeTaken = startTime ? Math.round((new Date() - startTime) / 1000) : 0; const timeMins = timeTaken / 60; const wpm = timeMins > 0 ? Math.round(userWords.length / timeMins) : 0; return { html: html.trim(), stats: { totalOriginal: totalOrig, totalUser: userWords.length, totalMistakes, keystrokes: userTextEl.value.length, wpm, accuracy, errorRate: 100 - accuracy, timeTaken }, punctuationMistakes: puncMistakes }; }
 
   // --- Display Functions ---
   function displayComparison(comparison) { comparisonResultEl.innerHTML = comparison.html; }
-  function displayStats(stats) {
-      statsEl.innerHTML = `<div class="stat-item"><h4>Original Words</h4><p>${stats.totalOriginal}</p></div> <div class="stat-item"><h4>Your Words</h4><p>${stats.totalUser}</p></div> <div class="stat-item"><h4>Total Mistakes</h4><p>${stats.totalMistakes}</p></div> <div class="stat-item"><h4>Keystrokes</h4><p>${stats.keystrokes}</p></div> <div class="stat-item"><h4>Typing Speed (WPM)</h4><p>${stats.wpm}</p></div> <div class="stat-item"><h4>Accuracy</h4><p>${stats.accuracy.toFixed(1)}%</p></div> <div class="stat-item"><h4>Time Taken</h4><p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p></div>`;
-  }
-  function displayFeedback(stats, punctuationMistakes) {
-      let fb = `<h4>Overall Assessment</h4> ${getOverallAssessment(stats.accuracy, stats.wpm)} <h4>Mistake Summary</h4><ul>`;
-      if (stats.totalMistakes > 0) { fb += `<li>Found ${stats.totalMistakes} total mistake(s).</li>`; if (punctuationMistakes > 0) fb += `<li>Including ${punctuationMistakes} punctuation difference(s).</li>`; }
-      else if (stats.accuracy === 100) { fb += `<li>No mistakes found! Excellent work!</li>`; }
-      else { fb += `<li>Some minor differences detected.</li>`; }
-      fb += `</ul><h4>Improvement Suggestions</h4><ul>`;
-      if (stats.accuracy < 90) fb += `<li>Focus on overall accuracy.</li>`;
-      if (punctuationMistakes > 3) fb += `<li>Pay close attention to commas and periods.</li>`;
-      if (stats.totalMistakes > 5) fb += `<li>Review the text carefully to reduce errors.</li>`;
-      if (stats.wpm < 40) fb += `<li>Practice regularly to increase typing speed.</li>`;
-      fb += `<li>Consistent practice is key!</li></ul>`; feedbackEl.innerHTML = fb;
-  }
+  function displayStats(stats) { statsEl.innerHTML = `<div class="stat-item"><h4>Original Words</h4><p>${stats.totalOriginal}</p></div> <div class="stat-item"><h4>Your Words</h4><p>${stats.totalUser}</p></div> <div class="stat-item"><h4>Total Mistakes</h4><p>${stats.totalMistakes}</p></div> <div class="stat-item"><h4>Keystrokes</h4><p>${stats.keystrokes}</p></div> <div class="stat-item"><h4>Typing Speed (WPM)</h4><p>${stats.wpm}</p></div> <div class="stat-item"><h4>Accuracy</h4><p>${stats.accuracy.toFixed(1)}%</p></div> <div class="stat-item"><h4>Time Taken</h4><p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p></div>`; }
+  function displayFeedback(stats, punctuationMistakes) { let fb = `<h4>Overall Assessment</h4> ${getOverallAssessment(stats.accuracy, stats.wpm)} <h4>Mistake Summary</h4><ul>`; if (stats.totalMistakes > 0) { fb += `<li>Found ${stats.totalMistakes} total mistake(s).</li>`; if (punctuationMistakes > 0) fb += `<li>Including ${punctuationMistakes} punctuation difference(s).</li>`; } else if (stats.accuracy === 100) { fb += `<li>No mistakes found! Excellent work!</li>`; } else { fb += `<li>Some minor differences detected.</li>`; } fb += `</ul><h4>Improvement Suggestions</h4><ul>`; if (stats.accuracy < 90) fb += `<li>Focus on overall accuracy.</li>`; if (punctuationMistakes > 3) fb += `<li>Pay close attention to commas and periods.</li>`; if (stats.totalMistakes > 5) fb += `<li>Review the text carefully to reduce errors.</li>`; if (stats.wpm < 40) fb += `<li>Practice regularly to increase typing speed.</li>`; fb += `<li>Consistent practice is key!</li></ul>`; feedbackEl.innerHTML = fb; }
   function displayFullTexts(original, user) { originalDisplayEl.textContent = original; userDisplayEl.textContent = user; }
   function getOverallAssessment(accuracy, wpm) { let a = ''; if (accuracy >= 98) a += '<p>🌟 Outstanding accuracy!</p>'; else if (accuracy >= 95) a += '<p>👍 Excellent accuracy!</p>'; else if (accuracy >= 90) a += '<p>✅ Good accuracy.</p>'; else if (accuracy >= 80) a += '<p>📝 Fair accuracy.</p>'; else a += '<p>⚠️ Accuracy needs improvement.</p>'; if (wpm >= 60) a += '<p>⚡ Very Fast Typer!</p>'; else if (wpm >= 50) a += '<p>🚀 Fast Typer!</p>'; else if (wpm >= 40) a += '<p>🏃 Moderate Speed.</p>'; else a += '<p>🐢 Developing Speed.</p>'; return a; }
 
   // --- Video Embedding ---
-  function embedVideo(url) {
-      const cont = document.getElementById('testVideoPlayer'); if (cont) cont.remove(); if (!url) return;
-      const videoContainer = document.createElement('div'); videoContainer.className = 'video-container'; videoContainer.id = 'testVideoPlayer'; let videoId;
-      try { const urlObj = new URL(url); if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) videoId = urlObj.searchParams.get('v') || urlObj.pathname.split('/').pop(); } catch (e) { /* Invalid URL? */ }
-      if (videoId) { videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`; }
-      else { videoContainer.innerHTML = `<video controls style="width:100%; height:100%; position:absolute; top:0; left:0; border-radius: 8px;"><source src="${url}">Video not supported.</video>`; }
-      originalTextGroup.insertAdjacentElement('afterend', videoContainer);
-  }
+  function embedVideo(url) { const cont = document.getElementById('testVideoPlayer'); if (cont) cont.remove(); if (!url) return; const videoContainer = document.createElement('div'); videoContainer.className = 'video-container'; videoContainer.id = 'testVideoPlayer'; let videoId; try { const urlObj = new URL(url); if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) videoId = urlObj.searchParams.get('v') || urlObj.pathname.split('/').pop(); } catch (e) { /* Ignore invalid URLs */ } if (videoId) { videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`; } else { videoContainer.innerHTML = `<video controls style="width:100%; height:100%; position:absolute; top:0; left:0; border-radius: 8px;"><source src="${url}">Video not supported.</video>`; } originalTextGroup.insertAdjacentElement('afterend', videoContainer); }
 
   // --- Global Test Management & Carousel ---
-  function fetchAndDisplayGlobalTests() {
-      database.ref('tests').orderByChild('timestamp').once('value').then(snapshot => {
-          allFetchedTests = Object.entries(snapshot.val() || {}).map(([id, test]) => ({ id, ...test })).sort((a,b) => (b.timestamp||0) - (a.timestamp||0));
-          filterAndDisplayGlobalTests();
-      }).catch(error => { console.error('Error fetching tests:', error); filterAndDisplayGlobalTests(); }); // Still render empty state on error
-  }
-
-  function filterAndDisplayGlobalTests() {
-      const category = testCategoryFilter.value; const searchTerm = testSearchInput.value.trim().toLowerCase();
-      let tests = allFetchedTests;
-      if (category !== 'all') tests = tests.filter(t => t.category === category);
-      if (searchTerm) tests = tests.filter(t => (t.title?.toLowerCase().includes(searchTerm)) || (t.text?.toLowerCase().includes(searchTerm)));
-      renderGlobalTests(tests);
-  }
-
-  function renderGlobalTests(filteredTests) {
-      carouselTrack = document.querySelector('.carousel-track'); carouselDotsContainer = document.querySelector('.carousel-dots');
-      carouselPrevBtn = document.querySelector('.prev-btn'); carouselNextBtn = document.querySelector('.next-btn');
-      if (!carouselTrack || !carouselDotsContainer || !carouselPrevBtn || !carouselNextBtn) return;
-      carouselTrack.innerHTML = ''; carouselDotsContainer.innerHTML = ''; carouselCards = [];
-      if (filteredTests.length === 0) { carouselTrack.innerHTML = '<p style="padding: 1rem; text-align: center; width: 100%;">No tests match filters.</p>'; disableCarouselButtons(); return; }
-      const isAdmin = currentUser && adminEmails.includes(currentUser.email);
-      filteredTests.forEach(test => {
-          const card = document.createElement('div'); card.className = 'test-card'; card.dataset.id = test.id; card.dataset.category = test.category;
-          const canModify = isAdmin || (currentUser && (test.userId === currentUser.uid || (!test.userId && test.userName === currentUser.displayName)));
-          card.innerHTML = `<div class="test-card-content" style="cursor: pointer;"><h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4><p>${test.text.substring(0,100)}${test.text.length>100?'...':''}</p>${test.videoUrl?'<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>':''}<div class="test-author"><img src="${test.userPhoto||`https://www.gravatar.com/avatar/${test.id}?d=identicon&s=24`}" alt=""><span>By ${test.userName||'User'}</span></div></div> ${canModify?'<div class="test-card-actions"><button class="edit-test-btn">Edit</button><button class="delete-test-btn">Delete</button></div>':''}`;
-          card.querySelector('.test-card-content').addEventListener('click', () => selectTest(card, test));
-          if (canModify) { card.querySelector('.edit-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); editTest(test.id, test); }); card.querySelector('.delete-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); deleteTest(test.id, test.title); }); }
-          carouselTrack.appendChild(card); carouselCards.push(card);
-      });
-      if (carouselCards.length > 0) initializeCarousel(); else disableCarouselButtons();
-  }
-
+  function fetchAndDisplayGlobalTests() { database.ref('tests').orderByChild('timestamp').once('value').then(snapshot => { allFetchedTests = Object.entries(snapshot.val() || {}).map(([id, test]) => ({ id, ...test })).sort((a,b) => (b.timestamp||0) - (a.timestamp||0)); filterAndDisplayGlobalTests(); }).catch(error => { console.error('Error fetching tests:', error); filterAndDisplayGlobalTests(); }); }
+  function filterAndDisplayGlobalTests() { const category = testCategoryFilter.value; const searchTerm = testSearchInput.value.trim().toLowerCase(); let tests = allFetchedTests; if (category !== 'all') tests = tests.filter(t => t.category === category); if (searchTerm) tests = tests.filter(t => (t.title?.toLowerCase().includes(searchTerm)) || (t.text?.toLowerCase().includes(searchTerm))); renderGlobalTests(tests); }
+  function renderGlobalTests(filteredTests) { carouselTrack = document.querySelector('.carousel-track'); carouselDotsContainer = document.querySelector('.carousel-dots'); carouselPrevBtn = document.querySelector('.prev-btn'); carouselNextBtn = document.querySelector('.next-btn'); if (!carouselTrack || !carouselDotsContainer || !carouselPrevBtn || !carouselNextBtn) return; carouselTrack.innerHTML = ''; carouselDotsContainer.innerHTML = ''; carouselCards = []; if (filteredTests.length === 0) { carouselTrack.innerHTML = '<p style="padding: 1rem; text-align: center; width: 100%;">No tests match filters.</p>'; disableCarouselButtons(); return; } const isAdmin = currentUser && adminEmails.includes(currentUser.email); filteredTests.forEach(test => { const card = document.createElement('div'); card.className = 'test-card'; card.dataset.id = test.id; card.dataset.category = test.category; const canModify = isAdmin || (currentUser && (test.userId === currentUser.uid || (!test.userId && test.userName === currentUser.displayName))); card.innerHTML = `<div class="test-card-content" style="cursor: pointer;"><h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4><p>${test.text.substring(0,100)}${test.text.length>100?'...':''}</p>${test.videoUrl?'<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>':''}<div class="test-author"><img src="${test.userPhoto||`https://www.gravatar.com/avatar/${test.id}?d=identicon&s=24`}" alt=""><span>By ${test.userName||'User'}</span></div></div> ${canModify?'<div class="test-card-actions"><button class="edit-test-btn">Edit</button><button class="delete-test-btn">Delete</button></div>':''}`; card.querySelector('.test-card-content').addEventListener('click', () => selectTest(card, test)); if (canModify) { card.querySelector('.edit-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); editTest(test.id, test); }); card.querySelector('.delete-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); deleteTest(test.id, test.title); }); } carouselTrack.appendChild(card); carouselCards.push(card); }); if (carouselCards.length > 0) initializeCarousel(); else disableCarouselButtons(); }
   function disableCarouselButtons() { if (carouselPrevBtn) carouselPrevBtn.disabled = true; if (carouselNextBtn) carouselNextBtn.disabled = true; }
-  function selectTest(cardElement, testData) { document.querySelectorAll('.test-card').forEach(c => c.classList.remove('selected')); cardElement.classList.add('selected'); originalTextEl.value = testData.text; originalTextGroup.classList.add('hidden'); timerOptions.classList.remove('hidden'); timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }); embedVideo(testData.videoUrl); userTextEl.value = ''; startTime = null; resultsSection.classList.add('hidden'); fullTextSection.classList.add('hidden'); showFullTextBtn.classList.add('hidden'); stopTimer(); timerDisplay.classList.add('hidden'); }
+  function selectTest(cardElement, testData) { document.querySelectorAll('.test-card').forEach(c => c.classList.remove('selected')); cardElement.classList.add('selected'); originalTextEl.value = testData.text; originalTextGroup.classList.add('hidden'); timerOptions.classList.remove('hidden'); timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }); embedVideo(testData.videoUrl); userTextEl.value = ''; startTime = null; resultsSection.classList.add('hidden'); fullTextSection.classList.add('hidden'); showFullTextBtn.classList.add('hidden'); closeResultsBtn.classList.add('hidden'); closeResultsBtnEnd.classList.add('hidden'); stopTimer(); timerDisplay.classList.add('hidden'); }
   function editTest(testId, testData) { editingTestIdInput.value = testId; customTitle.value = testData.title; customOriginal.value = testData.text; customVideoUrl.value = testData.videoUrl || ''; customCategory.value = testData.category; saveTestBtn.textContent = 'Update Test'; customTestTitleHeader.textContent = 'Edit Test'; customTestSection.scrollIntoView({ behavior: 'smooth' }); }
   function deleteTest(testId, testTitle) { showConfirmationModal(`Delete test "${testTitle}"?`, () => { database.ref('tests/' + testId).remove().then(() => { alert('Test deleted.'); fetchAndDisplayGlobalTests(); }).catch(err => alert('Error deleting test.')); }); }
-
-  function showConfirmationModal(message, onConfirm) {
-      const modal = document.createElement('div'); modal.className = 'modal'; modal.innerHTML = `<div class="modal-content"><h3>Confirm</h3><p>${message}</p><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn">Confirm</button></div></div>`;
-      document.body.appendChild(modal); const close = () => document.body.removeChild(modal);
-      modal.querySelector('.secondary-btn').onclick = close; modal.querySelector('.danger-btn').onclick = () => { onConfirm(); close(); }; modal.onclick = (e) => { if (e.target === modal) close(); };
-  }
-
-  function initializeCarousel() { /* ... (unchanged from previous version) ... */ if (!carouselTrack || carouselCards.length === 0) { disableCarouselButtons(); return; } cardWidth = carouselCards[0].offsetWidth + 16; const containerWidth = carouselTrack.parentElement.offsetWidth; carouselVisibleCards = Math.max(1, Math.floor(containerWidth / cardWidth)); const totalCards = carouselCards.length; const dotCount = Math.ceil(totalCards / carouselVisibleCards); carouselDotsContainer.innerHTML = ''; if (dotCount > 1) { for (let i = 0; i < dotCount; i++) { const dot = document.createElement('div'); dot.className = 'carousel-dot'; if (i === 0) dot.classList.add('active'); dot.addEventListener('click', () => { carouselCurrentIndex = i; updateCarouselVisuals(); }); carouselDotsContainer.appendChild(dot); } } carouselCurrentIndex = 0; updateCarouselVisuals(); const newPrevBtn = carouselPrevBtn.cloneNode(true); carouselPrevBtn.parentNode.replaceChild(newPrevBtn, carouselPrevBtn); carouselPrevBtn = newPrevBtn; const newNextBtn = carouselNextBtn.cloneNode(true); carouselNextBtn.parentNode.replaceChild(newNextBtn, carouselNextBtn); carouselNextBtn = newNextBtn; carouselPrevBtn.addEventListener('click', () => { if (carouselCurrentIndex > 0) { carouselCurrentIndex--; updateCarouselVisuals(); } }); carouselNextBtn.addEventListener('click', () => { const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1; if (carouselCurrentIndex < maxIndex) { carouselCurrentIndex++; updateCarouselVisuals(); } }); let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { const newContainerWidth = carouselTrack.parentElement.offsetWidth; const newVisibleCards = Math.max(1, Math.floor(newContainerWidth / cardWidth)); if (newVisibleCards !== carouselVisibleCards) { initializeCarousel(); } else { updateCarouselVisuals(); } }, 250); }); }
-  function updateCarouselVisuals() { /* ... (unchanged from previous version) ... */ if (!carouselTrack || carouselCards.length === 0) return; const totalCards = carouselCards.length; const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1; carouselCurrentIndex = Math.max(0, Math.min(carouselCurrentIndex, maxIndex)); const offset = -carouselCurrentIndex * (carouselVisibleCards * cardWidth); carouselTrack.style.transform = `translateX(${offset}px)`; document.querySelectorAll('.carousel-dot').forEach((dot, index) => { dot.classList.toggle('active', index === carouselCurrentIndex); }); carouselPrevBtn.disabled = carouselCurrentIndex === 0; carouselNextBtn.disabled = carouselCurrentIndex >= maxIndex; }
+  function showConfirmationModal(message, onConfirm) { const modal = document.createElement('div'); modal.className = 'modal'; modal.innerHTML = `<div class="modal-content"><h3>Confirm</h3><p>${message}</p><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn">Confirm</button></div></div>`; document.body.appendChild(modal); const close = () => document.body.removeChild(modal); modal.querySelector('.secondary-btn').onclick = close; modal.querySelector('.danger-btn').onclick = () => { onConfirm(); close(); }; modal.onclick = (e) => { if (e.target === modal) close(); }; }
+  function initializeCarousel() { if (!carouselTrack || carouselCards.length === 0) { disableCarouselButtons(); return; } cardWidth = carouselCards[0].offsetWidth + 16; const containerWidth = carouselTrack.parentElement.offsetWidth; carouselVisibleCards = Math.max(1, Math.floor(containerWidth / cardWidth)); const totalCards = carouselCards.length; const dotCount = Math.ceil(totalCards / carouselVisibleCards); carouselDotsContainer.innerHTML = ''; if (dotCount > 1) { for (let i = 0; i < dotCount; i++) { const dot = document.createElement('div'); dot.className = 'carousel-dot'; if (i === 0) dot.classList.add('active'); dot.addEventListener('click', () => { carouselCurrentIndex = i; updateCarouselVisuals(); }); carouselDotsContainer.appendChild(dot); } } carouselCurrentIndex = 0; updateCarouselVisuals(); const newPrevBtn = carouselPrevBtn.cloneNode(true); carouselPrevBtn.parentNode.replaceChild(newPrevBtn, carouselPrevBtn); carouselPrevBtn = newPrevBtn; const newNextBtn = carouselNextBtn.cloneNode(true); carouselNextBtn.parentNode.replaceChild(newNextBtn, carouselNextBtn); carouselNextBtn = newNextBtn; carouselPrevBtn.addEventListener('click', () => { if (carouselCurrentIndex > 0) { carouselCurrentIndex--; updateCarouselVisuals(); } }); carouselNextBtn.addEventListener('click', () => { const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1; if (carouselCurrentIndex < maxIndex) { carouselCurrentIndex++; updateCarouselVisuals(); } }); let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { const newContainerWidth = carouselTrack.parentElement.offsetWidth; const newVisibleCards = Math.max(1, Math.floor(newContainerWidth / cardWidth)); if (newVisibleCards !== carouselVisibleCards) { initializeCarousel(); } else { updateCarouselVisuals(); } }, 250); }); }
+  function updateCarouselVisuals() { if (!carouselTrack || carouselCards.length === 0) return; const totalCards = carouselCards.length; const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1; carouselCurrentIndex = Math.max(0, Math.min(carouselCurrentIndex, maxIndex)); const offset = -carouselCurrentIndex * (carouselVisibleCards * cardWidth); carouselTrack.style.transform = `translateX(${offset}px)`; document.querySelectorAll('.carousel-dot').forEach((dot, index) => { dot.classList.toggle('active', index === carouselCurrentIndex); }); carouselPrevBtn.disabled = carouselCurrentIndex === 0; carouselNextBtn.disabled = carouselCurrentIndex >= maxIndex; }
   function getCategoryName(cat) { const names = { general: 'General', kailash: 'KC', progressive: 'Progressive', legal: 'Legal', previous: 'Previous Yr', test: 'Test' }; return names[cat] || cat; }
 
-
   // --- Custom Test Form Management ---
-  function saveOrUpdateTest() {
-      if (!currentUser) { alert('Please login to save tests.'); return; }
-      const title = customTitle.value.trim(); const text = customOriginal.value.trim(); const videoUrl = customVideoUrl.value.trim(); const category = customCategory.value; const editingTestId = editingTestIdInput.value;
-      if (!title || !text) { alert('Title and Original Text are required.'); return; }
-      const testData = { title, text, videoUrl: videoUrl || null, userId: currentUser.uid, userName: currentUser.displayName, userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=24`, category };
-      let operation, message;
-      if (editingTestId) { testData.updatedAt = firebase.database.ServerValue.TIMESTAMP; operation = database.ref('tests/' + editingTestId).update(testData); message = 'Test updated!'; }
-      else { testData.timestamp = firebase.database.ServerValue.TIMESTAMP; operation = database.ref('tests').push(testData); message = 'Test saved!'; }
-      performDbOperation(operation, message);
-  }
-
-  function performDbOperation(operationPromise, successMessage) {
-      operationPromise.then(() => { alert(successMessage); resetCustomTestForm(); fetchAndDisplayGlobalTests(); }).catch(err => { console.error('DB Error:', err); alert('Failed to save test.'); });
-  }
-
+  function saveOrUpdateTest() { if (!currentUser) { alert('Please login to save tests.'); return; } const title = customTitle.value.trim(); const text = customOriginal.value.trim(); const videoUrl = customVideoUrl.value.trim(); const category = customCategory.value; const editingTestId = editingTestIdInput.value; if (!title || !text) { alert('Title and Original Text are required.'); return; } const testData = { title, text, videoUrl: videoUrl || null, userId: currentUser.uid, userName: currentUser.displayName, userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=24`, category }; let operation, message; if (editingTestId) { testData.updatedAt = firebase.database.ServerValue.TIMESTAMP; operation = database.ref('tests/' + editingTestId).update(testData); message = 'Test updated!'; } else { testData.timestamp = firebase.database.ServerValue.TIMESTAMP; operation = database.ref('tests').push(testData); message = 'Test saved!'; } performDbOperation(operation, message); }
+  function performDbOperation(operationPromise, successMessage) { operationPromise.then(() => { alert(successMessage); resetCustomTestForm(); fetchAndDisplayGlobalTests(); }).catch(err => { console.error('DB Error:', err); alert('Failed to save test.'); }); }
   function resetCustomTestForm() { editingTestIdInput.value = ''; customTitle.value = ''; customOriginal.value = ''; customVideoUrl.value = ''; customCategory.value = 'general'; saveTestBtn.textContent = 'Save & Share Test'; customTestTitleHeader.textContent = 'Add Your Own Test'; }
-
-  function showManageTestsModalHandler() {
-      if (!currentUser) return;
-      // Fetch tests by userId first, then fallback to userName for older tests
-      database.ref('tests').orderByChild('userId').equalTo(currentUser.uid).once('value')
-          .then(snap1 => {
-              let tests = snap1.val() || {};
-              return database.ref('tests').orderByChild('userName').equalTo(currentUser.displayName).once('value')
-                  .then(snap2 => ({ ...tests, ...(snap2.val() || {}) })); // Combine results, preferring userId match
-          })
-          .then(userTests => {
-              if (Object.keys(userTests).length === 0) { alert("You haven't added any tests yet."); return; }
-              showManageTestsModal(userTests);
-          })
-          .catch(err => { console.error('Error fetching user tests:', err); alert('Failed to fetch your tests.'); });
-  }
-
-  function showManageTestsModal(userTests) {
-      const modal = document.createElement('div'); modal.className = 'modal';
-      let listHTML = ''; Object.entries(userTests).forEach(([id, test]) => { listHTML += `<div class="test-item"><input type="checkbox" id="del-${id}" data-testid="${id}"><label for="del-${id}">${test.title} (${getCategoryName(test.category)})</label></div>`; });
-      modal.innerHTML = `<div class="modal-content"><h3>Manage Your Tests</h3><p>Select tests to delete.</p><div class="test-selection" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 1rem;">${listHTML}</div><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn" disabled>Delete Selected</button></div></div>`;
-      document.body.appendChild(modal); const close = () => document.body.removeChild(modal);
-      const delBtn = modal.querySelector('.danger-btn'); const checkboxes = modal.querySelectorAll('input[type="checkbox"]');
-      checkboxes.forEach(cb => cb.onchange = () => { delBtn.disabled = !Array.from(checkboxes).some(c => c.checked); });
-      modal.querySelector('.secondary-btn').onclick = close;
-      delBtn.onclick = () => { const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.dataset.testid); if (selectedIds.length === 0) return; showConfirmationModal(`Delete ${selectedIds.length} test(s)?`, () => { const updates = {}; selectedIds.forEach(id => { updates[`/tests/${id}`] = null; }); database.ref().update(updates).then(() => { alert('Test(s) deleted.'); fetchAndDisplayGlobalTests(); close(); }).catch(err => alert('Error deleting.')); }); };
-      modal.onclick = (e) => { if (e.target === modal) close(); };
-  }
-
+  function showManageTestsModalHandler() { if (!currentUser) return; database.ref('tests').orderByChild('userId').equalTo(currentUser.uid).once('value').then(snap1 => { let tests = snap1.val() || {}; return database.ref('tests').orderByChild('userName').equalTo(currentUser.displayName).once('value').then(snap2 => ({ ...tests, ...(snap2.val() || {}) })); }).then(userTests => { if (Object.keys(userTests).length === 0) { alert("You haven't added any tests yet."); return; } showManageTestsModal(userTests); }).catch(err => { console.error('Error fetching user tests:', err); alert('Failed to fetch your tests.'); }); }
+  function showManageTestsModal(userTests) { const modal = document.createElement('div'); modal.className = 'modal'; let listHTML = ''; Object.entries(userTests).forEach(([id, test]) => { listHTML += `<div class="test-item"><input type="checkbox" id="del-${id}" data-testid="${id}"><label for="del-${id}">${test.title} (${getCategoryName(test.category)})</label></div>`; }); modal.innerHTML = `<div class="modal-content"><h3>Manage Your Tests</h3><p>Select tests to delete.</p><div class="test-selection" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 1rem;">${listHTML}</div><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn" disabled>Delete Selected</button></div></div>`; document.body.appendChild(modal); const close = () => document.body.removeChild(modal); const delBtn = modal.querySelector('.danger-btn'); const checkboxes = modal.querySelectorAll('input[type="checkbox"]'); checkboxes.forEach(cb => cb.onchange = () => { delBtn.disabled = !Array.from(checkboxes).some(c => c.checked); }); modal.querySelector('.secondary-btn').onclick = close; delBtn.onclick = () => { const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.dataset.testid); if (selectedIds.length === 0) return; showConfirmationModal(`Delete ${selectedIds.length} test(s)?`, () => { const updates = {}; selectedIds.forEach(id => { updates[`/tests/${id}`] = null; }); database.ref().update(updates).then(() => { alert('Test(s) deleted.'); fetchAndDisplayGlobalTests(); close(); }).catch(err => alert('Error deleting.')); }); }; modal.onclick = (e) => { if (e.target === modal) close(); }; }
 
   // --- Dark Mode ---
   const darkModeToggle = document.getElementById('darkModeToggle');
