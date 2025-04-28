@@ -45,7 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const loginPrompt = document.getElementById('loginPrompt');
   const customTestSection = document.getElementById('customTestSection');
   const globalTestsSection = document.getElementById('globalTestsSection');
-  const globalTestsList = document.getElementById('globalTestsList');
   const leaderboardSection = document.getElementById('leaderboardSection');
   const leaderboardList = document.getElementById('leaderboardList');
   const leaderboardFilter = document.getElementById('leaderboardFilter');
@@ -75,6 +74,16 @@ document.addEventListener('DOMContentLoaded', function() {
   const registerPassword = document.getElementById('registerPassword');
   const confirmPassword = document.getElementById('confirmPassword');
   const deleteLeaderboardBtn = document.getElementById('deleteLeaderboardBtn');
+  
+  // Edit test elements
+  const editTestModal = document.getElementById('editTestModal');
+  const editTestTitle = document.getElementById('editTestTitle');
+  const editTestCategory = document.getElementById('editTestCategory');
+  const editTestText = document.getElementById('editTestText');
+  const editTestVideoUrl = document.getElementById('editTestVideoUrl');
+  const cancelEditTest = document.getElementById('cancelEditTest');
+  const saveEditedTest = document.getElementById('saveEditedTest');
+  const deleteTest = document.getElementById('deleteTest');
 
   // Timer variables
   let timerInterval;
@@ -91,6 +100,9 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentSortColumn = 'accuracy';
   let currentSortDirection = 'desc';
   let selectedLeaderboardRows = [];
+  
+  // Admin state
+  let isAdmin = false;
 
   // Initialize typing timer
   let startTime = null;
@@ -207,7 +219,9 @@ document.addEventListener('DOMContentLoaded', function() {
         "admin2@example.com"
       ];
 
-      if (adminEmails.includes(user.email)) {
+      isAdmin = adminEmails.includes(user.email);
+
+      if (isAdmin) {
         customTestSection.classList.remove('hidden');
         deleteLeaderboardBtn.classList.remove('hidden');
       }
@@ -228,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
       loginForm.classList.remove('hidden');
       registerForm.classList.add('hidden');
       deleteLeaderboardBtn.classList.add('hidden');
+      isAdmin = false;
     }
   });
 
@@ -1238,28 +1253,35 @@ document.addEventListener('DOMContentLoaded', function() {
               <img src="${test.userPhoto}" alt="${test.userName}">
               <span>Added by ${test.userName}</span>
             </div>
+            ${isAdmin ? `<button class="edit-test-btn" data-testid="${test.id}">Edit</button>` : ''}
           `;
-          testCard.addEventListener('click', () => {
-            document.querySelectorAll('.test-card').forEach(card => {
-              card.classList.remove('selected');
-            });
-            testCard.classList.add('selected');
-            
-            originalTextEl.value = test.text;
-            originalTextGroup.classList.add('hidden');
-            timerOptions.classList.remove('hidden');
-            timerButtons.forEach(btn => {
-              btn.disabled = false;
-              btn.style.opacity = '1';
-            });
-            
-            if (test.videoUrl) {
-              embedVideo(test.videoUrl);
-            } else {
-              const existingVideo = document.getElementById('testVideoPlayer');
-              if (existingVideo) existingVideo.remove();
+          
+          // Maintain existing click handler for selecting tests
+          testCard.addEventListener('click', (e) => {
+            // Don't trigger selection if clicking on edit button
+            if (!e.target.classList.contains('edit-test-btn')) {
+              document.querySelectorAll('.test-card').forEach(card => {
+                card.classList.remove('selected');
+              });
+              testCard.classList.add('selected');
+              
+              originalTextEl.value = test.text;
+              originalTextGroup.classList.add('hidden');
+              timerOptions.classList.remove('hidden');
+              timerButtons.forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+              });
+              
+              if (test.videoUrl) {
+                embedVideo(test.videoUrl);
+              } else {
+                const existingVideo = document.getElementById('testVideoPlayer');
+                if (existingVideo) existingVideo.remove();
+              }
             }
           });
+          
           carouselTrack.appendChild(testCard);
         });
         
@@ -1349,6 +1371,87 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize
     updateCarousel();
   }
+
+  // Edit test functionality
+  document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('edit-test-btn')) {
+      const testId = e.target.dataset.testid;
+      openEditTestModal(testId);
+    }
+  });
+
+  function openEditTestModal(testId) {
+    database.ref('tests/' + testId).once('value').then(snapshot => {
+      const test = snapshot.val();
+      if (test) {
+        // Store the test ID in the modal for later use
+        editTestModal.dataset.testid = testId;
+        
+        // Populate form fields
+        editTestTitle.value = test.title;
+        editTestCategory.value = test.category;
+        editTestText.value = test.text;
+        editTestVideoUrl.value = test.videoUrl || '';
+        
+        // Show modal
+        editTestModal.classList.remove('hidden');
+      }
+    });
+  }
+
+  // Save edited test
+  saveEditedTest.addEventListener('click', () => {
+    const testId = editTestModal.dataset.testid;
+    const updatedTest = {
+      title: editTestTitle.value.trim(),
+      category: editTestCategory.value,
+      text: editTestText.value.trim(),
+      videoUrl: editTestVideoUrl.value.trim() || null,
+      // Preserve existing metadata
+      userName: userName.textContent,
+      userPhoto: userPhoto.src,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    if (!updatedTest.title || !updatedTest.text) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    database.ref('tests/' + testId).update(updatedTest)
+      .then(() => {
+        alert('Test updated successfully!');
+        editTestModal.classList.add('hidden');
+        loadGlobalTests(); // Refresh the list
+      })
+      .catch(error => {
+        console.error('Error updating test:', error);
+        alert('Failed to update test. Please try again.');
+      });
+  });
+
+  // Delete test
+  deleteTest.addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete this test? This cannot be undone.')) {
+      const testId = editTestModal.dataset.testid;
+      
+      database.ref('tests/' + testId).remove()
+        .then(() => {
+          alert('Test deleted successfully!');
+          editTestModal.classList.add('hidden');
+          loadGlobalTests(); // Refresh the list
+        })
+        .catch(error => {
+          console.error('Error deleting test:', error);
+          alert('Failed to delete test. Please try again.');
+        });
+    }
+  });
+
+  // Cancel edit
+  cancelEditTest.addEventListener('click', () => {
+    editTestModal.classList.add('hidden');
+  });
 
   function getCategoryName(category) {
     const categories = {
