@@ -1,4 +1,3 @@
-
 // Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
@@ -1495,4 +1494,3 @@ if (localStorage.getItem('darkMode') === 'true') {
   document.getElementById('darkModeToggle').checked = true;
   document.body.classList.add('dark-mode');
 }
-```
