@@ -12,7 +12,6 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 <style>
-/* CSS Styles (unchanged from original) */
 :root {
   --primary: #4361ee;
   --primary-light: #4895ef;
@@ -172,7 +171,7 @@ body.dark-mode .input-group label {
   color: var(--primary);
 }
 
-textarea, input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="search"], select {
+textarea, input[type="text"], input[type="email"], input[type="password"], input[type="url"], select {
   width: 100%;
   padding: 1.2rem;
   border: 2px solid #e2e8f0;
@@ -190,7 +189,6 @@ body.dark-mode input[type="text"],
 body.dark-mode input[type="email"],
 body.dark-mode input[type="password"],
 body.dark-mode input[type="url"],
-body.dark-mode input[type="search"],
 body.dark-mode select {
   border-color: #444;
   color: #e0e0e0;
@@ -201,7 +199,6 @@ input[type="text"]:focus,
 input[type="email"]:focus,
 input[type="password"]:focus,
 input[type="url"]:focus,
-input[type="search"]:focus,
 select:focus {
   border-color: var(--primary-light);
   outline: none;
@@ -292,7 +289,7 @@ button:active {
 }
 
 .hidden {
-  display: none !important; /* Use important to override potential conflicting styles */
+  display: none;
 }
 
 .results-header {
@@ -665,24 +662,13 @@ body.dark-mode .global-tests-section {
 
 .test-filters {
   margin-bottom: 1rem;
-  display: flex; /* Use flexbox for layout */
-  gap: 1rem; /* Add gap between elements */
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
-}
-
-.test-filters .input-group {
-    flex-grow: 1; /* Allow search input to grow */
-    margin-bottom: 0; /* Remove bottom margin for inline elements */
-    min-width: 200px; /* Minimum width for search */
 }
 
 .test-filters select {
-  padding: 0.5rem; /* Adjust padding for select */
+  padding: 0.5rem;
   border-radius: 5px;
   border: 1px solid #e2e8f0;
   background: white;
-  height: auto; /* Reset height if needed */
-  align-self: center; /* Align select vertically */
 }
 
 body.dark-mode .test-filters select {
@@ -690,14 +676,6 @@ body.dark-mode .test-filters select {
   border-color: #444;
   color: #e0e0e0;
 }
-
-/* Style for search input */
-#testSearchInput {
-    padding: 0.5rem 1rem; /* Adjust padding */
-    height: auto; /* Reset height */
-    font-size: 0.9rem; /* Adjust font size */
-}
-
 
 .tests-list {
   display: grid;
@@ -716,7 +694,8 @@ body.dark-mode .test-filters select {
   box-shadow: 8px 8px 16px #e2e8f0,
               -8px -8px 16px #ffffff;
   margin-bottom: 1.5rem;
-  position: relative; /* Needed for absolute positioning of buttons */
+  display: flex; /* Use flexbox for better layout */
+  flex-direction: column; /* Stack content vertically */
 }
 
 body.dark-mode .test-card {
@@ -757,13 +736,16 @@ body.dark-mode .test-card.selected {
 .test-card p {
   color: var(--gray);
   font-size: 0.9rem;
+  flex-grow: 1; /* Allow paragraph to take up space */
+  margin-bottom: 1rem; /* Add space before author/buttons */
 }
 
 .test-author {
   display: flex;
   align-items: center;
-  margin-top: 0.5rem;
+  margin-top: auto; /* Push author and buttons to the bottom */
   font-size: 0.8rem;
+  margin-bottom: 0.5rem; /* Space between author and buttons */
 }
 
 .test-author img {
@@ -773,40 +755,34 @@ body.dark-mode .test-card.selected {
   margin-right: 8px;
 }
 
-/* Admin Buttons on Test Card */
-.test-card-admin-controls {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    display: flex;
-    gap: 5px; /* Space between edit and delete buttons */
-    z-index: 5;
+/* NEW: Styles for Edit/Delete buttons */
+.test-card-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem; /* Space above buttons */
 }
 
-.edit-test-btn, .delete-test-btn {
-  background-color: var(--warning);
-  color: white;
-  border: none;
-  padding: 0.4rem 0.8rem;
+.test-card-actions button {
+  padding: 0.3rem 0.6rem;
   font-size: 0.8rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s;
+  border-radius: 6px;
+  flex: 1; /* Make buttons take equal width */
+}
+
+.edit-test-btn {
+  background-color: var(--warning);
+}
+.edit-test-btn:hover {
+  background-color: #d97706; /* Darker warning */
 }
 
 .delete-test-btn {
-    background-color: var(--danger); /* Use danger color for delete */
+  background-color: var(--danger);
 }
-
-.edit-test-btn:hover {
-  background-color: #d97706; /* Darker warning */
-  transform: scale(1.1);
-}
-
 .delete-test-btn:hover {
-    background-color: #d11a5e; /* Darker danger */
-    transform: scale(1.1);
+  background-color: #d11a5e; /* Darker danger */
 }
+/* --- End of New Styles --- */
 
 
 /* Leaderboard Styles */
@@ -1073,14 +1049,6 @@ body.dark-mode .custom-test-section {
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-.modal.show {
-  opacity: 1;
-  visibility: visible;
 }
 
 .modal-content {
@@ -1088,17 +1056,10 @@ body.dark-mode .custom-test-section {
   padding: 2rem;
   border-radius: 10px;
   width: 90%;
-  max-width: 600px; /* Increased max-width for edit modal */
-  max-height: 85vh; /* Increased max-height */
+  max-width: 500px;
+  max-height: 80vh;
   overflow-y: auto;
-  transform: scale(0.9);
-  transition: transform 0.3s ease;
 }
-
-.modal.show .modal-content {
-    transform: scale(1);
-}
-
 
 body.dark-mode .modal-content {
   background-color: #1e1e1e;
@@ -1141,11 +1102,6 @@ body.dark-mode .test-item {
 
 .danger-btn:hover {
   background-color: #d11a5e !important;
-}
-
-/* Specific styles for Edit Modal */
-#editTestModal .input-group textarea {
-    min-height: 150px; /* Adjust height for text area in modal */
 }
 
 /* Responsive styles */
@@ -1227,18 +1183,6 @@ body.dark-mode .test-item {
     flex-direction: column;
     gap: 0.5rem;
   }
-
-  .modal-content {
-      width: 95%;
-  }
-
-  .test-filters {
-      flex-direction: column; /* Stack filters vertically on small screens */
-  }
-  .test-filters .input-group,
-  .test-filters select {
-      width: 100%; /* Make filters full width */
-  }
 }
 /* Add to existing styles.css */
 .delete-checkbox {
@@ -1283,14 +1227,14 @@ body.dark-mode .selected-row {
 
 .carousel-container {
   overflow: hidden;
-  margin: 0 2.5rem; /* Adjust margin for buttons */
+  margin: 0 2.5rem; /* Adjust margin to account for button width */
 }
 
 .carousel-track {
   display: flex;
   transition: transform 0.5s ease;
-  gap: 1rem;
-  padding: 0.5rem 0;
+  gap: 1rem; /* Gap between cards */
+  padding: 0.5rem 0; /* Padding for shadow visibility */
 }
 
 .carousel-btn {
@@ -1346,17 +1290,32 @@ body.dark-mode .selected-row {
 }
 
 /* Adjust test card size for carousel */
-.carousel-track .test-card { /* Make selector more specific */
-  min-width: 280px;
-  flex: 0 0 calc(33.333% - 1rem);
-  margin-bottom: 0; /* Remove bottom margin for carousel items */
+.test-card {
+  min-width: 280px; /* Minimum width for a card */
+  /* Calculate flex-basis dynamically in JS or use media queries */
+  flex-shrink: 0; /* Prevent cards from shrinking */
+  margin-bottom: 0; /* Remove bottom margin for carousel */
 }
 
-@media (max-width: 768px) {
-  .carousel-track .test-card {
-    flex: 0 0 calc(50% - 1rem);
+@media (min-width: 1024px) { /* Large screens: 3 cards */
+  .test-card {
+    flex-basis: calc(33.333% - (2 * 1rem / 3)); /* 1rem gap */
   }
+}
 
+@media (min-width: 640px) and (max-width: 1023px) { /* Medium screens: 2 cards */
+  .test-card {
+    flex-basis: calc(50% - (1 * 1rem / 2)); /* 1rem gap */
+  }
+}
+
+@media (max-width: 639px) { /* Small screens: 1 card */
+  .test-card {
+    flex-basis: 100%;
+  }
+    .carousel-container {
+      margin: 0 1rem; /* Reduce margin on small screens */
+  }
   .carousel-btn {
     width: 30px;
     height: 30px;
@@ -1364,11 +1323,6 @@ body.dark-mode .selected-row {
   }
 }
 
-@media (max-width: 480px) {
-  .carousel-track .test-card {
-    flex: 0 0 100%;
-  }
-}
 </style>
 </head>
 <body>
@@ -1463,32 +1417,29 @@ body.dark-mode .selected-row {
       <section id="globalTestsSection" class="hidden global-tests-section">
         <h3>Community Tests</h3>
         <div class="test-filters">
-           <div class="input-group">
-             <input type="search" id="testSearchInput" placeholder=" ">
-             <label for="testSearchInput">Search by Title</label>
-           </div>
-           <select id="testCategoryFilter">
-             <option value="all">All Categories</option>
-             <option value="general">General Matter</option>
-             <option value="kailash">Kailash Chandra</option>
-             <option value="progressive">Progressive</option>
-             <option value="legal">Legal</option>
-             <option value="previous">Previous Year</option>
-             <option value="test">Test</option>
-           </select>
+          <select id="testCategoryFilter">
+            <option value="all">All Categories</option>
+            <option value="general">General Matter</option>
+            <option value="kailash">Kailash Chandra</option>
+            <option value="progressive">Progressive</option>
+            <option value="legal">Legal</option>
+            <option value="previous">Previous Year</option>
+            <option value="test">Test</option>
+          </select>
         </div>
         <div id="globalTestsList" class="tests-carousel">
-          <button class="carousel-btn prev-btn"><</button>
+          <button class="carousel-btn prev-btn" disabled><</button>
           <div class="carousel-container">
             <div class="carousel-track"></div>
           </div>
-          <button class="carousel-btn next-btn">></button>
+          <button class="carousel-btn next-btn" disabled>></button>
         </div>
         <div class="carousel-dots"></div>
       </section>
 
       <section id="customTestSection" class="hidden custom-test-section">
-        <h3>Add Your Own Test</h3>
+        <h3 id="customTestTitleHeader">Add Your Own Test</h3>
+        <input type="hidden" id="editingTestId">
         <div class="input-group">
           <input type="text" id="customTitle" placeholder=" ">
           <label for="customTitle">Test Title</label>
@@ -1514,14 +1465,15 @@ body.dark-mode .selected-row {
         </div>
         <div class="button-group">
           <button id="saveTestBtn">Save & Share Test</button>
-          <button id="clearTestsBtn" class="secondary-btn">Clear My Tests</button>
+          <button id="clearCustomFormBtn" class="secondary-btn">Clear Form</button>
+          <button id="clearTestsBtn" class="secondary-btn">Manage My Tests</button>
         </div>
       </section>
 
       <section class="input-section">
         <div class="input-group" id="originalTextGroup">
           <textarea id="originalText" placeholder=" "></textarea>
-          <label for="originalText">Original Text (Paste here or select a test above)</label>
+          <label for="originalText">Original Text</label>
         </div>
 
         <div id="timerOptions" class="timer-options hidden">
@@ -1538,8 +1490,8 @@ body.dark-mode .selected-row {
 
         <div class="button-group test-controls">
           <button id="compareBtn">Compare Texts</button>
-          <button id="showFullTextBtn" class="secondary-btn hidden">View Full Texts</button>
-          <button id="closeResultsBtn" class="close-results-btn hidden">Close Results / New Test</button>
+          <button id="showFullTextBtn" class="secondary-btn">View Full Texts</button>
+          <button id="closeResultsBtn" class="close-results-btn hidden">Close Results</button>
         </div>
       </section>
 
@@ -1601,40 +1553,6 @@ body.dark-mode .selected-row {
     </footer>
   </div>
 
-  <div id="editTestModal" class="modal">
-    <div class="modal-content">
-      <h3>Edit Test</h3>
-      <input type="hidden" id="editTestId">
-      <div class="input-group">
-        <input type="text" id="editTestTitle" placeholder=" ">
-        <label for="editTestTitle">Test Title</label>
-      </div>
-      <div class="input-group">
-        <select id="editTestCategory">
-          <option value="general">General Matter</option>
-          <option value="kailash">Kailash Chandra</option>
-          <option value="progressive">Progressive</option>
-          <option value="legal">Legal</option>
-          <option value="previous">Previous Year</option>
-          <option value="test">Test</option>
-        </select>
-        <label for="editTestCategory">Test Category</label>
-      </div>
-      <div class="input-group">
-        <textarea id="editTestText" placeholder=" "></textarea>
-        <label for="editTestText">Original Text</label>
-      </div>
-      <div class="input-group">
-        <input type="url" id="editTestVideoUrl" placeholder=" ">
-        <label for="editTestVideoUrl">Video URL (Optional)</label>
-      </div>
-      <div class="modal-buttons">
-        <button id="cancelEditTestBtn" class="secondary-btn">Cancel</button>
-        <button id="saveEditedTestBtn">Save Changes</button>
-      </div>
-    </div>
-  </div>
-
 
 <script>
 // Initialize Firebase
@@ -1648,7 +1566,6 @@ const firebaseConfig = {
   appId: "1:341251531099:web:f4263621455541ffdc3a7e",
   measurementId: "G-ZXFC7NR9HV"
 };
-
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -1692,16 +1609,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const testNameFilter = document.getElementById('testNameFilter');
   const categoryFilter = document.getElementById('categoryFilter');
   const testCategoryFilter = document.getElementById('testCategoryFilter');
-  const testSearchInput = document.getElementById('testSearchInput'); // Search input
   const prevPageBtn = document.getElementById('prevPageBtn');
   const nextPageBtn = document.getElementById('nextPageBtn');
   const leaderboardPagination = document.getElementById('leaderboardPagination');
-  const saveBtn = document.getElementById('saveTestBtn');
-  const clearBtn = document.getElementById('clearTestsBtn');
+  const saveTestBtn = document.getElementById('saveTestBtn'); // Renamed from saveBtn
+  const clearTestsBtn = document.getElementById('clearTestsBtn'); // Renamed from clearBtn
+  const clearCustomFormBtn = document.getElementById('clearCustomFormBtn'); // New button
   const customTitle = document.getElementById('customTitle');
   const customOriginal = document.getElementById('customOriginal');
   const customVideoUrl = document.getElementById('customVideoUrl');
   const customCategory = document.getElementById('customCategory');
+  const customTestTitleHeader = document.getElementById('customTestTitleHeader'); // For edit mode
+  const editingTestIdInput = document.getElementById('editingTestId'); // Hidden input for edit mode
   const loginForm = document.getElementById('loginForm');
   const registerForm = document.getElementById('registerForm');
   const emailLoginBtn = document.getElementById('emailLoginBtn');
@@ -1717,29 +1636,19 @@ document.addEventListener('DOMContentLoaded', function() {
   const confirmPassword = document.getElementById('confirmPassword');
   const deleteLeaderboardBtn = document.getElementById('deleteLeaderboardBtn');
 
-  // Edit Modal Elements
-  const editTestModal = document.getElementById('editTestModal');
-  const editTestId = document.getElementById('editTestId');
-  const editTestTitle = document.getElementById('editTestTitle');
-  const editTestCategory = document.getElementById('editTestCategory');
-  const editTestText = document.getElementById('editTestText');
-  const editTestVideoUrl = document.getElementById('editTestVideoUrl');
-  const cancelEditTestBtn = document.getElementById('cancelEditTestBtn');
-  const saveEditedTestBtn = document.getElementById('saveEditedTestBtn');
+  // Global state
+  let currentUser = null; // Store current user object
+  const adminEmails = [ // Define admin emails
+      "anishkumar18034@gmail.com",
+      "anishkumar1803@gmail.com",
+      "admin2@example.com"
+  ];
 
-  // State variables
+  // Timer variables
   let timerInterval;
-  let timerDuration = 0; // Store selected timer duration in seconds
-  let endTime; // Timestamp when timer should end
-  let testActive = false; // Is a timed test currently running?
-  let startTime = null; // Timestamp when user starts typing or timer starts
-  let isAdmin = false;
-  let selectedTestInternal = { // Store selected test data internally
-      text: null,
-      title: null,
-      category: null
-  };
-  let allFetchedTests = []; // Store all fetched tests for filtering
+  let endTime;
+  let testActive = false;
+  let timerButtons = document.querySelectorAll('.timer-option');
 
   // Leaderboard variables
   let currentPage = 1;
@@ -1751,18 +1660,21 @@ document.addEventListener('DOMContentLoaded', function() {
   let currentSortDirection = 'desc';
   let selectedLeaderboardRows = [];
 
+  // Carousel variables
+  let carouselTrack;
+  let carouselDotsContainer;
+  let carouselCards = [];
+  let carouselPrevBtn;
+  let carouselNextBtn;
+  let cardWidth = 0;
+  let carouselCurrentIndex = 0;
+  let carouselVisibleCards = 3;
 
-  const adminEmails = [
-    "anishkumar18034@gmail.com",
-    "anishkumar1803@gmail.com",
-    // Add other admin emails here in lowercase
-    "admin@example.com"
-  ];
 
   // Initialize typing timer
+  let startTime = null;
   userTextEl.addEventListener('input', function() {
-    // Record start time on first input *only if* a timed test is not active
-    if (!testActive && !startTime) {
+    if (!startTime) {
       startTime = new Date();
     }
   });
@@ -1824,8 +1736,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
     auth.createUserWithEmailAndPassword(email, password)
       .then((userCredential) => {
+        // Store UID along with display name
         return userCredential.user.updateProfile({
           displayName: name
+        }).then(() => {
+            // Optionally store UID in database profile if needed elsewhere
+            // database.ref('users/' + userCredential.user.uid).set({ name: name, email: email });
         });
       })
       .then(() => {
@@ -1855,6 +1771,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Auth state listener
   auth.onAuthStateChanged(user => {
+    currentUser = user; // Store the current user object
     if (user) {
       loginBtn.classList.add('hidden');
       userInfo.classList.remove('hidden');
@@ -1862,30 +1779,32 @@ document.addEventListener('DOMContentLoaded', function() {
       if (user.photoURL) {
         userPhoto.src = user.photoURL;
       } else {
-        userPhoto.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`;
+          // Generate identicon based on UID for users without photo
+          userPhoto.src = 'https://www.gravatar.com/avatar/' + user.uid + '?d=identicon&s=40';
       }
 
       userName.textContent = user.displayName || 'User';
       loginPrompt.classList.add('hidden');
 
-      isAdmin = adminEmails.includes((user.email || '').toLowerCase());
+      // Check if user is admin
+      const isAdmin = adminEmails.includes(user.email);
 
       if (isAdmin) {
         customTestSection.classList.remove('hidden');
         deleteLeaderboardBtn.classList.remove('hidden');
       } else {
-          customTestSection.classList.add('hidden');
-          deleteLeaderboardBtn.classList.add('hidden');
+          // Non-admins can still see the section to add their *own* tests
+          customTestSection.classList.remove('hidden');
+          deleteLeaderboardBtn.classList.add('hidden'); // Hide bulk delete for non-admins
       }
 
       globalTestsSection.classList.remove('hidden');
       leaderboardSection.classList.remove('hidden');
 
-      fetchAllTestsOnce(); // Fetch all tests once on login
+      loadGlobalTests(); // Load tests after user is confirmed
       loadLeaderboard();
       cleanupOldData();
     } else {
-      isAdmin = false;
       loginBtn.classList.remove('hidden');
       userInfo.classList.add('hidden');
       loginPrompt.classList.remove('hidden');
@@ -1895,9 +1814,19 @@ document.addEventListener('DOMContentLoaded', function() {
       loginForm.classList.remove('hidden');
       registerForm.classList.add('hidden');
       deleteLeaderboardBtn.classList.add('hidden');
-      resetTestSelection(); // Reset internal state on logout
-      allFetchedTests = []; // Clear fetched tests on logout
+      // Clear potentially sensitive data on logout
+      originalTextEl.value = '';
+      userTextEl.value = '';
+      comparisonResultEl.innerHTML = '';
+      statsEl.innerHTML = '';
+      feedbackEl.innerHTML = '';
+      resultsSection.classList.add('hidden');
+      fullTextSection.classList.add('hidden');
+      if(carouselTrack) carouselTrack.innerHTML = ''; // Clear carousel
+      if(leaderboardList) leaderboardList.innerHTML = ''; // Clear leaderboard
     }
+    // Reset custom test form on auth change
+    resetCustomTestForm();
   });
 
   // Logout handler
@@ -1923,12 +1852,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Test category filter for community tests
   testCategoryFilter.addEventListener('change', () => {
-    renderGlobalTests(); // Re-render based on new category and existing search
-  });
-
-  // Test search input listener
-  testSearchInput.addEventListener('input', () => {
-      renderGlobalTests(); // Re-render based on new search and existing category
+    loadGlobalTests(); // Reload tests with the new category filter
   });
 
   // Pagination button handlers
@@ -1947,59 +1871,37 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // Delete leaderboard entries handler
+  // Delete leaderboard entries handler (Admin only)
   deleteLeaderboardBtn.addEventListener('click', () => {
-    if (selectedLeaderboardRows.length === 0) return;
+      if (!currentUser || !adminEmails.includes(currentUser.email)) return; // Security check
+      if (selectedLeaderboardRows.length === 0) return;
 
-    const modal = document.createElement('div');
-    modal.className = 'modal show';
-    modal.innerHTML = `
-      <div class="modal-content">
-        <h3>Confirm Deletion</h3>
-        <p>Are you sure you want to delete ${selectedLeaderboardRows.length} selected leaderboard entries? This action cannot be undone.</p>
-        <div class="modal-buttons">
-          <button id="cancelDeleteLeaderboard" class="secondary-btn">Cancel</button>
-          <button id="confirmDeleteLeaderboard" class="danger-btn">Delete</button>
-        </div>
-      </div>
-    `;
+      showConfirmationModal(
+          `Are you sure you want to delete ${selectedLeaderboardRows.length} selected leaderboard entries? This action cannot be undone.`,
+          () => { // onConfirm
+              const updates = {};
+              selectedLeaderboardRows.forEach(id => {
+                  updates[`attempts/${id}`] = null;
+              });
 
-    document.body.appendChild(modal);
-
-    modal.querySelector('#cancelDeleteLeaderboard').addEventListener('click', () => {
-      closeModal(modal);
-    });
-
-    modal.querySelector('#confirmDeleteLeaderboard').addEventListener('click', () => {
-      const updates = {};
-      selectedLeaderboardRows.forEach(id => {
-        updates[`attempts/${id}`] = null;
-      });
-
-      database.ref().update(updates)
-        .then(() => {
-          alert(`${selectedLeaderboardRows.length} entries deleted successfully.`);
-          selectedLeaderboardRows = [];
-          closeModal(modal);
-          loadLeaderboard();
-        })
-        .catch(error => {
-          console.error('Error deleting leaderboard entries:', error);
-          alert('Failed to delete entries. Please try again.');
-          closeModal(modal);
-        });
-    });
-
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            closeModal(modal);
-        }
-    });
+              database.ref().update(updates)
+                  .then(() => {
+                      alert(`${selectedLeaderboardRows.length} entries deleted successfully.`);
+                      selectedLeaderboardRows = [];
+                      loadLeaderboard(); // Reload to reflect changes
+                  })
+                  .catch(error => {
+                      console.error('Error deleting leaderboard entries:', error);
+                      alert('Failed to delete entries. Please try again.');
+                  });
+          }
+      );
   });
 
-  // Load leaderboard data
+  // Load leaderboard data with pagination
   function loadLeaderboard() {
     const filter = leaderboardFilter.value;
+    const category = categoryFilter.value;
     let query = database.ref('attempts').orderByChild('timestamp');
 
     if (filter === 'week') {
@@ -2016,10 +1918,12 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(snapshot => {
         const attempts = snapshot.val();
         if (!attempts) {
-          allAttempts = [];
-          leaderboardList.innerHTML = '<p>No attempts recorded yet.</p>';
+          leaderboardList.innerHTML = '<p>No attempts recorded yet. Be the first to complete a test!</p>';
           leaderboardPagination.innerHTML = '';
-          updateTestNameFilter(allAttempts);
+          allAttempts = []; // Reset attempts
+          filteredAttempts = [];
+          updateTestNameFilter([]); // Update filter with empty data
+          updatePagination(); // Update display
           return;
         }
 
@@ -2028,82 +1932,124 @@ document.addEventListener('DOMContentLoaded', function() {
           ...attempt
         }));
 
-        updateTestNameFilter(allAttempts);
-        applyLeaderboardFiltersAndSort();
+        sortAttempts(currentSortColumn, currentSortDirection); // Sort before filtering
+        updateTestNameFilter(allAttempts); // Update filter based on all attempts
 
+        // Apply filters
+        filteredAttempts = allAttempts.filter(attempt => {
+          const nameMatch = testNameFilter.value === 'all' || attempt.testTitle === testNameFilter.value;
+          const categoryMatch = category === 'all' || attempt.category === category;
+          return nameMatch && categoryMatch;
+        });
+
+        updatePagination(); // Display filtered & paginated results
       })
       .catch(error => {
         console.error('Error loading leaderboard:', error);
-        leaderboardList.innerHTML = '<p>Error loading leaderboard.</p>';
+        leaderboardList.innerHTML = '<p>Error loading leaderboard. Please try again later.</p>';
         leaderboardPagination.innerHTML = '';
       });
   }
 
-  // Apply filters and sort leaderboard
-  function applyLeaderboardFiltersAndSort() {
-      const selectedTestName = testNameFilter.value;
-      const selectedCategory = categoryFilter.value;
+  function sortAttempts(column, direction) {
+    // Ensure allAttempts is always an array before sorting
+    if (!Array.isArray(allAttempts)) {
+        allAttempts = [];
+    }
 
-      filteredAttempts = allAttempts.filter(attempt => {
-          const nameMatch = selectedTestName === 'all' || attempt.testTitle === selectedTestName;
-          const categoryMatch = selectedCategory === 'all' || attempt.category === selectedCategory;
-          return nameMatch && categoryMatch;
-      });
+    allAttempts.sort((a, b) => {
+        // Handle cases where stats might be missing
+        const statsA = a.stats || {};
+        const statsB = b.stats || {};
+        let aValue, bValue;
 
-      sortFilteredAttempts(currentSortColumn, currentSortDirection);
-      updatePagination();
-  }
+        switch (column) {
+            case 'accuracy':
+            case 'wpm':
+            case 'totalOriginal':
+            case 'totalUser':
+            case 'halfMistakes':
+            case 'fullMistakes':
+            case 'timeTaken':
+                aValue = statsA[column] ?? 0; // Default to 0 if undefined
+                bValue = statsB[column] ?? 0;
+                break;
+            case 'userName':
+                aValue = (a.userName || '').toLowerCase(); // Default to empty string
+                bValue = (b.userName || '').toLowerCase();
+                break;
+            case 'testTitle':
+                aValue = (a.testTitle || 'Custom Test').toLowerCase();
+                bValue = (b.testTitle || 'Custom Test').toLowerCase();
+                break;
+            case 'date':
+                aValue = a.timestamp || 0; // Default to 0
+                bValue = b.timestamp || 0;
+                break;
+            default:
+                return 0;
+        }
 
-  // Sorts the `filteredAttempts` array
-  function sortFilteredAttempts(column, direction) {
-      filteredAttempts.sort((a, b) => {
-          let aValue, bValue;
-          switch (column) {
-              case 'accuracy': case 'wpm': case 'totalOriginal': case 'totalUser':
-              case 'halfMistakes': case 'fullMistakes': case 'timeTaken':
-                  aValue = a.stats?.[column]; bValue = b.stats?.[column]; break;
-              case 'userName': aValue = (a.userName || '').toLowerCase(); bValue = (b.userName || '').toLowerCase(); break;
-              case 'testTitle': aValue = (a.testTitle || '').toLowerCase(); bValue = (b.testTitle || '').toLowerCase(); break;
-              case 'date': aValue = a.timestamp; bValue = b.timestamp; break;
-              default: return 0;
-          }
-          aValue = aValue ?? (typeof aValue === 'number' ? 0 : '');
-          bValue = bValue ?? (typeof bValue === 'number' ? 0 : '');
-          if (typeof aValue === 'number' && typeof bValue === 'number') {
-              return direction === 'asc' ? aValue - bValue : bValue - aValue;
-          } else if (typeof aValue === 'string' && typeof bValue === 'string') {
-              return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-          }
-          return 0;
-      });
+        // Comparison logic
+        if (typeof aValue === 'number' && typeof bValue === 'number') {
+            return direction === 'asc' ? aValue - bValue : bValue - aValue;
+        } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+             // Ensure localeCompare is called on strings
+            return direction === 'asc'
+                ? aValue.localeCompare(bValue)
+                : bValue.localeCompare(aValue);
+        } else {
+            // Fallback for mixed types or other scenarios
+            return 0;
+        }
+    });
   }
 
 
   function updateTestNameFilter(attempts) {
-    uniqueTestNames = new Set(attempts.map(attempt => attempt.testTitle || 'Custom Test'));
-    const currentTestFilter = testNameFilter.value;
-    testNameFilter.innerHTML = '<option value="all">All Tests</option>';
-    [...uniqueTestNames].sort().forEach(testName => {
-      const option = document.createElement('option');
-      option.value = testName;
-      option.textContent = testName;
-      testNameFilter.appendChild(option);
-    });
-    testNameFilter.value = uniqueTestNames.has(currentTestFilter) ? currentTestFilter : 'all';
+      uniqueTestNames = new Set(attempts.map(attempt => attempt.testTitle || 'Custom Test'));
+      const currentTestFilter = testNameFilter.value;
+
+      // Clear existing options except the default "All Tests"
+      testNameFilter.innerHTML = '<option value="all">All Tests</option>';
+
+      // Sort test names alphabetically before adding them
+      const sortedTestNames = Array.from(uniqueTestNames).sort((a, b) => a.localeCompare(b));
+
+      sortedTestNames.forEach(testName => {
+          const option = document.createElement('option');
+          option.value = testName;
+          option.textContent = testName;
+          testNameFilter.appendChild(option);
+      });
+
+      // Restore previous selection if it still exists, otherwise default to "all"
+      if (uniqueTestNames.has(currentTestFilter)) {
+          testNameFilter.value = currentTestFilter;
+      } else {
+          testNameFilter.value = 'all';
+      }
   }
+
 
   function updatePagination() {
     const totalEntries = filteredAttempts.length;
     const totalPages = Math.ceil(totalEntries / entriesPerPage);
-    currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
+    currentPage = Math.max(1, Math.min(currentPage, totalPages)); // Ensure currentPage is valid
+
     const startIdx = (currentPage - 1) * entriesPerPage;
-    const endIdx = startIdx + entriesPerPage;
+    const endIdx = Math.min(startIdx + entriesPerPage, totalEntries); // Ensure endIdx doesn't exceed total
     const pageAttempts = filteredAttempts.slice(startIdx, endIdx);
+
     prevPageBtn.disabled = currentPage === 1;
     nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
-    leaderboardPagination.innerHTML = totalEntries > 0
-        ? `Showing ${startIdx + 1}-${Math.min(endIdx, totalEntries)} of ${totalEntries} entries`
-        : 'No entries found';
+
+    if (totalEntries > 0) {
+        leaderboardPagination.innerHTML = `Showing ${startIdx + 1}-${endIdx} of ${totalEntries} entries`;
+    } else {
+        leaderboardPagination.innerHTML = 'No entries found.';
+    }
+
     renderLeaderboardTable(pageAttempts, startIdx + 1);
   }
 
@@ -2112,97 +2058,172 @@ document.addEventListener('DOMContentLoaded', function() {
       leaderboardList.innerHTML = '<p>No attempts match your filters.</p>';
       return;
     }
-    let tableHTML = `<table><thead><tr>
-        <th data-column="rank">Rank</th><th data-column="userName">User</th>
-        <th data-column="testTitle">Test</th><th data-column="accuracy">Accuracy</th>
-        <th data-column="wpm">Speed (WPM)</th><th data-column="totalOriginal">Original Words</th>
-        <th data-column="totalUser">Typed Words</th><th data-column="timeTaken">Time Taken</th>
-        <th data-column="halfMistakes">Half Mistakes</th><th data-column="fullMistakes">Full Mistakes</th>
-        <th data-column="date">Date</th></tr></thead><tbody>`;
+
+    // Determine if the delete button should be visible (admin logged in)
+    const isAdmin = currentUser && adminEmails.includes(currentUser.email);
+
+    let tableHTML = `
+      <table>
+        <thead>
+          <tr>
+            ${isAdmin ? '<th>Select</th>' : ''} <th data-column="rank">Rank</th>
+            <th data-column="userName">User</th>
+            <th data-column="testTitle">Test</th>
+            <th data-column="accuracy">Accuracy</th>
+            <th data-column="wpm">Speed (WPM)</th>
+            <th data-column="totalOriginal">Original Words</th>
+            <th data-column="totalUser">Typed Words</th>
+            <th data-column="timeTaken">Time Taken</th>
+            <th data-column="halfMistakes">Half Mistakes</th>
+            <th data-column="fullMistakes">Full Mistakes</th>
+            <th data-column="date">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
     attempts.forEach((attempt, index) => {
       const date = new Date(attempt.timestamp);
-      const accuracy = attempt.stats?.accuracy ?? 0;
-      const accuracyClass = accuracy >= 90 ? 'accuracy-high' : accuracy >= 70 ? 'accuracy-medium' : 'accuracy-low';
-      const timeTaken = attempt.stats?.timeTaken ?? 0;
+      const stats = attempt.stats || {}; // Handle missing stats
+      const accuracy = stats.accuracy ?? 0; // Default to 0
+      const timeTaken = stats.timeTaken ?? 0; // Default to 0
+
+      const accuracyClass =
+        accuracy >= 90 ? 'accuracy-high' :
+        accuracy >= 70 ? 'accuracy-medium' : 'accuracy-low';
+
       const minutes = Math.floor(timeTaken / 60);
       const seconds = timeTaken % 60;
       const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      // Add badges to top 3 based on the *overall* rank, not just page rank
+      const overallRank = (currentPage - 1) * entriesPerPage + index + 1; // Calculate overall rank
       let badge = '';
-      const overallRank = startRank + index;
-      if (overallRank === 1) badge = '<span class="badge badge-gold">🥇</span>';
-      else if (overallRank === 2) badge = '<span class="badge badge-silver">🥈</span>';
-      else if (overallRank === 3) badge = '<span class="badge badge-bronze">🥉</span>';
-      const userPhotoSrc = attempt.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(attempt.userName || 'User')}&background=random&color=fff`;
-      tableHTML += `<tr data-id="${attempt.id}" class="${selectedLeaderboardRows.includes(attempt.id) ? 'selected-row' : ''}">
-          <td>${overallRank} ${badge}</td>
-          <td class="leaderboard-user"><img src="${userPhotoSrc}" alt="${attempt.userName || 'User'}"><span>${attempt.userName || 'Anonymous'}</span></td>
+      if (overallRank === 1) {
+        badge = '<span class="badge badge-gold">🥇</span>';
+      } else if (overallRank === 2) {
+        badge = '<span class="badge badge-silver">🥈</span>';
+      } else if (overallRank === 3) {
+        badge = '<span class="badge badge-bronze">🥉</span>';
+      }
+
+      const isSelected = selectedLeaderboardRows.includes(attempt.id);
+
+      tableHTML += `
+        <tr data-id="${attempt.id}" class="${isAdmin ? 'leaderboard-row-selectable' : ''} ${isSelected ? 'selected-row' : ''}">
+          ${isAdmin ? `<td><input type="checkbox" class="delete-checkbox" data-id="${attempt.id}" ${isSelected ? 'checked' : ''}></td>` : ''}
+          <td>${startRank + index} ${badge}</td>
+          <td class="leaderboard-user">
+            <img src="${attempt.userPhoto || 'https://www.gravatar.com/avatar/' + attempt.id + '?d=identicon&s=30'}" alt="${attempt.userName || 'User'}">
+            <span>${attempt.userName || 'User'}</span>
+          </td>
           <td>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
           <td class="accuracy-cell ${accuracyClass}">${accuracy.toFixed(1)}%</td>
-          <td>${attempt.stats?.wpm ?? 0}</td><td>${attempt.stats?.totalOriginal ?? 0}</td>
-          <td>${attempt.stats?.totalUser ?? 0}</td><td>${timeFormatted}</td>
-          <td>${attempt.stats?.halfMistakes ?? 0}</td><td>${attempt.stats?.fullMistakes ?? 0}</td>
-          <td>${date.toLocaleDateString()}</td></tr>`;
+          <td>${stats.wpm ?? 0}</td>
+          <td>${stats.totalOriginal ?? 0}</td>
+          <td>${stats.totalUser ?? 0}</td>
+          <td>${timeFormatted}</td>
+          <td>${stats.halfMistakes ?? 0}</td>
+          <td>${stats.fullMistakes ?? 0}</td>
+          <td>${date.toLocaleDateString()}</td>
+        </tr>
+      `;
     });
+
     tableHTML += `</tbody></table>`;
     leaderboardList.innerHTML = tableHTML;
+
     makeTableSortable();
-    updateDeleteButtonState();
+    addLeaderboardRowSelectionListeners(); // Add listeners for selection
+    updateDeleteButtonState(); // Update button based on selection
   }
 
   function makeTableSortable() {
     const headers = document.querySelectorAll('.leaderboard-list th[data-column]');
     headers.forEach(header => {
-      const newHeader = header.cloneNode(true);
-      header.parentNode.replaceChild(newHeader, header);
-      newHeader.style.cursor = 'pointer';
+      header.style.cursor = 'pointer';
+      // Remove previous listeners to prevent duplicates
+      header.replaceWith(header.cloneNode(true));
+      // Get the new header element after cloning
+      const newHeader = document.querySelector(`.leaderboard-list th[data-column="${header.dataset.column}"]`);
+
       newHeader.addEventListener('click', () => {
         const column = newHeader.getAttribute('data-column');
-        if (!column || column === 'rank') return;
+        if (!column) return; // Ignore clicks on non-data columns (like Select)
+
         if (currentSortColumn === column) {
           currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
         } else {
           currentSortColumn = column;
-          currentSortDirection = 'desc';
+          currentSortDirection = 'desc'; // Default to descending for new column
         }
-        sortFilteredAttempts(currentSortColumn, currentSortDirection);
-        currentPage = 1;
+
+        sortAttempts(column, currentSortDirection);
+        currentPage = 1; // Reset to first page after sorting
         updatePagination();
-        const currentHeaders = document.querySelectorAll('.leaderboard-list th[data-column]');
-        currentHeaders.forEach(h => {
-          h.classList.remove('sorted-asc', 'sorted-desc');
-          if (h.getAttribute('data-column') === currentSortColumn) {
-            h.classList.add(`sorted-${currentSortDirection}`);
-          }
+
+        // Update visual indicators on headers
+        document.querySelectorAll('.leaderboard-list th[data-column]').forEach(h => {
+            h.classList.remove('sorted-asc', 'sorted-desc');
+            if (h.getAttribute('data-column') === column) {
+                h.classList.add(`sorted-${currentSortDirection}`);
+            }
         });
       });
+
+      // Set initial sort indicator
       if (newHeader.getAttribute('data-column') === currentSortColumn) {
         newHeader.classList.add(`sorted-${currentSortDirection}`);
       }
     });
-
-    const rows = document.querySelectorAll('.leaderboard-list tbody tr');
-    rows.forEach(row => {
-      row.classList.add('leaderboard-row-selectable');
-      row.addEventListener('click', (e) => {
-        if (e.target.closest('a') || e.target.closest('button')) return;
-        const attemptId = row.dataset.id;
-        if (selectedLeaderboardRows.includes(attemptId)) {
-          selectedLeaderboardRows = selectedLeaderboardRows.filter(id => id !== attemptId);
-          row.classList.remove('selected-row');
-        } else {
-          selectedLeaderboardRows.push(attemptId);
-          row.classList.add('selected-row');
-        }
-        updateDeleteButtonState();
-      });
-    });
   }
 
+  function addLeaderboardRowSelectionListeners() {
+      const isAdmin = currentUser && adminEmails.includes(currentUser.email);
+      if (!isAdmin) return; // Only admins can select rows
+
+      const checkboxes = document.querySelectorAll('.leaderboard-list .delete-checkbox');
+      checkboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', (e) => {
+              const attemptId = e.target.dataset.id;
+              const row = e.target.closest('tr');
+              if (e.target.checked) {
+                  if (!selectedLeaderboardRows.includes(attemptId)) {
+                      selectedLeaderboardRows.push(attemptId);
+                  }
+                  row.classList.add('selected-row');
+              } else {
+                  selectedLeaderboardRows = selectedLeaderboardRows.filter(id => id !== attemptId);
+                  row.classList.remove('selected-row');
+              }
+              updateDeleteButtonState();
+          });
+      });
+
+      // Optional: Allow clicking anywhere on the row to toggle the checkbox
+      const rows = document.querySelectorAll('.leaderboard-list tbody tr.leaderboard-row-selectable');
+      rows.forEach(row => {
+          row.addEventListener('click', (e) => {
+              // Only toggle if the click wasn't directly on the checkbox itself
+              if (e.target.tagName !== 'INPUT') {
+                  const checkbox = row.querySelector('.delete-checkbox');
+                  if (checkbox) {
+                      checkbox.checked = !checkbox.checked;
+                      // Manually trigger the change event
+                      checkbox.dispatchEvent(new Event('change'));
+                  }
+              }
+          });
+      });
+  }
 
   function updateDeleteButtonState() {
-    deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0;
-    deleteLeaderboardBtn.style.opacity = deleteLeaderboardBtn.disabled ? 0.5 : 1;
-    deleteLeaderboardBtn.style.cursor = deleteLeaderboardBtn.disabled ? 'not-allowed' : 'pointer';
+      const isAdmin = currentUser && adminEmails.includes(currentUser.email);
+      if (isAdmin) {
+          deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0;
+      } else {
+          deleteLeaderboardBtn.disabled = true; // Always disabled for non-admins
+      }
   }
 
 
@@ -2211,70 +2232,58 @@ document.addEventListener('DOMContentLoaded', function() {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     const timestampThreshold = sixMonthsAgo.getTime();
-    database.ref('attempts').orderByChild('timestamp').endAt(timestampThreshold).once('value').then(snapshot => {
-        const updates = {}; let count = 0;
-        snapshot.forEach(child => { updates[child.key] = null; count++; });
-        if (count > 0) {
-            console.log(`Cleaning up ${count} old leaderboard entries...`);
-            database.ref('attempts').update(updates)
-                .then(() => console.log("Old entries cleaned up."))
-                .catch(err => console.error("Error cleaning up old entries:", err));
-        } else { console.log("No old leaderboard entries to clean up."); }
-    }).catch(error => console.error("Error fetching old leaderboard entries:", error));
-}
 
+    database.ref('attempts').orderByChild('timestamp').endAt(timestampThreshold).once('value').then(snapshot => {
+      const updates = {};
+      let count = 0;
+      snapshot.forEach(child => {
+        updates[child.key] = null;
+        count++;
+      });
+      if (count > 0) {
+        console.log(`Cleaning up ${count} old leaderboard entries...`);
+        database.ref('attempts').update(updates)
+            .then(() => console.log('Old entries cleanup complete.'))
+            .catch(err => console.error('Error cleaning up old entries:', err));
+      }
+    });
+  }
 
   // Run cleanup weekly
   setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
 
-  // Reset internal test selection state
-  function resetTestSelection() {
-      selectedTestInternal = { text: null, title: null, category: null };
-      // Also remove visual selection from cards if any
-      document.querySelectorAll('.test-card.selected').forEach(card => {
-          card.classList.remove('selected');
-      });
-  }
-
   // Original text paste handler
   originalTextEl.addEventListener('paste', function() {
-    resetTestSelection(); // Clear any selected test
-    setTimeout(() => { // Allow paste to complete
+    document.querySelectorAll('.test-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+
+    setTimeout(() => {
       if (originalTextEl.value.trim() !== '' && !testActive) {
-        originalTextGroup.classList.remove('hidden'); // Ensure it's visible
+        originalTextGroup.classList.add('hidden');
         timerOptions.classList.remove('hidden');
-        const timerButtons = document.querySelectorAll('.timer-option');
-        timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; });
+        timerButtons.forEach(btn => {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        });
       }
     }, 0);
   });
 
   // Timer option click handler
-  document.querySelectorAll('.timer-option').forEach(button => {
+  timerButtons.forEach(button => {
     button.addEventListener('click', function() {
       const minutes = parseInt(this.dataset.minutes);
-      startTimer(minutes); // Pass minutes to startTimer
+      startTimer(minutes);
+      timerOptions.classList.add('hidden');
+      timerDisplay.classList.remove('hidden');
+      testActive = true;
     });
   });
 
   // Compare button click handler
   compareBtn.addEventListener('click', function() {
-    const hasOriginal = selectedTestInternal.text || originalTextEl.value.trim();
-    if (!hasOriginal) {
-        alert("Please select a test or paste original text first.");
-        return;
-    }
-    if (!userTextEl.value.trim()) {
-        alert("Please enter your transcription before comparing.");
-        return;
-    }
-    // If compare is clicked before typing anything (and no timer), startTime might be null
-    if (!testActive && !startTime) {
-        // Set startTime now if user clicks compare without typing first (edge case)
-        startTime = new Date();
-    }
-
-    stopTimer(); // Stop timer if running
+    stopTimer();
     compareTexts();
     disableTimerOptions();
   });
@@ -2288,55 +2297,28 @@ document.addEventListener('DOMContentLoaded', function() {
   // Download PDF button click handler
   downloadPdfBtn.addEventListener('click', downloadAsPdf);
 
-  // Close results button click handler (Reset UI)
+  // Close results button click handler
   closeResultsBtn.addEventListener('click', function() {
-    resultsSection.classList.add('hidden');
-    fullTextSection.classList.add('hidden');
-    originalTextEl.value = '';
-    userTextEl.value = '';
-    userTextEl.readOnly = false;
-    userTextEl.classList.remove('locked-textarea');
-    compareBtn.disabled = false;
-    closeResultsBtn.classList.add('hidden');
-    showFullTextBtn.classList.add('hidden'); // Hide full text button on reset
-    originalTextGroup.classList.remove('hidden'); // Show original text input again
-    timerOptions.classList.add('hidden');
-    timerDisplay.classList.add('hidden');
-    timerDisplay.classList.remove('timer-ended');
-    testActive = false;
-    startTime = null;
-    stopTimer(); // Ensure any lingering timer interval is cleared
-    resetTestSelection(); // Clear internal test selection
-
     const existingVideo = document.getElementById('testVideoPlayer');
     if (existingVideo) existingVideo.remove();
-    window.scrollTo(0, 0);
+    location.reload(); // Reload the page to reset state
   });
 
   function startTimer(minutes) {
-    timerDuration = minutes * 60; // Store duration in seconds
-    endTime = new Date(new Date().getTime() + timerDuration * 1000); // Calculate end time
-    startTime = new Date(); // Record the precise start time
-    testActive = true; // Set test as active
+    endTime = new Date();
+    endTime.setMinutes(endTime.getMinutes() + minutes);
 
-    timerOptions.classList.add('hidden');
-    timerDisplay.classList.remove('hidden');
-    // Hide original text group only if a test was NOT selected (i.e., user pasted text)
-    if (!selectedTestInternal.text) {
-        originalTextGroup.classList.add('hidden');
-    }
+    updateTimerDisplay();
 
-    updateTimerDisplay(); // Initial display
-    // Clear any existing interval before starting a new one
-    if (timerInterval) clearInterval(timerInterval);
     timerInterval = setInterval(() => {
       updateTimerDisplay();
+
       const now = new Date();
       if (now >= endTime) {
         stopTimer();
         timerDisplay.classList.add('timer-ended');
         timerDisplay.textContent = "TIME'S UP!";
-        compareTexts(); // Automatically compare when time is up
+        compareTexts();
         lockTest();
         disableTimerOptions();
       }
@@ -2345,11 +2327,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function stopTimer() {
     clearInterval(timerInterval);
-    timerInterval = null; // Reset interval variable
+    timerDisplay.classList.add('hidden');
   }
 
   function disableTimerOptions() {
-    document.querySelectorAll('.timer-option').forEach(btn => {
+    timerButtons.forEach(btn => {
       btn.disabled = true;
       btn.style.opacity = '0.5';
       btn.style.cursor = 'not-allowed';
@@ -2358,15 +2340,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function updateTimerDisplay() {
     const now = new Date();
-    // Ensure endTime is valid before calculating remaining time
-    const remaining = endTime instanceof Date && !isNaN(endTime) ? endTime - now : 0;
+    const remaining = endTime - now;
 
-    if (remaining <= 0) {
-        timerDisplay.textContent = "00:00";
-        return;
-    }
+    if (remaining <= 0) return;
+
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
     timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
   }
 
@@ -2377,386 +2357,268 @@ document.addEventListener('DOMContentLoaded', function() {
     closeResultsBtn.classList.remove('hidden');
   }
 
-
-  // --- NEW FUNCTIONS START ---
-
-  /**
-   * Main function to initiate text comparison.
-   * Gathers text, processes it, triggers comparison, and displays results.
-   */
   function compareTexts() {
-    // Get original and user-transcribed text from the respective text areas.
-    const originalText = selectedTestInternal.text ? selectedTestInternal.text : originalTextEl.value;
+    const originalText = originalTextEl.value;
     const userText = userTextEl.value;
 
-    // Basic validation: Ensure both text areas have content.
     if (!originalText || !userText) {
-      // Use a more user-friendly notification instead of alert().
-      // This could be a custom modal or a message area on the page.
-      console.error('Please enter both original text and your transcription.');
-      // Example: displayMessage('Please enter both original text and your transcription.', 'warning');
-      alert('Please enter both original text and your transcription.'); // Kept alert for now, replace with better UI element
+      alert('Please enter both original text and your transcription.');
       return;
     }
 
-    // Determine the title of the test being compared.
-    let testTitle = "Custom Test"; // Default title for pasted text.
-    // Check if a test card was selected from the community tests.
+    let testTitle = "Custom Test";
+    let testCategory = 'general'; // Default category
     const selectedTestCard = document.querySelector('.test-card.selected');
     if (selectedTestCard) {
-        // If a card is selected, use its title.
-        testTitle = selectedTestCard.querySelector('h4').textContent;
+        // Extract title carefully, removing badge if present
+        const titleElement = selectedTestCard.querySelector('h4');
+        testTitle = titleElement ? titleElement.firstChild.textContent.trim() : 'Selected Test';
+        testCategory = selectedTestCard.dataset.category || 'general';
     }
 
-    // Process both texts: split into words, remove unwanted characters/tags.
     const originalWords = processText(originalText);
     const userWords = processText(userText);
 
-    // Perform the core comparison logic.
     const comparison = compareParagraphs(originalWords, userWords);
 
-    // Display the comparison results visually (highlighting differences).
     displayComparison(comparison);
-    // Display the calculated statistics (WPM, accuracy, etc.).
     displayStats(comparison.stats);
-    // Provide feedback and suggestions based on the stats and mistakes.
     displayFeedback(comparison.stats, originalWords, userWords);
-    // Make the full original and user texts available for viewing.
     displayFullTexts(originalText, userText);
 
-    // Record and display the date/time of the comparison.
     const now = new Date();
     resultDateEl.textContent = now.toLocaleString();
 
-    // Show the results section and hide the input/full text sections.
     showResults();
 
-    // If a timed test was active, lock the input fields.
     if (testActive) {
       lockTest();
     }
 
-    // Save the attempt data to Firebase if a user is logged in.
-    const user = auth.currentUser;
-    if (user) {
+    // Save attempt to leaderboard if user is logged in
+    if (currentUser) {
       const attemptData = {
-        userName: user.displayName || 'Anonymous', // Use 'Anonymous' if displayName is not available
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`, // Provide a fallback avatar
+        userId: currentUser.uid, // Store user ID
+        userName: currentUser.displayName || 'Anonymous',
+        userPhoto: currentUser.photoURL || 'https://www.gravatar.com/avatar/' + currentUser.uid + '?d=identicon&s=30',
         testTitle: testTitle,
-        category: selectedTestCard ? selectedTestCard.dataset.category : customCategory.value, // Get category from selected card or custom input
-        stats: comparison.stats, // Include all calculated stats
-        timestamp: Date.now() // Use a simple timestamp
+        category: testCategory, // Use determined category
+        stats: comparison.stats,
+        timestamp: firebase.database.ServerValue.TIMESTAMP // Use server timestamp
       };
 
-      // Push the data to the 'attempts' node in Firebase Realtime Database.
       database.ref('attempts').push(attemptData)
         .then(() => {
-            console.log("Attempt saved successfully.");
-            loadLeaderboard(); // Refresh the leaderboard after saving
+            console.log('Attempt saved to leaderboard.');
+            loadLeaderboard(); // Refresh leaderboard
         })
-        .catch(error => console.error('Error saving attempt:', error)); // Log any errors during saving
+        .catch(error => console.error('Error saving attempt:', error));
     }
   }
 
-  /**
-   * Shows the full text comparison view and hides the main results summary.
-   */
   function showFullTexts() {
-    resultsSection.classList.add('hidden'); // Hide the statistics and highlighted comparison
-    fullTextSection.classList.remove('hidden'); // Show the side-by-side full text view
+    resultsSection.classList.add('hidden');
+    fullTextSection.classList.remove('hidden');
   }
 
-  /**
-   * Shows the main results summary (stats, highlighted text) and hides the full text view.
-   */
   function showResults() {
-    fullTextSection.classList.add('hidden'); // Hide the side-by-side full text view
-    resultsSection.classList.remove('hidden'); // Show the statistics and highlighted comparison
-    showFullTextBtn.classList.remove('hidden'); // Ensure the "View Full Texts" button is visible
+    fullTextSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
   }
 
-  /**
-   * Generates a PDF document of the results section.
-   */
   function downloadAsPdf() {
-    // Get the HTML element containing the results to be converted to PDF.
     const resultsElement = document.getElementById('results');
-    const downloadBtn = resultsElement.querySelector('#downloadPdfBtn'); // Find the download button within results
-    const originalDownloadDisplay = downloadBtn.style.display; // Store its original display style
+    // Temporarily make hidden elements visible for capture if needed
+    // e.g., comparisonResultEl.style.display = 'block';
 
-    // Temporarily hide the download button itself so it's not included in the PDF image.
-    downloadBtn.style.display = 'none';
-
-    // Use html2canvas to capture the results element as an image.
     html2canvas(resultsElement, {
-      scale: 1.5, // Increase scale for better resolution in the PDF.
-      useCORS: true, // Necessary if images are loaded from other domains.
-      allowTaint: true, // Allows rendering cross-origin images (use with caution).
-      logging: false // Disable html2canvas logging in the console.
+      scale: 1.5, // Increase scale for better resolution
+      useCORS: true,
+      allowTaint: true,
+      logging: false // Reduce console noise
     }).then(canvas => {
-      // Restore the download button's visibility after capture.
-      downloadBtn.style.display = originalDownloadDisplay;
-
-      // Convert the canvas to a JPEG image data URL.
-      const imgData = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG format with 80% quality.
-      // Create a new jsPDF instance (portrait, millimeters, A4 size).
+      const imgData = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG for smaller size
       const pdf = new jsPDF('p', 'mm', 'a4');
-      // Get PDF page dimensions.
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      // Calculate image dimensions, maintaining aspect ratio and adding margins.
-      const imgWidth = pdfWidth - 20; // 10mm margin on each side
-      const imgHeight = canvas.height * imgWidth / canvas.width;
-      let heightLeft = imgHeight; // Track remaining image height to print.
-      let position = 10; // Initial Y position for the image (10mm margin).
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const ratio = canvasWidth / canvasHeight;
+      const imgWidth = pdfWidth - 20; // Add some margin
+      const imgHeight = imgWidth / ratio;
 
-      // Add the first part of the image to the PDF.
+      let heightLeft = imgHeight;
+      let position = 10; // Initial top margin
+
       pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-      // Decrease remaining height by the height of the first page content area.
-      heightLeft -= (pdfHeight - 20); // Subtract page height minus top/bottom margins
+      heightLeft -= (pdfHeight - 20); // Subtract available height
 
-      // If the image is taller than one page, add new pages.
       while (heightLeft > 0) {
-        // Calculate the Y position for the image segment on the new page.
-        // This effectively shifts the image upwards on subsequent pages.
-        position = heightLeft - imgHeight + 10; // Adjust position based on remaining height
-        pdf.addPage(); // Add a new page to the PDF.
-        // Add the next segment of the image.
+        position = heightLeft - imgHeight + 10; // Adjust position for next page
+        pdf.addPage();
         pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-        // Decrease remaining height.
         heightLeft -= (pdfHeight - 20);
       }
 
-      // Generate a filename for the PDF.
-      const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
-      const testTitle = selectedTestInternal.title || 'CustomTest'; // Get test title or use default
-      const filename = `StenoWarriors_${testTitle.replace(/[^a-z0-9]/gi, '_')}_${dateStr}.pdf`; // Sanitize title
-
-      // Save the generated PDF.
-      pdf.save(filename);
+      pdf.save('steno-warriors-results.pdf');
+      // Restore visibility if changed
+      // e.g., comparisonResultEl.style.display = '';
     }).catch(err => {
-        // Restore the download button even if an error occurs.
-        downloadBtn.style.display = originalDownloadDisplay;
         console.error("Error generating PDF:", err);
-        alert("Failed to generate PDF. Check console for details.");
+        alert("Could not generate PDF. Please try again.");
+        // Restore visibility if changed
     });
   }
 
-  /**
-   * Prepares text for comparison by cleaning and splitting it into words.
-   * @param {string} text - The input text string.
-   * @returns {string[]} An array of processed words.
-   */
   function processText(text) {
-    // Normalize line breaks, remove HTML tags, normalize quotes,
-    // replace multiple spaces with single space, trim whitespace, and split into words.
     return text
-      .replace(/\r\n|\r/g, '\n') // Normalize line endings to \n
       .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/[\u2018\u2019]/g, "'") // Replace curly single quotes with standard apostrophe
-      .replace(/[\u201C\u201D]/g, '"') // Replace curly double quotes with standard double quotes
-      .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with a single space
-      .trim() // Remove leading/trailing whitespace
-      .split(' '); // Split the string into an array of words based on spaces
+      .replace(/[\u2018\u2019]/g, "'") // Normalize apostrophes
+      .replace(/[\u201C\u201D]/g, '"') // Normalize quotes
+      .replace(/[.,!?;:]/g, '') // Remove punctuation for basic comparison (adjust if needed)
+      .trim()
+      .split(/\s+/); // Split by whitespace
   }
 
-  /**
-   * Checks if two words are similar, ignoring case and basic punctuation.
-   * @param {string} wordA - The first word.
-   * @param {string} wordB - The second word.
-   * @returns {boolean} True if the words are considered similar, false otherwise.
-   */
   function isSimilar(wordA, wordB) {
-    // Convert both words to lowercase and remove common punctuation marks.
-    const cleanA = wordA.toLowerCase().replace(/[.,!?;:"']/g, '');
-    const cleanB = wordB.toLowerCase().replace(/[.,!?;:"']/g, '');
-    // Return true if the cleaned words are identical.
-    return cleanA === cleanB;
+      // Basic similarity check (case-insensitive)
+      return wordA.toLowerCase() === wordB.toLowerCase();
+      // Could implement Levenshtein distance for more advanced similarity
   }
 
-  /**
-   * Checks if two arrays of words are identical using the isSimilar function for word comparison.
-   * @param {string[]} arr1 - The first array of words.
-   * @param {string[]} arr2 - The second array of words.
-   * @returns {boolean} True if the arrays are considered equal, false otherwise.
-   */
   function arraysAreEqual(arr1, arr2) {
-    // If the arrays have different lengths, they cannot be equal.
     if (arr1.length !== arr2.length) return false;
-    // Iterate through the arrays and compare words at the same index.
     for (let i = 0; i < arr1.length; i++) {
-      // Use isSimilar for comparison to handle case/punctuation differences.
-      if (!isSimilar(arr1[i], arr2[i])) return false; // If any pair is not similar, arrays are not equal.
+      if (arr1[i] !== arr2[i]) return false;
     }
-    // If all corresponding words are similar, the arrays are equal.
     return true;
   }
 
-  /**
-   * Compares two arrays of words (paragraphs) and generates comparison HTML and statistics.
-   * This is a more advanced comparison algorithm attempting to synchronize after mismatches.
-   * @param {string[]} paragraphA - The array of words from the original text.
-   * @param {string[]} paragraphB - The array of words from the user's transcription.
-   * @returns {object} An object containing the comparison HTML and statistics.
-   */
-   function compareParagraphs(paragraphA, paragraphB) {
-    let comparedText = ''; // HTML string to build the visual comparison
-    let numHalfDiff = 0;   // Count of minor differences (e.g., capitalization)
-    let numFullDiff = 0;   // Count of major differences (missing, added, wrong word)
-    let wordAIndex = 0;    // Current index for paragraphA
-    let wordBIndex = 0;    // Current index for paragraphB
+  function compareParagraphs(paragraphA, paragraphB) {
+      // This is a simplified comparison logic. A more robust diff algorithm (like Myers diff)
+      // would provide better results for insertions/deletions.
+      let comparedText = '';
+      let numHalfDiff = 0; // For capitalization/minor spelling differences
+      let numFullDiff = 0; // For missing/added/completely different words
+      let correctCount = 0;
+      let wordAIndex = 0;
+      let wordBIndex = 0;
 
-    // Loop until both paragraphs have been fully processed
-    while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
-        const wordA = paragraphA[wordAIndex] || ''; // Get current word or empty string if out of bounds
-        const wordB = paragraphB[wordBIndex] || ''; // Get current word or empty string if out of bounds
+      const maxLength = Math.max(paragraphA.length, paragraphB.length);
 
-        // Clean words for comparison (lowercase, remove basic punctuation)
-        const cleanWordA = wordA.replace(/[,\?\-\s.]/g, '').toLowerCase();
-        const cleanWordB = wordB.replace(/[,\?\-\s.]/g, '').toLowerCase();
+      while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
+          const wordA = paragraphA[wordAIndex] || '';
+          const wordB = paragraphB[wordBIndex] || '';
+          const cleanWordA = wordA.toLowerCase(); // Compare lowercase
+          const cleanWordB = wordB.toLowerCase();
 
-        // --- Case 1: Exact Match (after cleaning) ---
-        if (cleanWordA === cleanWordB && wordA && wordB) { // Ensure words exist before comparing
-            // Check if the original casing/punctuation differs
-            if (wordA !== wordB) {
-                // Mark as capitalization/minor difference
-                comparedText += `<span class="capitalization">${wordA}</span> `;
-                comparedText += `<span class="capitalization-strike">${wordB}</span> `;
-                numHalfDiff++;
-            } else {
-                // Mark as correct
-                comparedText += `<span class="correct">${wordA}</span> `;
-            }
-            // Move to the next word in both paragraphs
-            wordAIndex++;
-            wordBIndex++;
-        }
-        // --- Case 2: End of one paragraph reached ---
-        else if (wordAIndex >= paragraphA.length) {
-            // Original text ended, remaining user words are additions
-            comparedText += `<span class="addition">${wordB}</span> `;
-            numFullDiff++;
-            wordBIndex++;
-        } else if (wordBIndex >= paragraphB.length) {
-            // User text ended, remaining original words are missing
-            comparedText += `<span class="missing">${wordA}</span> `;
-            numFullDiff++;
-            wordAIndex++;
-        }
-        // --- Case 3: Mismatch - Attempt Synchronization ---
-        else {
-            let foundSync = false;
-            // Look ahead in user text (max 5 words) to see if original word appears
-            for (let lookAheadB = 1; lookAheadB <= 5 && (wordBIndex + lookAheadB) < paragraphB.length; lookAheadB++) {
-                if (isSimilar(wordA, paragraphB[wordBIndex + lookAheadB])) {
-                    // Found original word later in user text. Mark intermediate user words as additions.
-                    for (let i = 0; i < lookAheadB; i++) {
-                        comparedText += `<span class="addition">${paragraphB[wordBIndex + i]}</span> `;
-                        numFullDiff++;
-                    }
-                    // Mark the synchronized word (handle capitalization)
-                    if (wordA !== paragraphB[wordBIndex + lookAheadB]) {
-                         comparedText += `<span class="capitalization">${wordA}</span> `;
-                         comparedText += `<span class="capitalization-strike">${paragraphB[wordBIndex + lookAheadB]}</span> `;
-                         numHalfDiff++;
-                    } else {
-                        comparedText += `<span class="correct">${wordA}</span> `;
-                    }
-                    // Advance indices past the synchronized point
-                    wordAIndex++;
-                    wordBIndex += lookAheadB + 1;
-                    foundSync = true;
-                    break;
-                }
-            }
+          if (wordA === wordB) { // Exact match
+              comparedText += `<span class="correct">${wordA}</span> `;
+              correctCount++;
+              wordAIndex++;
+              wordBIndex++;
+          } else if (cleanWordA === cleanWordB) { // Capitalization difference
+              comparedText += `<span class="capitalization">${wordA}</span> `; // Show original
+              // comparedText += `<span class="capitalization-strike">${wordB}</span> `; // Optionally show user's version
+              wordAIndex++;
+              wordBIndex++;
+              numHalfDiff++;
+          } else {
+              // Simple diff: Check next few words for resynchronization
+              let lookahead = 3;
+              let foundMatchA = -1;
+              let foundMatchB = -1;
 
-            // If not found by looking ahead in user text, look ahead in original text
-            if (!foundSync) {
-                for (let lookAheadA = 1; lookAheadA <= 5 && (wordAIndex + lookAheadA) < paragraphA.length; lookAheadA++) {
-                    if (isSimilar(paragraphA[wordAIndex + lookAheadA], wordB)) {
-                        // Found user word later in original text. Mark intermediate original words as missing.
-                        for (let i = 0; i < lookAheadA; i++) {
-                            comparedText += `<span class="missing">${paragraphA[wordAIndex + i]}</span> `;
-                            numFullDiff++;
-                        }
-                        // Mark the synchronized word (handle capitalization)
-                         if (paragraphA[wordAIndex + lookAheadA] !== wordB) {
-                             comparedText += `<span class="capitalization">${paragraphA[wordAIndex + lookAheadA]}</span> `;
-                             comparedText += `<span class="capitalization-strike">${wordB}</span> `;
-                             numHalfDiff++;
-                         } else {
-                             comparedText += `<span class="correct">${paragraphA[wordAIndex + lookAheadA]}</span> `;
-                         }
-                        // Advance indices past the synchronized point
-                        wordAIndex += lookAheadA + 1;
-                        wordBIndex++;
-                        foundSync = true;
-                        break;
-                    }
-                }
-            }
+              // Look ahead in B for word A
+              for (let i = 1; i <= lookahead && (wordBIndex + i) < paragraphB.length; i++) {
+                  if (paragraphA[wordAIndex] === paragraphB[wordBIndex + i]) {
+                      foundMatchB = i;
+                      break;
+                  }
+              }
 
-            // --- Case 4: Still Mismatched - Mark as full difference ---
-            if (!foundSync) {
-                comparedText += `<span class="missing">${wordA}</span> `;
-                comparedText += `<span class="addition">${wordB}</span> `;
-                numFullDiff++;
-                wordAIndex++;
-                wordBIndex++;
-            }
-        }
-    }
+              // Look ahead in A for word B
+              for (let i = 1; i <= lookahead && (wordAIndex + i) < paragraphA.length; i++) {
+                  if (paragraphB[wordBIndex] === paragraphA[wordAIndex + i]) {
+                      foundMatchA = i;
+                      break;
+                  }
+              }
 
-    // --- Calculate Statistics ---
-    const keystrokesCount = userTextEl.value.length; // Total characters typed by the user.
-    // Calculate error percentage (half mistakes count half as much as full mistakes).
-    const errorPercentage = paragraphA.length > 0 ?
-      Math.min(100, ((numHalfDiff / 2) + numFullDiff) / paragraphA.length * 100) : 0;
-    // Accuracy is the inverse of the error percentage.
-    const accuracyPercentage = Math.max(0, 100 - errorPercentage);
-
-    // Calculate time taken and WPM.
-    const endTimeCalc = new Date(); // Use current time as end time for calculation
-    // Calculate time difference only if startTime is valid
-    const timeTakenSeconds = startTime ? Math.round((endTimeCalc - startTime) / 1000) : 0;
-    // Ensure timeTakenSeconds is not negative if system clock changes etc.
-    const validTimeTakenSeconds = Math.max(0, timeTakenSeconds);
-    const typingTimeMinutes = validTimeTakenSeconds / 60;
-    const wordsTyped = paragraphB.length; // Base WPM on the number of words the user actually typed.
-    const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0; // Avoid division by zero.
-
-    // Return the results object.
-    return {
-      html: comparedText.trim(), // The generated HTML string for display.
-      stats: {
-        totalOriginal: paragraphA.length, // Total words in the original text.
-        totalUser: paragraphB.length,     // Total words in the user's transcription.
-        halfMistakes: numHalfDiff,         // Count of minor errors (e.g., capitalization).
-        fullMistakes: numFullDiff,         // Count of major errors (missing, added, wrong).
-        keystrokes: keystrokesCount,       // Total characters typed by the user.
-        wpm: wpm,                          // Words per minute.
-        accuracy: accuracyPercentage,      // Overall accuracy percentage.
-        errorRate: errorPercentage,        // Overall error rate percentage.
-        timeTaken: validTimeTakenSeconds   // Total time taken in seconds.
+              if (foundMatchB !== -1 && (foundMatchA === -1 || foundMatchB <= foundMatchA)) {
+                  // Found wordA later in B -> words in B were added
+                  for (let i = 0; i < foundMatchB; i++) {
+                      comparedText += `<span class="addition">${paragraphB[wordBIndex + i]}</span> `;
+                      numFullDiff++;
+                  }
+                  wordBIndex += foundMatchB;
+              } else if (foundMatchA !== -1) {
+                  // Found wordB later in A -> words in A were missed
+                  for (let i = 0; i < foundMatchA; i++) {
+                      comparedText += `<span class="missing">${paragraphA[wordAIndex + i]}</span> `;
+                      numFullDiff++;
+                  }
+                  wordAIndex += foundMatchA;
+              } else {
+                  // No match found nearby -> assume mismatch
+                  if (wordA && wordB) {
+                      // Consider it a spelling error if words are somewhat similar (optional)
+                      // For now, treat as full diff
+                      comparedText += `<span class="missing">${wordA}</span> `;
+                      comparedText += `<span class="addition">${wordB}</span> `;
+                      numFullDiff++;
+                      wordAIndex++;
+                      wordBIndex++;
+                  } else if (wordA) { // Word A exists, Word B doesn't (end of user text)
+                      comparedText += `<span class="missing">${wordA}</span> `;
+                      numFullDiff++;
+                      wordAIndex++;
+                  } else { // Word B exists, Word A doesn't (end of original text)
+                      comparedText += `<span class="addition">${wordB}</span> `;
+                      numFullDiff++;
+                      wordBIndex++;
+                  }
+              }
+          }
       }
-    };
+
+      const totalOriginalWords = paragraphA.length;
+      const totalMistakes = (numHalfDiff / 2) + numFullDiff; // Count half mistakes as 0.5
+      const errorPercentage = totalOriginalWords > 0 ?
+          Math.min(100, (totalMistakes / totalOriginalWords) * 100) : 0;
+      const accuracyPercentage = Math.max(0, 100 - errorPercentage);
+
+      const keystrokesCount = userTextEl.value.length;
+      const endTime = new Date();
+      const timeTakenSeconds = startTime ? Math.round((endTime - startTime) / 1000) : 0;
+      const typingTimeMinutes = timeTakenSeconds / 60;
+      const wordsTyped = paragraphB.length; // Use user words for WPM calculation
+      // Calculate WPM based on net words (correct words typed per minute) or gross words
+      // Using gross WPM here:
+      const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
+
+      return {
+          html: comparedText.trim(), // Trim trailing space
+          stats: {
+              totalOriginal: totalOriginalWords,
+              totalUser: wordsTyped,
+              halfMistakes: numHalfDiff,
+              fullMistakes: numFullDiff,
+              keystrokes: keystrokesCount,
+              wpm: wpm,
+              accuracy: accuracyPercentage,
+              errorRate: errorPercentage,
+              timeTaken: timeTakenSeconds
+          }
+      };
   }
 
-  /**
-   * Displays the visually compared text (with highlights) in the designated element.
-   * @param {object} comparison - The comparison object returned by compareParagraphs.
-   */
+
   function displayComparison(comparison) {
-    // Set the innerHTML of the comparison result element to the generated HTML string.
     comparisonResultEl.innerHTML = comparison.html;
   }
 
-  /**
-   * Displays the calculated statistics in the designated element.
-   * @param {object} stats - The statistics object from the comparison result.
-   */
   function displayStats(stats) {
-    // Populate the stats element with formatted statistics data.
     statsEl.innerHTML = `
       <div class="stat-item">
         <h4>Original Words</h4>
@@ -2784,7 +2646,8 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <div class="stat-item">
         <h4>Accuracy</h4>
-        <p>${stats.accuracy.toFixed(1)}%</p> </div>
+        <p>${stats.accuracy.toFixed(1)}%</p>
+      </div>
       <div class="stat-item">
         <h4>Time Taken</h4>
         <p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p>
@@ -2792,716 +2655,706 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
   }
 
-  /**
-   * Generates and displays feedback and improvement suggestions based on performance.
-   * @param {object} stats - The statistics object.
-   * @param {string[]} originalWords - Array of original words.
-   * @param {string[]} userWords - Array of user-typed words.
-   */
   function displayFeedback(stats, originalWords, userWords) {
-    // Analyze the mistakes made during the transcription.
-    const analysis = analyzeMistakes(originalWords, userWords);
+    // Basic feedback based on stats
+    let feedbackHTML = `<h4>Overall Assessment</h4>`;
+    feedbackHTML += getOverallAssessment(stats.accuracy, stats.wpm);
 
-    // Construct the feedback HTML string.
-    let feedback = `
-      <h4>Overall Assessment</h4>
-      ${getOverallAssessment(stats.accuracy, stats.wpm)} <h4>Mistake Analysis</h4>
-      <ul>
-        ${analysis.commonMistakes.map(m => `<li>${m}</li>`).join('')}
-      </ul>
+    // More detailed analysis could be added here by comparing originalWords and userWords
+    // For example, identifying common types of errors (omissions, additions, specific word errors)
 
-      <h4>Improvement Suggestions</h4>
-      <ul>
-        ${getImprovementSuggestions(analysis, stats)}
-      </ul>
-    `;
+    feedbackHTML += `<h4>Improvement Suggestions</h4><ul>`;
+    if (stats.accuracy < 90) {
+      feedbackHTML += `<li>Focus on accuracy. Slow down slightly if needed.</li>`;
+    }
+    if (stats.halfMistakes > 5) {
+         feedbackHTML += `<li>Pay attention to capitalization and minor spelling details.</li>`;
+    }
+     if (stats.fullMistakes > stats.totalOriginal * 0.05) { // More than 5% full mistakes
+         feedbackHTML += `<li>Review the original text carefully to avoid missing or adding words.</li>`;
+     }
+    if (stats.wpm < 40) {
+        feedbackHTML += `<li>Practice regularly to increase your typing speed.</li>`;
+    }
+    feedbackHTML += `<li>Consistent practice is key to improvement!</li>`;
+    feedbackHTML += `</ul>`;
 
-    // Display the generated feedback in the feedback element.
-    feedbackEl.innerHTML = feedback;
+    feedbackEl.innerHTML = feedbackHTML;
   }
 
-  /**
-   * Displays the full original and user-transcribed texts in their respective display areas.
-   * @param {string} original - The original text.
-   * @param {string} user - The user's transcribed text.
-   */
   function displayFullTexts(original, user) {
-    // Set the text content for the original and user text display elements.
     originalDisplayEl.textContent = original;
     userDisplayEl.textContent = user;
   }
 
-  /**
-   * Analyzes the differences between original and user text to identify common mistake types.
-   * @param {string[]} originalText - Array of original words.
-   * @param {string[]} userText - Array of user-typed words.
-   * @returns {object} An object containing analysis results (mistake rates, common errors).
-   */
   function analyzeMistakes(originalText, userText) {
-    // Initialize the analysis object.
-    const analysis = {
-      commonMistakes: [], // Array to hold descriptions of common mistakes.
-      omissionRate: 0,    // Rate of skipping words.
-      additionRate: 0,    // Rate of adding extra words.
-      spellingErrorRate: 0, // Rate of spelling/minor errors.
-      capitalizationErrorRate: 0, // Rate of capitalization errors specifically.
-      mostErrorProneWords: [] // List of words frequently involved in errors.
-    };
-
-    // --- This is a simplified analysis based on direct word-pair comparison ---
-    // A more accurate analysis would require using the detailed diff from compareParagraphs.
-    // However, this provides a basic overview.
-
-    const wordPairs = []; // Array to store pairs of differing words.
-    const minLength = Math.min(originalText.length, userText.length);
-
-    // Compare words at the same index up to the length of the shorter text.
-    for (let i = 0; i < minLength; i++) {
-      const origWordClean = originalText[i].toLowerCase().replace(/[.,!?;:"']/g, '');
-      const userWordClean = userText[i].toLowerCase().replace(/[.,!?;:"']/g, '');
-
-      // If cleaned words differ, store the original and user pair.
-      if (origWordClean !== userWordClean) {
-        wordPairs.push({ original: originalText[i], user: userText[i] });
-      }
-    }
-
-    // Add differences due to length mismatch (approximations).
-    if (originalText.length > userText.length) {
-        for (let i = minLength; i < originalText.length; i++) {
-            wordPairs.push({ original: originalText[i], user: '' }); // Omission
-        }
-    } else if (userText.length > originalText.length) {
-        for (let i = minLength; i < userText.length; i++) {
-            wordPairs.push({ original: '', user: userText[i] }); // Addition
-        }
-    }
-
-
-    let omissionCount = 0;
-    let additionCount = 0;
-    let spellingCount = 0; // Includes capitalization for this simplified analysis
-    let capitalizationCount = 0; // More specific count
-    const errorWords = []; // Track original words involved in errors
-
-    // Categorize the identified differences.
-    wordPairs.forEach(pair => {
-      const orig = pair.original;
-      const user = pair.user;
-      const origClean = orig.toLowerCase().replace(/[.,!?;:"']/g, '');
-      const userClean = user.toLowerCase().replace(/[.,!?;:"']/g, '');
-
-      if (user === '') {
-        omissionCount++;
-        errorWords.push(orig);
-      } else if (orig === '') {
-        additionCount++;
-        // Don't add original word if it was an addition
-      } else if (origClean === userClean) {
-          // Words match after cleaning, but not exactly -> Capitalization/Punctuation
-          capitalizationCount++; // Count specifically
-          spellingCount++; // Also count in general spelling/minor errors
-          errorWords.push(orig);
-      } else {
-          // Words differ even after cleaning -> Spelling/Wrong word
-          spellingCount++;
-          errorWords.push(orig);
-      }
-    });
-
-    // Calculate rates based on the length of the original text.
-    const totalOriginal = originalText.length || 1; // Avoid division by zero
-    analysis.omissionRate = omissionCount / totalOriginal;
-    analysis.additionRate = additionCount / totalOriginal; // Note: Rate based on original length might be misleading for additions.
-    analysis.spellingErrorRate = spellingCount / totalOriginal;
-    analysis.capitalizationErrorRate = capitalizationCount / totalOriginal;
-
-    // Find the most frequently misspelled/omitted original words.
-    const wordFrequency = {};
-    errorWords.forEach(word => {
-      const lowerWord = word.toLowerCase().replace(/[.,!?;:"']/g, ''); // Clean the word for frequency count
-      if (lowerWord) { // Avoid counting empty strings if punctuation was the only content
-          wordFrequency[lowerWord] = (wordFrequency[lowerWord] || 0) + 1;
-      }
-    });
-
-    // Sort words by error frequency and take the top 5.
-    analysis.mostErrorProneWords = Object.entries(wordFrequency)
-      .sort((a, b) => b[1] - a[1]) // Sort descending by frequency
-      .slice(0, 5) // Take the top 5
-      .map(entry => entry[0]); // Get only the word
-
-    // Populate the commonMistakes array with descriptions.
-    if (capitalizationCount > 0) {
-      analysis.commonMistakes.push(`Capitalization/punctuation errors (${capitalizationCount} instances)`);
-    }
-    if (spellingCount > capitalizationCount) { // Avoid double counting pure capitalization errors here
-       analysis.commonMistakes.push(`Spelling/wrong word errors (${spellingCount - capitalizationCount} instances)`);
-    }
-    if (omissionCount > 0) {
-      analysis.commonMistakes.push(`Omitted words (${omissionCount} instances)`);
-    }
-    if (additionCount > 0) {
-      analysis.commonMistakes.push(`Added extra words (${additionCount} instances)`);
-    }
-     if (analysis.mostErrorProneWords.length > 0) {
-        analysis.commonMistakes.push(`Words often missed/mistyped: ${analysis.mostErrorProneWords.join(', ')}`);
-    }
-    if (analysis.commonMistakes.length === 0) {
-        analysis.commonMistakes.push("No specific common mistake patterns identified in this simple analysis.");
-    }
-
-
-    return analysis;
+      // Placeholder for more detailed mistake analysis if needed later
+      return {
+          commonMistakes: [],
+          mostErrorProneWords: []
+      };
   }
 
-  /**
-   * Provides an overall assessment message based on accuracy and WPM.
-   * @param {number} accuracy - The accuracy percentage.
-   * @param {number} wpm - The words per minute.
-   * @returns {string} An HTML string containing the assessment message.
-   */
   function getOverallAssessment(accuracy, wpm) {
     let assessment = '';
 
-    // Assess accuracy.
-    if (accuracy >= 95) {
-      assessment += '<p>🌟 <strong>Excellent accuracy!</strong> Your transcription is nearly perfect.</p>';
-    } else if (accuracy >= 85) {
-      assessment += '<p>👍 <strong>Good accuracy.</strong> With a little more practice, you can reach excellence.</p>';
-    } else if (accuracy >= 70) {
-      assessment += '<p>📝 <strong>Fair accuracy.</strong> Focus on reducing errors to improve your score.</p>';
+    if (accuracy >= 98) {
+      assessment += '<p>🌟 <strong>Outstanding accuracy!</strong> Professional level.</p>';
+    } else if (accuracy >= 95) {
+      assessment += '<p>👍 <strong>Excellent accuracy!</strong> Very few errors.</p>';
+    } else if (accuracy >= 90) {
+      assessment += '<p>✅ <strong>Good accuracy.</strong> Solid performance, room for refinement.</p>';
+    } else if (accuracy >= 80) {
+      assessment += '<p>📝 <strong>Fair accuracy.</strong> Focus on reducing common errors.</p>';
     } else {
-      assessment += '<p>⚠️ <strong>Needs improvement.</strong> Work on accuracy before increasing speed.</p>';
+      assessment += '<p>⚠️ <strong>Accuracy needs improvement.</strong> Prioritize correctness over speed for now.</p>';
     }
 
-    // Assess speed (WPM).
-    if (wpm >= 50) {
-      assessment += '<p>⚡ <strong>Fast typer!</strong> Your speed is impressive. ';
-      // Add advice based on accuracy at high speed.
-      if (accuracy < 90) {
-        assessment += 'Try slowing down slightly to improve accuracy.</p>';
-      } else {
-        assessment += 'Maintain this speed while keeping accuracy high.</p>';
-      }
+    if (wpm >= 60) {
+      assessment += '<p>⚡ <strong>Very Fast Typer!</strong> Excellent speed.</p>';
+    } else if (wpm >= 50) {
+      assessment += '<p>🚀 <strong>Fast Typer!</strong> Good speed, keep it up.</p>';
     } else if (wpm >= 40) {
-      assessment += '<p>🏃 <strong>Moderate speed.</strong> You\'re typing at a good pace. ';
-      assessment += 'With practice, you can increase speed without sacrificing accuracy.</p>';
+      assessment += '<p>🏃 <strong>Moderate Speed.</strong> Decent pace, aim higher with practice.</p>';
     } else {
-      assessment += '<p>🐢 <strong>Slow pace.</strong> Focus on building muscle memory and gradually increasing your speed.</p>';
+      assessment += '<p>🐢 <strong>Developing Speed.</strong> Focus on technique and rhythm.</p>';
     }
 
     return assessment;
   }
 
-  /**
-   * Generates specific improvement suggestions based on the mistake analysis.
-   * @param {object} analysis - The mistake analysis object.
-   * @param {object} stats - The statistics object.
-   * @returns {string} An HTML string containing list items with suggestions.
-   */
   function getImprovementSuggestions(analysis, stats) {
-    let suggestions = []; // Array to hold suggestion strings.
-
-    // Add suggestions based on specific error rates (thresholds can be adjusted).
-    if (analysis.omissionRate > 0.1) { // If more than 10% of words are omitted
-      suggestions.push('You seem to be skipping words. Try to read slightly ahead or listen more carefully to anticipate upcoming words.');
-    }
-
-    if (analysis.additionRate > 0.05) { // If more than 5% extra words are added
-      suggestions.push('You\'re adding extra words. Focus on typing only what you see/hear in the original text.');
-    }
-
-    if (analysis.spellingErrorRate > 0.1) { // If more than 10% spelling/wrong word errors
-      suggestions.push('Spelling or word choice mistakes are noticeable. Practice commonly misspelled words or review the text more closely.');
-       if (analysis.mostErrorProneWords.length > 0) {
-           suggestions.push(`Focus practice on these words: ${analysis.mostErrorProneWords.join(', ')}.`);
-       }
-    }
-
-    if (analysis.capitalizationErrorRate > 0.05) { // If more than 5% capitalization errors
-      suggestions.push('Pay attention to capitalization. Remember proper nouns and the start of sentences require capitals.');
-    }
-
-    // Add general suggestions.
-    suggestions.push('Practice makes perfect! Repeat difficult sections until you master them.');
-    suggestions.push('Consider breaking long passages into smaller chunks for focused practice.');
-    if (stats.accuracy < 95 && stats.wpm > 45) { // If accuracy is not great but speed is high
-        suggestions.push('Focus on improving accuracy before trying to type faster. Speed will increase naturally with accuracy.');
-    } else {
-        suggestions.push('Continue practicing regularly to improve both speed and accuracy.');
-    }
-
-
-    // Format suggestions as HTML list items.
-    return suggestions.map(s => `<li>${s}</li>`).join('');
+      // Placeholder for suggestions based on detailed analysis
+      let suggestions = [];
+      suggestions.push('Practice consistently.');
+      suggestions.push('Focus on accuracy first, then speed.');
+      suggestions.push('Review your mistakes after each test.');
+      return suggestions.map(s => `<li>${s}</li>`).join('');
   }
-
-  // --- NEW FUNCTIONS END ---
 
 
   function embedVideo(url) {
     const existingVideo = document.getElementById('testVideoPlayer');
-    if (existingVideo) existingVideo.remove();
+    if (existingVideo) {
+      existingVideo.remove();
+    }
+
     if (!url) return;
+
     const videoContainer = document.createElement('div');
     videoContainer.className = 'video-container';
     videoContainer.id = 'testVideoPlayer';
-    let videoId = null;
-    try {
-        const urlObj = new URL(url);
-        // Updated Regex to handle various YouTube URL formats
-        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
-        const match = url.match(youtubeRegex);
-        if (match && match[1]) {
-            videoId = match[1];
-        }
-    } catch (e) { console.warn("Could not parse video URL:", url, e); }
+
+    // Basic check for YouTube URLs
+    let videoId;
+    if (url.includes('youtube.com/watch?v=')) {
+        videoId = url.split('v=')[1].split('&')[0];
+    } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1].split('?')[0];
+    }
 
     if (videoId) {
-      videoContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        // Embed YouTube video
+        videoContainer.innerHTML = `
+          <iframe src="https://www.youtube.com/embed/${videoId}"
+                  frameborder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowfullscreen></iframe>
+        `;
     } else {
-      // Fallback for direct video links or other platforms
-      videoContainer.innerHTML = `<video controls style="width:100%; height: 100%; position: absolute; top: 0; left: 0; border-radius: 8px;"><source src="${url}" type="video/mp4"><source src="${url}" type="video/webm"><source src="${url}" type="video/ogg">Video not supported or invalid URL. <a href="${url}" target="_blank">Link</a></video>`;
+        // Assume direct video link (MP4, WebM, etc.)
+        videoContainer.innerHTML = `
+          <video controls style="width:100%; height:100%; position:absolute; top:0; left:0; border-radius: 8px;">
+            <source src="${url}" type="video/mp4">
+            Your browser does not support the video tag or the video format.
+          </video>
+        `;
     }
-    // Insert video before the user text input area
-    const userTextGroup = document.getElementById('userText').parentNode;
-    userTextGroup.parentNode.insertBefore(videoContainer, userTextGroup);
+
+    // Insert video container after the original text group
+    originalTextGroup.insertAdjacentElement('afterend', videoContainer);
   }
 
-  // Fetch all tests once and store them
-  function fetchAllTestsOnce() {
-      database.ref('tests').orderByChild('timestamp').once('value')
+  function loadGlobalTests() {
+      const category = testCategoryFilter.value;
+      const testsRef = database.ref('tests');
+
+      // Determine the query based on the category filter
+      let query = testsRef.orderByChild('timestamp'); // Default sort
+      if (category !== 'all') {
+          // Firebase Realtime DB doesn't support querying by two properties directly (category and timestamp) without indexes.
+          // Fetch all, then filter client-side, or structure data differently (e.g., /testsByCategory/{category}/{testId}).
+          // For simplicity, fetching all and filtering client-side here.
+          // Consider adding server-side indexing if performance becomes an issue with many tests.
+          query = testsRef.orderByChild('timestamp'); // Still order by timestamp for recent first
+      }
+
+      query.once('value')
           .then(snapshot => {
-              const tests = snapshot.val();
-              if (tests) {
-                  allFetchedTests = Object.entries(tests)
-                      .map(([id, test]) => ({ id, ...test }))
-                      .sort((a, b) => b.timestamp - a.timestamp); // Sort newest first
-              } else {
-                  allFetchedTests = [];
+              carouselTrack = document.querySelector('.carousel-track');
+              carouselDotsContainer = document.querySelector('.carousel-dots');
+              carouselPrevBtn = document.querySelector('.prev-btn');
+              carouselNextBtn = document.querySelector('.next-btn');
+
+              if (!carouselTrack || !carouselDotsContainer || !carouselPrevBtn || !carouselNextBtn) {
+                  console.error("Carousel elements not found!");
+                  return;
               }
-              renderGlobalTests(); // Initial render after fetching
+
+              carouselTrack.innerHTML = ''; // Clear previous cards
+              carouselDotsContainer.innerHTML = ''; // Clear previous dots
+              carouselCards = []; // Reset cards array
+
+              const tests = snapshot.val();
+              if (!tests) {
+                  carouselTrack.innerHTML = '<p style="padding: 1rem; text-align: center; width: 100%;">No community tests available.</p>';
+                  disableCarouselButtons();
+                  return;
+              }
+
+              // Convert to array and sort by timestamp descending (newest first)
+              const testsArray = Object.entries(tests).map(([id, test]) => ({
+                  id,
+                  ...test
+              })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+              // Filter by category client-side
+              const filteredTests = category === 'all'
+                  ? testsArray
+                  : testsArray.filter(test => test.category === category);
+
+              if (filteredTests.length === 0) {
+                  carouselTrack.innerHTML = `<p style="padding: 1rem; text-align: center; width: 100%;">No tests found for the '${getCategoryName(category)}' category.</p>`;
+                   disableCarouselButtons();
+                  return;
+              }
+
+              // Check user permissions (admin or owner)
+              const isAdmin = currentUser && adminEmails.includes(currentUser.email);
+
+              filteredTests.forEach((test) => {
+                  const testCard = document.createElement('div');
+                  testCard.className = 'test-card';
+                  testCard.dataset.id = test.id; // Store test ID
+                  testCard.dataset.category = test.category;
+
+                  // Determine if the current user can edit/delete this test
+                  // Use UID for ownership check if available, fallback to userName
+                  const canModify = isAdmin || (currentUser && (
+                      (test.userId && test.userId === currentUser.uid) ||
+                      (!test.userId && test.userName === currentUser.displayName) // Fallback for older tests
+                  ));
+
+                  testCard.innerHTML = `
+                      <div class="test-card-content" style="cursor: pointer;"> <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
+                          <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
+                          ${test.videoUrl ? `<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>` : ''}
+                          <div class="test-author">
+                              <img src="${test.userPhoto || 'https://www.gravatar.com/avatar/' + test.id + '?d=identicon&s=24'}" alt="${test.userName || 'User'}">
+                              <span>Added by ${test.userName || 'User'}</span>
+                          </div>
+                      </div>
+                      ${canModify ? `
+                      <div class="test-card-actions">
+                          <button class="edit-test-btn" data-id="${test.id}">Edit</button>
+                          <button class="delete-test-btn" data-id="${test.id}">Delete</button>
+                      </div>
+                      ` : ''}
+                  `;
+
+                  // Add click listener to the content area to select the test
+                  testCard.querySelector('.test-card-content').addEventListener('click', () => {
+                      selectTest(testCard, test);
+                  });
+
+                  // Add listeners for Edit/Delete buttons if they exist
+                  if (canModify) {
+                      const editBtn = testCard.querySelector('.edit-test-btn');
+                      const deleteBtn = testCard.querySelector('.delete-test-btn');
+
+                      if (editBtn) {
+                          editBtn.addEventListener('click', (e) => {
+                              e.stopPropagation(); // Prevent card selection when clicking button
+                              editTest(test.id, test);
+                          });
+                      }
+                      if (deleteBtn) {
+                          deleteBtn.addEventListener('click', (e) => {
+                              e.stopPropagation(); // Prevent card selection
+                              deleteTest(test.id, test.title);
+                          });
+                      }
+                  }
+
+                  carouselTrack.appendChild(testCard);
+                  carouselCards.push(testCard); // Add to our array
+              });
+
+              // Initialize carousel only if there are cards
+              if (carouselCards.length > 0) {
+                  initializeCarousel();
+              } else {
+                  disableCarouselButtons();
+              }
           })
           .catch(error => {
-              console.error('Error fetching all tests:', error);
-              allFetchedTests = [];
-              renderGlobalTests(); // Render even if fetch fails (shows error message)
-          });
-  }
-
-  // Render tests based on current filters and search term using stored data
-  function renderGlobalTests() {
-      const category = testCategoryFilter.value;
-      const searchTerm = testSearchInput.value.toLowerCase().trim();
-      const carouselTrack = document.querySelector('.carousel-track');
-      const dotsContainer = document.querySelector('.carousel-dots');
-      carouselTrack.innerHTML = ''; dotsContainer.innerHTML = '';
-
-      if (!allFetchedTests || allFetchedTests.length === 0) {
-          carouselTrack.innerHTML = '<p>No community tests available.</p>';
-          initializeCarousel();
-          return;
-      }
-
-      // Filter by category
-      let categoryFilteredTests = category === 'all'
-          ? allFetchedTests
-          : allFetchedTests.filter(test => test.category === category);
-
-      // Filter by search term
-      let searchFilteredTests = categoryFilteredTests;
-      if (searchTerm) {
-          searchFilteredTests = categoryFilteredTests.filter(test =>
-              test.title.toLowerCase().includes(searchTerm)
-          );
-      }
-
-      if (searchFilteredTests.length === 0) {
-          carouselTrack.innerHTML = '<p>No tests match your filters.</p>';
-          initializeCarousel();
-          return;
-      }
-
-      // --- Render logic (same as before) ---
-      searchFilteredTests.forEach((test) => {
-          const testCard = document.createElement('div');
-          testCard.className = 'test-card';
-          testCard.dataset.category = test.category;
-          testCard.dataset.id = test.id;
-          const userPhotoSrc = test.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(test.userName || 'User')}&background=random&color=fff`;
-          const adminControlsHTML = isAdmin ? `<div class="test-card-admin-controls">
-                <button class="edit-test-btn" data-testid="${test.id}" title="Edit Test">✏️</button>
-                <button class="delete-test-btn" data-testid="${test.id}" title="Delete Test">🗑️</button>
-            </div>` : '';
-          testCard.innerHTML = `${adminControlsHTML}<h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
-            <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
-            ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
-            <div class="test-author"><img src="${userPhotoSrc}" alt="${test.userName || 'User'}"><span>Added by ${test.userName || 'Anonymous'}</span></div>`;
-
-          testCard.addEventListener('click', (e) => {
-            if (e.target.closest('.test-card-admin-controls')) return; // Ignore clicks on admin buttons
-            document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected'));
-            testCard.classList.add('selected');
-            selectedTestInternal = { text: test.text, title: test.title, category: test.category }; // Store selected test data
-            originalTextEl.value = ''; // Clear manual input area
-            originalTextGroup.classList.add('hidden'); // Hide manual input area
-            timerOptions.classList.remove('hidden'); // Show timer options
-            // Reset timer buttons
-            document.querySelectorAll('.timer-option').forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; });
-            userTextEl.value = ''; // Clear user input
-            userTextEl.readOnly = false; // Ensure user input is editable
-            userTextEl.classList.remove('locked-textarea');
-            compareBtn.disabled = false; // Enable compare button
-            resultsSection.classList.add('hidden'); // Hide previous results
-            fullTextSection.classList.add('hidden'); // Hide full text view
-            closeResultsBtn.classList.add('hidden'); // Hide close button
-            showFullTextBtn.classList.add('hidden'); // Hide full text btn on new selection
-            timerDisplay.classList.add('hidden'); // Hide timer display
-            timerDisplay.classList.remove('timer-ended'); // Reset timer end state
-            testActive = false; // Reset test state
-            startTime = null; // Reset start time
-            stopTimer(); // Clear any existing timer interval
-            // Embed video if available, otherwise remove existing video player
-            if (test.videoUrl) {
-                embedVideo(test.videoUrl);
-            } else {
-                const existingVideo = document.getElementById('testVideoPlayer');
-                if (existingVideo) existingVideo.remove();
-            }
-            userTextEl.focus(); // Focus on the transcription area
-          });
-
-          const editButton = testCard.querySelector('.edit-test-btn');
-          if (editButton) editButton.addEventListener('click', (e) => { e.stopPropagation(); showEditModal(test); });
-          const deleteButton = testCard.querySelector('.delete-test-btn');
-          if (deleteButton) deleteButton.addEventListener('click', (e) => { e.stopPropagation(); confirmAndDeleteTest(test.id, test.title); });
-
-          carouselTrack.appendChild(testCard);
-      });
-      // --- End Render logic ---
-
-      initializeCarousel(); // Re-initialize carousel with filtered items
-  }
-
-
-  // Function to show confirmation and delete a specific test
-  function confirmAndDeleteTest(testId, testTitle) {
-      const modal = document.createElement('div');
-      modal.className = 'modal show';
-      modal.innerHTML = `<div class="modal-content"><h3>Confirm Deletion</h3>
-          <p>Delete "<strong>${testTitle}</strong>"? This cannot be undone.</p>
-          <div class="modal-buttons">
-              <button id="cancelDeleteTest" class="secondary-btn">Cancel</button>
-              <button id="confirmDeleteTest" class="danger-btn">Delete Test</button>
-          </div></div>`;
-      document.body.appendChild(modal);
-      modal.querySelector('#cancelDeleteTest').addEventListener('click', () => closeModal(modal));
-      modal.querySelector('#confirmDeleteTest').addEventListener('click', () => {
-          database.ref('tests').child(testId).remove()
-              .then(() => {
-                  alert(`Test "${testTitle}" deleted.`);
-                  closeModal(modal);
-                  // Remove the deleted test from the local cache and re-render
-                  allFetchedTests = allFetchedTests.filter(test => test.id !== testId);
-                  renderGlobalTests();
-              })
-              .catch(error => { console.error('Error deleting test:', error); alert('Failed to delete test.'); closeModal(modal); });
-      });
-      modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
-  }
-
-
-  // Function to show the edit modal
-  function showEditModal(test) {
-      editTestId.value = test.id;
-      editTestTitle.value = test.title;
-      editTestCategory.value = test.category;
-      editTestText.value = test.text;
-      editTestVideoUrl.value = test.videoUrl || '';
-      editTestModal.classList.add('show');
-      // Ensure labels are animated correctly after populating
-      setTimeout(handleInputFocusBlur, 50);
-  }
-
-  // Function to close any modal
-  function closeModal(modalElement) {
-      modalElement.classList.remove('show');
-      if (modalElement.id !== 'editTestModal') {
-          modalElement.addEventListener('transitionend', () => {
-              if (modalElement.parentNode === document.body) document.body.removeChild(modalElement);
-          }, { once: true });
-      }
-  }
-
-
-  // Event listener for closing the edit modal
-  cancelEditTestBtn.addEventListener('click', () => closeModal(editTestModal));
-
-  // Event listener for saving changes in the edit modal
-  saveEditedTestBtn.addEventListener('click', () => {
-      const testId = editTestId.value;
-      const updatedData = {
-          title: editTestTitle.value.trim(), category: editTestCategory.value,
-          text: editTestText.value.trim(), videoUrl: editTestVideoUrl.value.trim() || null
-      };
-      if (!updatedData.title || !updatedData.text) { alert('Title and Text required.'); return; }
-      database.ref('tests').child(testId).update(updatedData)
-          .then(() => {
-              alert('Test updated.');
-              closeModal(editTestModal);
-              // Update the local cache and re-render
-              const index = allFetchedTests.findIndex(test => test.id === testId);
-              if (index !== -1) {
-                  // Preserve original timestamp and author info when updating
-                  allFetchedTests[index] = {
-                      ...allFetchedTests[index], // Keep existing data like timestamp, author
-                      ...updatedData // Overwrite with new data
-                    };
+              console.error('Error loading tests:', error);
+              if (carouselTrack) {
+                  carouselTrack.innerHTML = '<p style="padding: 1rem; text-align: center; width: 100%;">Error loading community tests. Please try again later.</p>';
               }
-              renderGlobalTests();
-           })
-          .catch(error => { console.error('Error updating test:', error); alert('Failed to update test.'); });
-  });
+              disableCarouselButtons();
+          });
+  }
 
-  // Close edit modal on outside click
-  editTestModal.addEventListener('click', (e) => { if (e.target === editTestModal) closeModal(editTestModal); });
+  function disableCarouselButtons() {
+      if (carouselPrevBtn) carouselPrevBtn.disabled = true;
+      if (carouselNextBtn) carouselNextBtn.disabled = true;
+  }
+
+  // Function to handle selecting a test card
+  function selectTest(testCardElement, testData) {
+      document.querySelectorAll('.test-card').forEach(card => {
+          card.classList.remove('selected');
+      });
+      testCardElement.classList.add('selected');
+
+      originalTextEl.value = testData.text;
+      originalTextGroup.classList.add('hidden'); // Hide original text input
+      timerOptions.classList.remove('hidden'); // Show timer options
+      timerButtons.forEach(btn => { // Enable timer buttons
+          btn.disabled = false;
+          btn.style.opacity = '1';
+          btn.style.cursor = 'pointer';
+      });
+
+      // Embed video if URL exists
+      if (testData.videoUrl) {
+          embedVideo(testData.videoUrl);
+      } else {
+          // Remove video player if it exists from a previous selection
+          const existingVideo = document.getElementById('testVideoPlayer');
+          if (existingVideo) existingVideo.remove();
+      }
+
+      // Optionally clear user text area
+      userTextEl.value = '';
+      startTime = null; // Reset typing timer
+      // Reset results display
+      resultsSection.classList.add('hidden');
+      fullTextSection.classList.add('hidden');
+  }
+
+
+  // Function to handle editing a test
+  function editTest(testId, testData) {
+      // Populate the custom test form
+      editingTestIdInput.value = testId; // Set the hidden input
+      customTitle.value = testData.title;
+      customOriginal.value = testData.text;
+      customVideoUrl.value = testData.videoUrl || '';
+      customCategory.value = testData.category;
+
+      // Change button text and header
+      saveTestBtn.textContent = 'Update Test';
+      customTestTitleHeader.textContent = 'Edit Test';
+
+      // Scroll to the custom test section for visibility
+      customTestSection.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  // Function to handle deleting a test
+  function deleteTest(testId, testTitle) {
+      showConfirmationModal(
+          `Are you sure you want to delete the test "${testTitle}"? This action cannot be undone.`,
+          () => { // onConfirm
+              database.ref('tests/' + testId).remove()
+                  .then(() => {
+                      alert(`Test "${testTitle}" deleted successfully.`);
+                      loadGlobalTests(); // Reload tests to update the carousel
+                  })
+                  .catch(error => {
+                      console.error('Error deleting test:', error);
+                      alert('Failed to delete test. Please try again.');
+                  });
+          }
+      );
+  }
+
+  // Generic Confirmation Modal Function
+  function showConfirmationModal(message, onConfirm) {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+          <div class="modal-content">
+              <h3>Confirm Action</h3>
+              <p>${message}</p>
+              <div class="modal-buttons">
+                  <button id="cancelActionModal" class="secondary-btn">Cancel</button>
+                  <button id="confirmActionModal" class="danger-btn">Confirm</button>
+              </div>
+          </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const closeModal = () => document.body.removeChild(modal);
+
+      modal.querySelector('#cancelActionModal').addEventListener('click', closeModal);
+      modal.querySelector('#confirmActionModal').addEventListener('click', () => {
+          onConfirm();
+          closeModal();
+      });
+      // Optional: Close modal if clicking outside the content
+      modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+              closeModal();
+          }
+      });
+  }
 
 
   function initializeCarousel() {
-    const track = document.querySelector('.carousel-track');
-    const dotsContainer = document.querySelector('.carousel-dots');
-    const cards = track.querySelectorAll('.test-card');
-    const prevBtn = document.querySelector('.prev-btn');
-    const nextBtn = document.querySelector('.next-btn');
-    const carouselContainer = document.querySelector('.carousel-container');
+      if (!carouselTrack || carouselCards.length === 0) {
+          disableCarouselButtons();
+          return;
+      }
 
-    if (!track || !dotsContainer || !prevBtn || !nextBtn || !carouselContainer || cards.length === 0) {
-        prevBtn.style.display = 'none'; nextBtn.style.display = 'none';
-        dotsContainer.style.display = 'none';
-        if (track && cards.length === 0) {
-             // Keep existing message or add default if track is truly empty
-             if (!track.querySelector('p')) {
-                track.innerHTML = '<p>No tests available.</p>';
-             }
-        }
-        return;
-    }
-    prevBtn.style.display = 'flex'; nextBtn.style.display = 'flex';
+      // Calculate card width (including margin/gap) - ensure cards are rendered first
+      // Use offsetWidth of the first card. Add gap (1rem = 16px typically)
+      cardWidth = carouselCards[0].offsetWidth + 16;
 
-    let cardWidth = 0; let currentIndex = 0; let visibleCards = 1; let dotCount = 1;
+      // Determine visible cards based on container width
+      const containerWidth = carouselTrack.parentElement.offsetWidth;
+      carouselVisibleCards = Math.max(1, Math.floor(containerWidth / cardWidth));
 
-    function calculateDimensions() {
-        if (cards.length > 0) {
-            const cardStyle = getComputedStyle(cards[0]);
-            const trackStyle = getComputedStyle(track);
-            const cardMargin = parseFloat(cardStyle.marginLeft) + parseFloat(cardStyle.marginRight);
-            // Use gap if defined, otherwise fallback to margin calculation
-            const trackGap = parseFloat(trackStyle.gap) || (parseFloat(cardStyle.marginRight) || 0); // Use marginRight as fallback gap
-            cardWidth = cards[0].offsetWidth + trackGap; // Simplified width + gap/margin
-            const containerWidth = carouselContainer.offsetWidth;
-            // Ensure cardWidth is positive before division
-            visibleCards = cardWidth > 0 ? Math.max(1, Math.floor(containerWidth / cardWidth)) : 1;
-            // Adjust dot count calculation slightly
-            dotCount = cardWidth > 0 ? Math.ceil(cards.length / Math.max(1, Math.floor(containerWidth / cardWidth))) : 1;
-            dotCount = Math.max(1, dotCount); // Ensure at least 1 dot if there are cards
+      const totalCards = carouselCards.length;
+      const dotCount = Math.ceil(totalCards / carouselVisibleCards);
 
-        } else { cardWidth = 0; visibleCards = 1; dotCount = 0; }
-    }
+      // Create dots
+      carouselDotsContainer.innerHTML = ''; // Clear existing dots
+      if (dotCount > 1) { // Only show dots if multiple pages
+          for (let i = 0; i < dotCount; i++) {
+              const dot = document.createElement('div');
+              dot.className = 'carousel-dot';
+              if (i === 0) dot.classList.add('active');
+              dot.addEventListener('click', () => {
+                  carouselCurrentIndex = i;
+                  updateCarouselVisuals();
+              });
+              carouselDotsContainer.appendChild(dot);
+          }
+      }
 
-    function createDots() {
-        dotsContainer.innerHTML = '';
-        if (dotCount <= 1) { dotsContainer.style.display = 'none'; return; }
-        dotsContainer.style.display = 'flex';
-        for (let i = 0; i < dotCount; i++) {
-          const dot = document.createElement('div');
-          dot.className = 'carousel-dot';
-          dot.addEventListener('click', () => { currentIndex = i; updateCarousel(); });
-          dotsContainer.appendChild(dot);
-        }
-    }
+      // Reset index and update visuals
+      carouselCurrentIndex = 0;
+      updateCarouselVisuals();
 
-    function updateCarousel() {
-      currentIndex = Math.max(0, Math.min(currentIndex, dotCount - 1));
-       // Ensure cardWidth and visibleCards are positive before calculating offset
-      const offset = (cardWidth > 0 && visibleCards > 0) ? -currentIndex * (visibleCards * cardWidth) : 0;
-      // Calculate maximum possible offset
-      const maxOffset = cardWidth > 0 ? -(cards.length - visibleCards) * cardWidth : 0;
-      // Clamp the offset to prevent overscrolling
-      const clampedOffset = Math.max(maxOffset, Math.min(0, offset));
+      // Remove previous listeners before adding new ones
+      const newPrevBtn = carouselPrevBtn.cloneNode(true);
+      carouselPrevBtn.parentNode.replaceChild(newPrevBtn, carouselPrevBtn);
+      carouselPrevBtn = newPrevBtn;
 
-      track.style.transform = `translateX(${clampedOffset}px)`;
-      document.querySelectorAll('.carousel-dot').forEach((dot, index) => dot.classList.toggle('active', index === currentIndex));
-      prevBtn.disabled = currentIndex === 0;
-      nextBtn.disabled = currentIndex >= dotCount - 1;
-      prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
-      nextBtn.style.opacity = nextBtn.disabled ? '0.5' : '1';
-      prevBtn.style.cursor = prevBtn.disabled ? 'not-allowed' : 'pointer';
-      nextBtn.style.cursor = nextBtn.disabled ? 'not-allowed' : 'pointer';
-    }
+      const newNextBtn = carouselNextBtn.cloneNode(true);
+      carouselNextBtn.parentNode.replaceChild(newNextBtn, carouselNextBtn);
+      carouselNextBtn = newNextBtn;
 
-    prevBtn.onclick = () => { if (currentIndex > 0) { currentIndex--; updateCarousel(); } };
-    nextBtn.onclick = () => { if (currentIndex < dotCount - 1) { currentIndex++; updateCarousel(); } };
+      // Add navigation handlers
+      carouselPrevBtn.addEventListener('click', () => {
+          if (carouselCurrentIndex > 0) {
+              carouselCurrentIndex--;
+              updateCarouselVisuals();
+          }
+      });
 
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-            const oldVisibleCards = visibleCards;
-            const oldDotCount = dotCount;
-            calculateDimensions();
-            // Only recreate dots and adjust index if the number of dots changes
-            if (dotCount !== oldDotCount) {
-                // Adjust index carefully based on the change in visible items per "page"
-                currentIndex = Math.max(0, Math.min(Math.floor(currentIndex * oldDotCount / dotCount), dotCount - 1));
-                createDots();
-            }
-            updateCarousel(); // Always update position on resize
-        }, 250);
-    });
+      carouselNextBtn.addEventListener('click', () => {
+          const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1;
+          if (carouselCurrentIndex < maxIndex) {
+              carouselCurrentIndex++;
+              updateCarouselVisuals();
+          }
+      });
 
-    calculateDimensions(); createDots(); updateCarousel();
+      // Handle window resize - debounce this for performance
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(() => {
+              // Recalculate visible cards and update
+              const newContainerWidth = carouselTrack.parentElement.offsetWidth;
+              const newVisibleCards = Math.max(1, Math.floor(newContainerWidth / cardWidth));
+              if (newVisibleCards !== carouselVisibleCards) {
+                  initializeCarousel(); // Re-initialize fully on breakpoint change
+              } else {
+                  updateCarouselVisuals(); // Just update position if width changes slightly
+              }
+          }, 250); // Debounce resize event
+      });
+  }
+
+  function updateCarouselVisuals() {
+      if (!carouselTrack || carouselCards.length === 0) return;
+
+      const totalCards = carouselCards.length;
+      const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1;
+      carouselCurrentIndex = Math.max(0, Math.min(carouselCurrentIndex, maxIndex)); // Clamp index
+
+      // Calculate offset: index * number of visible cards * width of each card
+      const offset = -carouselCurrentIndex * (carouselVisibleCards * cardWidth);
+      carouselTrack.style.transform = `translateX(${offset}px)`;
+
+      // Update active dot
+      document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+          dot.classList.toggle('active', index === carouselCurrentIndex);
+      });
+
+      // Disable/enable buttons
+      carouselPrevBtn.disabled = carouselCurrentIndex === 0;
+      carouselNextBtn.disabled = carouselCurrentIndex >= maxIndex;
   }
 
 
   function getCategoryName(category) {
-    const categories = { 'general': 'General', 'kailash': 'Kailash', 'progressive': 'Progressive', 'legal': 'Legal', 'previous': 'Previous Yr', 'test': 'Test' };
-    return categories[category] || category.charAt(0).toUpperCase() + category.slice(1);
+    const categories = {
+      'general': 'General Matter',
+      'kailash': 'Kailash Chandra',
+      'progressive': 'Progressive',
+      'legal': 'Legal',
+      'previous': 'Previous Year',
+      'test': 'Test' // Added Test category
+    };
+    return categories[category] || category; // Return category key if not found
   }
 
-  // Save Custom Test Button
-  saveBtn.addEventListener('click', () => {
-    const user = auth.currentUser; if (!user) { alert('Please login.'); return; }
-    const title = customTitle.value.trim(); const text = customOriginal.value.trim();
-    const videoUrl = customVideoUrl.value.trim(); const category = customCategory.value;
-    if (!title || !text) { alert('Title and Text required.'); return; }
-    const testData = { title, text, videoUrl: videoUrl || null, userName: user.displayName || 'Anonymous',
-      userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`,
-      category, timestamp: firebase.database.ServerValue.TIMESTAMP }; // Use server timestamp
-    database.ref('tests').push(testData)
-      .then((newRef) => {
-          alert('Test saved.');
-          customTitle.value = ''; customOriginal.value = ''; customVideoUrl.value = '';
-          // Add the new test to the local cache and re-render
-          // Fetch the actual timestamp after saving if needed, or use client time approx.
-          const newTestData = { id: newRef.key, ...testData, timestamp: Date.now() }; // Approx timestamp
-          allFetchedTests.unshift(newTestData); // Add to beginning
-          allFetchedTests.sort((a, b) => b.timestamp - a.timestamp); // Re-sort
-          renderGlobalTests();
+  // Save/Update Test Button Handler
+  saveTestBtn.addEventListener('click', () => {
+    if (!currentUser) {
+      alert('Please login to save tests.');
+      return;
+    }
+
+    const title = customTitle.value.trim();
+    const text = customOriginal.value.trim();
+    const videoUrl = customVideoUrl.value.trim();
+    const category = customCategory.value;
+    const editingTestId = editingTestIdInput.value; // Get ID if editing
+
+    if (!title || !text) {
+      alert('Please enter both a title and the original text.');
+      return;
+    }
+
+    const testData = {
+      title,
+      text,
+      videoUrl: videoUrl || null,
+      userId: currentUser.uid, // Store user ID for ownership
+      userName: currentUser.displayName,
+      userPhoto: currentUser.photoURL || 'https://www.gravatar.com/avatar/' + currentUser.uid + '?d=identicon&s=24',
+      category,
+      timestamp: firebase.database.ServerValue.TIMESTAMP // Use server time
+    };
+
+    let dbOperation;
+    let successMessage;
+
+    if (editingTestId) {
+      // Update existing test
+      // Ensure user has permission (should be checked before showing edit form, but double-check)
+      database.ref('tests/' + editingTestId).once('value').then(snapshot => {
+          const existingTest = snapshot.val();
+          const isAdmin = adminEmails.includes(currentUser.email);
+          if (!existingTest) {
+              alert("Error: Test not found.");
+              resetCustomTestForm(); // Reset form if test disappeared
+              return;
+          }
+          if (!isAdmin && existingTest.userId !== currentUser.uid && existingTest.userName !== currentUser.displayName) {
+               alert("Error: You do not have permission to edit this test.");
+               return;
+          }
+
+          // Proceed with update
+          dbOperation = database.ref('tests/' + editingTestId).update(testData);
+          successMessage = 'Test updated successfully!';
+          performDbOperation(dbOperation, successMessage);
+      }).catch(error => {
+            console.error("Error checking edit permissions:", error);
+            alert("Could not verify edit permissions. Please try again.");
+      });
+
+    } else {
+      // Save new test
+      dbOperation = database.ref('tests').push(testData);
+      successMessage = 'Test saved and shared successfully!';
+      performDbOperation(dbOperation, successMessage);
+    }
+  });
+
+  function performDbOperation(operationPromise, successMessage) {
+      operationPromise
+          .then(() => {
+              alert(successMessage);
+              resetCustomTestForm(); // Clear the form
+              loadGlobalTests(); // Refresh the carousel
+          })
+          .catch(error => {
+              console.error('Error saving/updating test:', error);
+              alert('Failed to save/update test. Please try again.');
+          });
+  }
+
+  // Clear Custom Test Form Button
+  clearCustomFormBtn.addEventListener('click', resetCustomTestForm);
+
+  function resetCustomTestForm() {
+      editingTestIdInput.value = ''; // Clear editing ID
+      customTitle.value = '';
+      customOriginal.value = '';
+      customVideoUrl.value = '';
+      customCategory.value = 'general'; // Reset category to default
+      saveTestBtn.textContent = 'Save & Share Test'; // Reset button text
+      customTestTitleHeader.textContent = 'Add Your Own Test'; // Reset header
+  }
+
+
+  // Clear/Manage My Tests Button Handler (Shows Modal)
+  clearTestsBtn.addEventListener('click', () => {
+    if (!currentUser) return;
+
+    database.ref('tests')
+      .orderByChild('userId') // Query by userId if possible
+      .equalTo(currentUser.uid)
+      .once('value')
+      .then(snapshot => {
+        let userTests = snapshot.val();
+
+        // Fallback for older tests without userId, query by userName
+        if (!userTests) {
+            return database.ref('tests')
+                .orderByChild('userName')
+                .equalTo(currentUser.displayName)
+                .once('value');
+        }
+        return snapshot; // Return original snapshot if found by UID
       })
-      .catch(error => { console.error('Error saving test:', error); alert('Failed to save test.'); });
+      .then(snapshot => {
+          const userTests = snapshot.val();
+
+          if (!userTests || Object.keys(userTests).length === 0) {
+              alert('You haven\'t added any tests yet.');
+              return;
+          }
+
+          // Build and show the modal for managing tests
+          showManageTestsModal(userTests);
+      })
+      .catch(error => {
+        console.error('Error fetching user tests:', error);
+        alert('Failed to fetch your tests. Please try again.');
+      });
   });
 
-  // Clear *My* Tests Button (Admin Only)
-  clearBtn.addEventListener('click', () => {
-    const user = auth.currentUser; if (!user || !isAdmin) { alert("Permission denied."); return; }
-    // Use the local cache instead of fetching again
-    const userTests = allFetchedTests.filter(test => test.userName === user.displayName);
-    if (userTests.length === 0) { alert('You have no tests to delete.'); return; }
+  // Function to display the "Manage My Tests" modal
+  function showManageTestsModal(userTests) {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+          <div class="modal-content">
+              <h3>Manage Your Tests</h3>
+              <p>Select tests to delete.</p>
+              <div class="test-selection" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 1rem;">
+                  </div>
+              <div class="modal-buttons">
+                  <button id="cancelManageTests" class="secondary-btn">Cancel</button>
+                  <button id="confirmDeleteSelectedTests" class="danger-btn" disabled>Delete Selected</button>
+              </div>
+          </div>
+      `;
 
-    const modal = document.createElement('div'); modal.className = 'modal show';
-    modal.innerHTML = `<div class="modal-content"><h3>Select Your Tests to Delete</h3>
-        <div class="test-selection" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 1rem;"></div>
-        <div class="modal-buttons"><button id="cancelDelMy" class="secondary-btn">Cancel</button><button id="confirmDelMy" class="danger-btn">Delete Selected</button></div></div>`;
-    document.body.appendChild(modal);
-    const testSelection = modal.querySelector('.test-selection'); const checkboxes = [];
-    userTests.forEach((test) => { // Iterate over the filtered local array
-      const item = document.createElement('div'); item.className = 'test-item'; const cbId = `my-test-${test.id}`;
-      item.innerHTML = `<input type="checkbox" id="${cbId}"><label for="${cbId}">${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></label>`;
-      testSelection.appendChild(item); checkboxes.push({id: test.id, checkbox: item.querySelector('input')});
-    });
-    modal.querySelector('#cancelDelMy').addEventListener('click', () => closeModal(modal));
-    modal.querySelector('#confirmDelMy').addEventListener('click', () => {
-      const selected = checkboxes.filter(i => i.checkbox.checked).map(i => i.id);
-      if (selected.length === 0) { alert('Select tests to delete.'); return; }
-      const updates = {}; selected.forEach(id => { updates[`tests/${id}`] = null; });
-      database.ref().update(updates)
-        .then(() => {
-            alert(`${selected.length} test(s) deleted.`);
-            closeModal(modal);
-            // Remove deleted tests from local cache and re-render
-            allFetchedTests = allFetchedTests.filter(test => !selected.includes(test.id));
-            renderGlobalTests();
-        })
-        .catch(error => { console.error('Error deleting tests:', error); alert('Failed to delete.'); closeModal(modal); });
-    });
-    modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(modal); });
-  });
+      document.body.appendChild(modal);
+
+      const testSelectionContainer = modal.querySelector('.test-selection');
+      const confirmDeleteBtn = modal.querySelector('#confirmDeleteSelectedTests');
+      const checkboxes = [];
+
+      // Populate the modal with user's tests
+      Object.entries(userTests).forEach(([id, test]) => {
+          const testItem = document.createElement('div');
+          testItem.className = 'test-item';
+          const checkboxId = `manage-test-${id}`;
+          testItem.innerHTML = `
+              <input type="checkbox" id="${checkboxId}" data-testid="${id}">
+              <label for="${checkboxId}">${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></label>
+          `;
+          testSelectionContainer.appendChild(testItem);
+          const checkbox = testItem.querySelector('input');
+          checkboxes.push(checkbox);
+
+          // Add listener to enable/disable delete button
+          checkbox.addEventListener('change', () => {
+              const anyChecked = checkboxes.some(cb => cb.checked);
+              confirmDeleteBtn.disabled = !anyChecked;
+          });
+      });
+
+      // Modal button listeners
+      modal.querySelector('#cancelManageTests').addEventListener('click', () => {
+          document.body.removeChild(modal);
+      });
+
+      confirmDeleteBtn.addEventListener('click', () => {
+          const selectedTestIds = checkboxes
+              .filter(checkbox => checkbox.checked)
+              .map(checkbox => checkbox.dataset.testid);
+
+          if (selectedTestIds.length === 0) return; // Should be disabled, but double-check
+
+          // Show nested confirmation modal for deletion
+          showConfirmationModal(
+              `Are you sure you want to delete ${selectedTestIds.length} selected test(s)? This action cannot be undone.`,
+              () => { // onConfirm nested
+                  const updates = {};
+                  selectedTestIds.forEach(id => {
+                      updates[`/tests/${id}`] = null; // Path for deletion
+                  });
+
+                  database.ref().update(updates)
+                      .then(() => {
+                          alert(`${selectedTestIds.length} test(s) deleted successfully.`);
+                          loadGlobalTests(); // Refresh carousel
+                      })
+                      .catch(error => {
+                          console.error('Error deleting tests:', error);
+                          alert('Failed to delete tests. Please try again.');
+                      })
+                      .finally(() => {
+                           document.body.removeChild(modal); // Close the manage modal
+                      });
+              }
+          );
+      });
+       // Optional: Close modal if clicking outside the content
+       modal.addEventListener('click', (e) => {
+           if (e.target === modal) {
+                document.body.removeChild(modal);
+           }
+       });
+  }
+
+
 }); // End DOMContentLoaded
 
 // Dark mode toggle
-const darkModeToggle = document.getElementById('darkModeToggle');
-const toggleIcon = document.querySelector('.toggle-icon');
-darkModeToggle.addEventListener('change', function() {
+document.getElementById('darkModeToggle').addEventListener('change', function() {
   document.body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', this.checked);
-  toggleIcon.textContent = this.checked ? '☀️' : '🌙';
-  handleInputFocusBlur(); // Update labels on theme change
 });
-// Set initial dark mode state
+
+// Check for saved user preference on load
 if (localStorage.getItem('darkMode') === 'true') {
-  darkModeToggle.checked = true; document.body.classList.add('dark-mode'); toggleIcon.textContent = '☀️';
-} else { toggleIcon.textContent = '🌙'; }
-
-// Floating label handler
-function handleInputFocusBlur() {
-    const inputs = document.querySelectorAll('.input-group input, .input-group textarea, .input-group select');
-    inputs.forEach(input => {
-        // Find the label associated with the input.
-        // It might be directly preceding the input or linked via the 'for' attribute.
-        const label = input.labels?.[0] || (input.previousElementSibling?.tagName === 'LABEL' ? input.previousElementSibling : null);
-        if (!label) return; // Skip if no label found
-
-        const updateLabel = () => {
-            const isFocused = document.activeElement === input;
-            // Check value for inputs/textareas, selected value for selects
-            const hasValue = (input.matches('select') ? input.value !== '' : input.value.trim() !== '');
-            // Determine background color based on theme for the floating label background
-            const bgColor = document.body.classList.contains('dark-mode') ? '#1e1e1e' : 'white';
-
-            // Apply floating label styles if focused or has value
-            if (isFocused || hasValue) {
-                Object.assign(label.style, {
-                    top: '-0.6rem', // Move label up
-                    left: '0.8rem', // Indent label slightly
-                    fontSize: '0.8rem', // Reduce font size
-                    color: 'var(--primary)', // Change color to primary
-                    background: bgColor, // Set background to match container
-                    padding: '0 0.5rem', // Add padding
-                    zIndex: '2' // Ensure label is above input border
-                });
-            } else {
-                // Reset styles to default placeholder position
-                Object.assign(label.style, {
-                    top: '', left: '', fontSize: '', color: '', background: '', padding: '', zIndex: ''
-                });
-            }
-        };
-        // Add event listeners to update label state
-        input.addEventListener('focus', updateLabel);
-        input.addEventListener('blur', updateLabel);
-        input.addEventListener('input', updateLabel); // Update on typing
-        if (input.matches('select')) {
-            input.addEventListener('change', updateLabel); // Update on selection change
-        }
-        updateLabel(); // Initial check when the page loads or function is called
-    });
+  document.getElementById('darkModeToggle').checked = true;
+  document.body.classList.add('dark-mode');
 }
-// Run the handler on initial load and when the theme might change
-document.addEventListener('DOMContentLoaded', handleInputFocusBlur);
-// Also re-run if the edit modal becomes visible
-document.addEventListener('DOMContentLoaded', () => {
-    const editModal = document.getElementById('editTestModal'); // Define editModal here
-    if (editModal) {
-        const editModalObserver = new MutationObserver(() => {
-            if (editModal.classList.contains('show')) {
-                handleInputFocusBlur(); // Re-apply floating labels when modal shows
-            }
-        });
-        editModalObserver.observe(editModal, { attributes: true, attributeFilter: ['class'] });
-    }
-});
-
 </script>
 </body>
 </html>
