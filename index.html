@@ -2497,104 +2497,703 @@ document.addEventListener('DOMContentLoaded', function() {
       .split(' ');
   }
 
+    const minLength = Math.min(wordA.length, wordB.length);
 
-  function isSimilar(wordA, wordB) {
-    const cleanA = wordA.toLowerCase().replace(/[.,!?;:"']/g, '');
-    const cleanB = wordB.toLowerCase().replace(/[.,!?;:"']/g, '');
-    return cleanA === cleanB;
-  }
+    const maxLength = Math.max(wordA.length, wordB.length);
+
+    let similarCount = 0;
+
+    const threshold = 50;
+
+    
+
+    for (let i = 0; i < minLength; i++) {
+
+      if (wordA[i] === wordB[i]) {
+
+        similarCount++;
+
+      }
+
+    }
+
+    
+
+    const similarityPercentage = (similarCount / maxLength) * 100;
+
+    return similarityPercentage >= threshold;
 
 
   function arraysAreEqual(arr1, arr2) {
     if (arr1.length !== arr2.length) return false;
     for (let i = 0; i < arr1.length; i++) {
-      if (!isSimilar(arr1[i], arr2[i])) return false;
+     if (arr1[i] !== arr2[i]) return false;
     }
     return true;
   }
 
 
-  function compareParagraphs(paragraphA, paragraphB, timeTakenSeconds) {
-    let comparedHtml = ''; let halfMistakes = 0; let fullMistakes = 0;
-    let correctWords = 0; let idxA = 0; let idxB = 0;
-    const lenA = paragraphA.length; const lenB = paragraphB.length;
+ function compareParagraphs(paragraphA, paragraphB) {
 
-    while (idxA < lenA || idxB < lenB) {
-        const wordA = paragraphA[idxA] || ''; const wordB = paragraphB[idxB] || '';
-        const cleanA = wordA.toLowerCase().replace(/[.,!?;:"']/g, '');
-        const cleanB = wordB.toLowerCase().replace(/[.,!?;:"']/g, '');
+    let comparedText = '';
 
-        if (idxA >= lenA) { comparedHtml += `<span class="addition">${wordB}</span> `; fullMistakes++; idxB++; }
-        else if (idxB >= lenB) { comparedHtml += `<span class="missing">${wordA}</span> `; fullMistakes++; idxA++; }
-        else if (cleanA === cleanB) {
-            if (wordA !== wordB) { comparedHtml += `<span class="capitalization">${wordA}</span><span class="capitalization-strike">${wordB}</span> `; halfMistakes++; }
-            else { comparedHtml += `<span class="correct">${wordA}</span> `; correctWords++; }
-            idxA++; idxB++;
+    let numHalfDiff = 0;
+
+    let numFullDiff = 0;
+
+    let wordAIndex = 0;
+
+    let wordBIndex = 0;
+
+
+
+    while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
+
+      const wordA = paragraphA[wordAIndex] || '';
+
+      const wordB = paragraphB[wordBIndex] || '';
+
+      const cleanWordA = wordA.replace(/[,\?\-\s]/g, '');
+
+      const cleanWordB = wordB.replace(/[,\?\-\s]/g, '');
+
+
+
+      if (cleanWordA === cleanWordB) {
+
+        comparedText += `<span class="correct">${wordA}</span> `;
+
+        wordAIndex++;
+
+        wordBIndex++;
+
+      } else if (cleanWordA.toLowerCase() === cleanWordB.toLowerCase()) {
+
+        comparedText += `<span class="capitalization">${wordA}</span> `;
+
+        comparedText += `<span class="capitalization-strike">${wordB}</span> `;
+
+        wordAIndex++;
+
+        wordBIndex++;
+
+        numHalfDiff++;
+
+      } else {
+
+        if (!wordA) {
+
+          comparedText += `<span class="addition">${wordB}</span> `;
+
+          wordBIndex++;
+
+          numFullDiff++;
+
+        } else if (!wordB) {
+
+          comparedText += `<span class="missing">${wordA}</span> `;
+
+          wordAIndex++;
+
+          numFullDiff++;
+
         } else {
-            let lookAheadA = idxA + 1; let lookAheadB = idxB + 1; let foundSync = false;
-            if (lookAheadB < lenB && isSimilar(wordA, paragraphB[lookAheadB])) {
-                comparedHtml += `<span class="addition">${wordB}</span> `; fullMistakes++; idxB++; foundSync = true;
+
+          if (wordA === paragraphB[wordBIndex]) {
+
+            comparedText += `<span class="spelling">${wordA}</span> `;
+
+            wordAIndex++;
+
+            wordBIndex++;
+
+          } else if (wordB === paragraphA[wordAIndex]) {
+
+            comparedText += `<span class="spelling-strike">${wordB}</span> `;
+
+            wordAIndex++;
+
+            wordBIndex++;
+
+          } else if (isSimilar(wordA, wordB)) {
+
+            comparedText += `<span class="spelling">${wordA}</span> `;
+
+            comparedText += `<span class="spelling-strike">${wordB}</span> `;
+
+            wordAIndex++;
+
+            wordBIndex++;
+
+            numHalfDiff++;
+
+          } else {
+
+            const pairA = [wordA];
+
+            const pairB = [wordB];
+
+            
+
+            for (let i = 1; i < 5 && (wordBIndex + i) < paragraphB.length; i++) {
+
+              pairB.push(paragraphB[wordBIndex + i]);
+
             }
-            else if (lookAheadA < lenA && isSimilar(paragraphA[lookAheadA], wordB)) {
-                comparedHtml += `<span class="missing">${wordA}</span> `; fullMistakes++; idxA++; foundSync = true;
+
+            
+
+            for (let i = 1; i < 5 && (wordAIndex + i) < paragraphA.length; i++) {
+
+              pairA.push(paragraphA[wordAIndex + i]);
+
             }
-            if (!foundSync) {
-                comparedHtml += `<span class="missing">${wordA}</span><span class="addition">${wordB}</span> `; fullMistakes++; idxA++; idxB++;
+
+
+
+            let foundPairInA = false;
+
+            for (let i = 1; i <= 50 && (wordAIndex + i) < paragraphA.length; i++) {
+
+              const subarrayA = paragraphA.slice(wordAIndex + i, wordAIndex + i + pairB.length);
+
+              if (arraysAreEqual(subarrayA, pairB)) {
+
+                for (let j = 0; j < i; j++) {
+
+                  comparedText += `<span class="missing">${paragraphA[wordAIndex + j]}</span> `;
+
+                  numFullDiff++;
+
+                }
+
+                comparedText += `<span class="correct">${pairB.join(' ')}</span> `;
+
+                wordAIndex += i + pairB.length;
+
+                wordBIndex += pairB.length;
+
+                foundPairInA = true;
+
+                break;
+
+              }
+
             }
+
+
+
+            if (!foundPairInA) {
+
+              let foundPairInB = false;
+
+              for (let i = 1; i <= 50 && (wordBIndex + i) < paragraphB.length; i++) {
+
+                const subarrayB = paragraphB.slice(wordBIndex + i, wordBIndex + i + pairA.length);
+
+                if (arraysAreEqual(subarrayB, pairA)) {
+
+                  for (let j = 0; j < i; j++) {
+
+                    comparedText += `<span class="addition">${paragraphB[wordBIndex + j]}</span> `;
+
+                    numFullDiff++;
+
+                  }
+
+                  comparedText += `<span class="correct">${pairA.join(' ')}</span> `;
+
+                  wordAIndex += pairA.length;
+
+                  wordBIndex += i + pairA.length;
+
+                  foundPairInB = true;
+
+                  break;
+
+                }
+
+              }
+
+
+
+              if (!foundPairInB) {
+
+                comparedText += `<span class="missing">${wordA}</span> `;
+
+                comparedText += `<span class="addition">${wordB}</span> `;
+
+                wordAIndex++;
+
+                wordBIndex++;
+
+                numFullDiff++;
+
+              }
+
+            }
+
+          }
+
         }
+
+      }
+
     }
-    const totalOriginalWords = lenA; const totalUserWords = lenB;
-    const keystrokes = userTextEl.value.length;
-    let accuracy = 0;
-    if (totalOriginalWords > 0) {
-        accuracy = Math.max(0, (correctWords - (halfMistakes / 2)) / totalOriginalWords * 100);
-        accuracy = Math.min(100, accuracy);
-    }
-    const errorRate = 100 - accuracy;
-    const typingTimeMinutes = timeTakenSeconds > 0 ? timeTakenSeconds / 60 : 0; // Avoid division by zero
-    const wpm = typingTimeMinutes > 0 ? Math.round((keystrokes / 5) / typingTimeMinutes) : 0;
+
+
+
+    const keystrokesCount = userTextEl.value.length;
+
+    const errorPercentage = paragraphA.length > 0 ? 
+
+      Math.min(100, ((numHalfDiff / 2) + numFullDiff) / paragraphA.length * 100) : 0;
+
+    const accuracyPercentage = Math.max(0, 100 - errorPercentage);
+
+    
+
+    const endTime = new Date();
+
+    const timeTakenSeconds = startTime ? Math.round((endTime - startTime) / 1000) : 0;
+
+    
+
+    const typingTimeMinutes = timeTakenSeconds / 60;
+
+    const wordsTyped = paragraphB.length;
+
+    const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
+
+
 
     return {
-        html: comparedHtml.trim(),
-        stats: { totalOriginal: totalOriginalWords, totalUser: totalUserWords, halfMistakes: halfMistakes, fullMistakes: fullMistakes, keystrokes: keystrokes, wpm: wpm, accuracy: accuracy, errorRate: errorRate, timeTaken: timeTakenSeconds }
-    };
-}
 
+      html: comparedText,
+
+      stats: {
+
+        totalOriginal: paragraphA.length,
+
+        totalUser: paragraphB.length,
+
+        halfMistakes: numHalfDiff,
+
+        fullMistakes: numFullDiff,
+
+        keystrokes: keystrokesCount,
+
+        wpm: wpm,
+
+        accuracy: accuracyPercentage,
+
+        errorRate: errorPercentage,
+
+        timeTaken: timeTakenSeconds
+
+      }
+
+    };
+
+  }
+
+  
 
   function displayComparison(comparison) {
-    comparisonResultEl.innerHTML = comparison.html;
-  }
 
+    comparisonResultEl.innerHTML = comparison.html;
+
+  }
   function displayStats(stats) {
     statsEl.innerHTML = `
-      <div class="stat-item"><h4>Original Words</h4><p>${stats.totalOriginal}</p></div>
-      <div class="stat-item"><h4>Your Words</h4><p>${stats.totalUser}</p></div>
-      <div class="stat-item"><h4>Half Mistakes</h4><p>${stats.halfMistakes}</p></div>
-      <div class="stat-item"><h4>Full Mistakes</h4><p>${stats.fullMistakes}</p></div>
-      <div class="stat-item"><h4>Keystrokes</h4><p>${stats.keystrokes}</p></div>
-      <div class="stat-item"><h4>Typing Speed (WPM)</h4><p>${stats.wpm}</p></div>
-      <div class="stat-item"><h4>Accuracy</h4><p>${stats.accuracy.toFixed(1)}%</p></div>
-      <div class="stat-item"><h4>Time Taken</h4><p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p></div>`;
+      <div class="stat-item">
+
+        <h4>Original Words</h4>
+
+        <p>${stats.totalOriginal}</p>
+
+      </div>
+
+      <div class="stat-item">
+
+        <h4>Your Words</h4>
+
+        <p>${stats.totalUser}</p>
+
+      </div>
+
+      <div class="stat-item">
+
+        <h4>Half Mistakes</h4>
+
+        <p>${stats.halfMistakes}</p>
+
+      </div>
+
+      <div class="stat-item">
+
+        <h4>Full Mistakes</h4>
+
+        <p>${stats.fullMistakes}</p>
+
+      </div>
+
+      <div class="stat-item">
+
+        <h4>Keystrokes</h4>
+
+        <p>${stats.keystrokes}</p>
+
+      </div>
+
+      <div class="stat-item">
+
+        <h4>Typing Speed (WPM)</h4>
+
+        <p>${stats.wpm}</p>
+
+      </div>
+
+      <div class="stat-item">
+
+        <h4>Accuracy</h4>
+
+        <p>${stats.accuracy.toFixed(1)}%</p>
+
+      </div>
+
+      <div class="stat-item">
+
+        <h4>Time Taken</h4>
+
+        <p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p>
+
+      </div>
+
+    `;
+
   }
+
+  
 
   function displayFeedback(stats, originalWords, userWords) {
-    let feedbackHTML = `<h4>Feedback</h4><ul>`;
-    if (stats.accuracy >= 98) feedbackHTML += `<li>Excellent accuracy!</li>`;
-    else if (stats.accuracy >= 90) feedbackHTML += `<li>Good accuracy. Focus on minor errors.</li>`;
-    else feedbackHTML += `<li>Accuracy needs improvement. Focus carefully.</li>`;
-    if (stats.wpm >= 60) feedbackHTML += `<li>Great speed!</li>`;
-    else if (stats.wpm >= 40) feedbackHTML += `<li>Good typing speed. Practice to increase.</li>`;
-    else feedbackHTML += `<li>Focus on improving typing speed.</li>`;
-    if (stats.halfMistakes > 0) feedbackHTML += `<li>Pay attention to capitalization/spelling.</li>`;
-    if (stats.fullMistakes > 0) feedbackHTML += `<li>Watch out for missed/added words.</li>`;
-    feedbackHTML += `</ul>`;
-    feedbackEl.innerHTML = feedbackHTML;
+
+    const analysis = analyzeMistakes(originalWords, userWords);
+
+    
+
+    let feedback = `
+
+      <h4>Overall Assessment</h4>
+
+      ${getOverallAssessment(stats.accuracy, stats.wpm)}
+
+      
+
+      <h4>Mistake Analysis</h4>
+
+      <ul>
+
+        ${analysis.commonMistakes.map(m => `<li>${m}</li>`).join('')}
+
+      </ul>
+
+      
+
+      <h4>Improvement Suggestions</h4>
+
+      <ul>
+
+        ${getImprovementSuggestions(analysis, stats)}
+
+      </ul>
+
+    `;
+
+    
+
+    feedbackEl.innerHTML = feedback;
+
   }
 
+  
 
   function displayFullTexts(original, user) {
-    originalDisplayEl.textContent = original; // Original text is shown here in results
+
+    originalDisplayEl.textContent = original;
+
     userDisplayEl.textContent = user;
+
+  }
+
+  
+
+  function analyzeMistakes(originalText, userText) {
+
+    const analysis = {
+
+      commonMistakes: [],
+
+      omissionRate: 0,
+
+      additionRate: 0,
+
+      spellingErrorRate: 0,
+
+      capitalizationErrorRate: 0,
+
+      mostErrorProneWords: []
+
+    };
+
+    
+
+    const wordPairs = [];
+
+    const minLength = Math.min(originalText.length, userText.length);
+
+    
+
+    for (let i = 0; i < minLength; i++) {
+
+      const origWord = originalText[i].toLowerCase();
+
+      const userWord = userText[i].toLowerCase();
+
+      
+
+      if (origWord !== userWord) {
+
+        wordPairs.push({ original: originalText[i], user: userText[i] });
+
+      }
+
+    }
+
+    
+
+    let omissionCount = 0;
+
+    let additionCount = 0;
+
+    let spellingCount = 0;
+
+    let capitalizationCount = 0;
+
+    const errorWords = [];
+
+    
+
+    wordPairs.forEach(pair => {
+
+      const orig = pair.original.toLowerCase();
+
+      const user = pair.user.toLowerCase();
+
+      
+
+      if (user === '') {
+
+        omissionCount++;
+
+      } else if (orig === '') {
+
+        additionCount++;
+
+      } else if (orig === user) {
+
+        capitalizationCount++;
+
+        errorWords.push(pair.original);
+
+      } else if (isSimilar(orig, user)) {
+
+        spellingCount++;
+
+        errorWords.push(pair.original);
+
+      } else {
+
+        errorWords.push(pair.original);
+
+      }
+
+    });
+
+    
+
+    analysis.omissionRate = omissionCount / originalText.length;
+
+    analysis.additionRate = additionCount / originalText.length;
+
+    analysis.spellingErrorRate = spellingCount / originalText.length;
+
+    analysis.capitalizationErrorRate = capitalizationCount / originalText.length;
+
+    
+
+    const wordFrequency = {};
+
+    errorWords.forEach(word => {
+
+      const lowerWord = word.toLowerCase();
+
+      wordFrequency[lowerWord] = (wordFrequency[lowerWord] || 0) + 1;
+
+    });
+
+    
+
+    analysis.mostErrorProneWords = Object.entries(wordFrequency)
+
+      .sort((a, b) => b[1] - a[1])
+
+      .slice(0, 5)
+
+      .map(entry => entry[0]);
+
+    
+
+    if (capitalizationCount > 0) {
+
+      analysis.commonMistakes.push(`Capitalization errors (${capitalizationCount} instances)`);
+
+    }
+
+    if (spellingCount > 0) {
+
+      analysis.commonMistakes.push(`Spelling mistakes (${spellingCount} instances)`);
+
+    }
+
+    if (omissionCount > 0) {
+
+      analysis.commonMistakes.push(`Omitted words (${omissionCount} instances)`);
+
+    }
+
+    if (additionCount > 0) {
+
+      analysis.commonMistakes.push(`Added extra words (${additionCount} instances)`);
+
+    }
+
+    
+
+    return analysis;
+
+  }
+
+  
+
+  function getOverallAssessment(accuracy, wpm) {
+
+    let assessment = '';
+
+    
+
+    if (accuracy >= 95) {
+
+      assessment += '<p>🌟 <strong>Excellent accuracy!</strong> Your transcription is nearly perfect.</p>';
+
+    } else if (accuracy >= 85) {
+
+      assessment += '<p>👍 <strong>Good accuracy.</strong> With a little more practice, you can reach excellence.</p>';
+
+    } else if (accuracy >= 70) {
+
+      assessment += '<p>📝 <strong>Fair accuracy.</strong> Focus on reducing errors to improve your score.</p>';
+
+    } else {
+
+      assessment += '<p>⚠️ <strong>Needs improvement.</strong> Work on accuracy before increasing speed.</p>';
+
+    }
+
+    
+
+    if (wpm >= 50) {
+
+      assessment += '<p>⚡ <strong>Fast typer!</strong> Your speed is impressive. ';
+
+      if (accuracy < 90) {
+
+        assessment += 'Try slowing down slightly to improve accuracy.</p>';
+
+      } else {
+
+        assessment += 'Maintain this speed while keeping accuracy high.</p>';
+
+      }
+
+    } else if (wpm >= 40) {
+
+      assessment += '<p>🏃 <strong>Moderate speed.</strong> You\'re typing at a good pace. ';
+
+      assessment += 'With practice, you can increase speed without sacrificing accuracy.</p>';
+
+    } else {
+
+      assessment += '<p>🐢 <strong>Slow pace.</strong> Focus on building muscle memory and gradually increasing your speed.</p>';
+
+    }
+
+    
+
+    return assessment;
+
+  }
+
+  
+
+  function getImprovementSuggestions(analysis, stats) {
+
+    let suggestions = [];
+
+    
+
+    if (analysis.omissionRate > 0.2) {
+
+      suggestions.push('You\'re skipping many words. Practice reading ahead to anticipate upcoming words.');
+
+    }
+
+    
+
+    if (analysis.additionRate > 0.15) {
+
+      suggestions.push('You\'re adding extra words. Focus on typing only what you see/hear.');
+
+    }
+
+    
+
+    if (analysis.spellingErrorRate > 0.25) {
+
+      suggestions.push('Spelling mistakes are frequent. Consider practicing difficult words separately.');
+
+    }
+
+    
+
+    if (analysis.capitalizationErrorRate > 0.1) {
+
+      suggestions.push('Watch your capitalization. Remember proper nouns and sentence starts need capitals.');
+
+    }
+
+    
+
+    suggestions.push('Practice difficult sections repeatedly until you master them.');
+
+    suggestions.push('Break long passages into smaller chunks for focused practice.');
+
+    suggestions.push('Focus on accuracy before speed - speed will come naturally with practice.');
+
+    
+
+    return suggestions.map(s => `<li>${s}</li>`).join('');
+
   }
 
   function embedVideo(url) {
