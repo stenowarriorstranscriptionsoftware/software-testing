@@ -1,13 +1,14 @@
+
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyDNdovILjmsBQxGuXx4iOOw1JgCL2_3TLI",
-  authDomain: "stenowarriorsyoursteno.firebaseapp.com",
-  databaseURL: "https://stenowarriorsyoursteno-default-rtdb.firebaseio.com",
-  projectId: "stenowarriorsyoursteno",
-  storageBucket: "stenowarriorsyoursteno.appspot.com",
-  messagingSenderId: "173103533896",
-  appId: "1:173103533896:web:78bbe18e17ca8f5da5ad7d",
-  measurementId: "G-Y3E0QVFSBB"
+  apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
+  authDomain: "setup-login-page.firebaseapp.com",
+  databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
+  projectId: "setup-login-page",
+  storageBucket: "setup-login-page.firebasestorage.app",
+  messagingSenderId: "341251531099",
+  appId: "1:341251531099:web:f4263621455541ffdc3a7e",
+  measurementId: "G-ZXFC7NR9HV"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -16,10 +17,6 @@ const database = firebase.database();
 
 // Initialize jsPDF
 const { jsPDF } = window.jspdf;
-
-// Admin configuration
-const ADMIN_EMAIL = "anishkumar18034@gmail.com";
-let isAdmin = false;
 
 document.addEventListener('DOMContentLoaded', function() {
   // DOM elements
@@ -78,6 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const registerEmail = document.getElementById('registerEmail');
   const registerPassword = document.getElementById('registerPassword');
   const confirmPassword = document.getElementById('confirmPassword');
+  const deleteLeaderboardBtn = document.getElementById('deleteLeaderboardBtn');
 
   // Timer variables
   let timerInterval;
@@ -93,6 +91,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let uniqueTestNames = new Set();
   let currentSortColumn = 'accuracy';
   let currentSortDirection = 'desc';
+  let selectedLeaderboardRows = [];
 
   // Initialize typing timer
   let startTime = null;
@@ -188,26 +187,35 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
 
-  // Auth state listener with admin check
+  // Auth state listener
   auth.onAuthStateChanged(user => {
     if (user) {
-      isAdmin = user.email === ADMIN_EMAIL;
-      
       loginBtn.classList.add('hidden');
       userInfo.classList.remove('hidden');
+
       if (user.photoURL) {
         userPhoto.src = user.photoURL;
       } else {
         userPhoto.src = 'https://www.gravatar.com/avatar/' + user.uid + '?d=identicon';
       }
+
       userName.textContent = user.displayName || 'User';
-      if (isAdmin) {
-        userName.innerHTML += ' <span class="admin-badge">ADMIN</span>';
-      }
       loginPrompt.classList.add('hidden');
-      customTestSection.classList.remove('hidden');
+
+      const adminEmails = [
+        "anishkumar18034@gmail.com",
+        "anishkumar1803@gmail.com",
+        "admin2@example.com"
+      ];
+
+      if (adminEmails.includes(user.email)) {
+        customTestSection.classList.remove('hidden');
+        deleteLeaderboardBtn.classList.remove('hidden');
+      }
+
       globalTestsSection.classList.remove('hidden');
       leaderboardSection.classList.remove('hidden');
+
       loadGlobalTests();
       loadLeaderboard();
       cleanupOldData();
@@ -220,6 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
       leaderboardSection.classList.add('hidden');
       loginForm.classList.remove('hidden');
       registerForm.classList.add('hidden');
+      deleteLeaderboardBtn.classList.add('hidden');
     }
   });
 
@@ -263,6 +272,49 @@ document.addEventListener('DOMContentLoaded', function() {
       currentPage++;
       updatePagination();
     }
+  });
+
+  // Delete leaderboard entries handler
+  deleteLeaderboardBtn.addEventListener('click', () => {
+    if (selectedLeaderboardRows.length === 0) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>Confirm Deletion</h3>
+        <p>Are you sure you want to delete ${selectedLeaderboardRows.length} selected leaderboard entries? This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button id="cancelDeleteLeaderboard" class="secondary-btn">Cancel</button>
+          <button id="confirmDeleteLeaderboard" class="danger-btn">Delete</button>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('#cancelDeleteLeaderboard').addEventListener('click', () => {
+      document.body.removeChild(modal);
+    });
+    
+    modal.querySelector('#confirmDeleteLeaderboard').addEventListener('click', () => {
+      const updates = {};
+      selectedLeaderboardRows.forEach(id => {
+        updates[`attempts/${id}`] = null;
+      });
+      
+      database.ref().update(updates)
+        .then(() => {
+          alert(`${selectedLeaderboardRows.length} entries deleted successfully.`);
+          selectedLeaderboardRows = [];
+          document.body.removeChild(modal);
+          loadLeaderboard();
+        })
+        .catch(error => {
+          console.error('Error deleting leaderboard entries:', error);
+          alert('Failed to delete entries. Please try again.');
+        });
+    });
   });
 
   // Load leaderboard data with pagination
@@ -349,7 +401,7 @@ document.addEventListener('DOMContentLoaded', function() {
       } else {
         return direction === 'asc' 
           ? aValue.localeCompare(bValue) 
-          : bValue.localeCompare(aValue);
+          : bValue.localeCompare(bValue);
       }
     });
   }
@@ -408,7 +460,6 @@ document.addEventListener('DOMContentLoaded', function() {
             <th data-column="halfMistakes">Half Mistakes</th>
             <th data-column="fullMistakes">Full Mistakes</th>
             <th data-column="date">Date</th>
-            ${isAdmin ? '<th>Actions</th>' : ''}
           </tr>
         </thead>
         <tbody>
@@ -424,6 +475,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const seconds = attempt.stats.timeTaken % 60;
       const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
+      // Add badges to top 3
       let badge = '';
       if (startRank + index === 1) {
         badge = '<span class="badge badge-gold">🥇</span>';
@@ -434,7 +486,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
 
       tableHTML += `
-        <tr>
+        <tr data-id="${attempt.id}" class="${selectedLeaderboardRows.includes(attempt.id) ? 'selected-row' : ''}">
           <td>${startRank + index} ${badge}</td>
           <td class="leaderboard-user">
             <img src="${attempt.userPhoto}" alt="${attempt.userName}">
@@ -449,7 +501,6 @@ document.addEventListener('DOMContentLoaded', function() {
           <td>${attempt.stats.halfMistakes}</td>
           <td>${attempt.stats.fullMistakes}</td>
           <td>${date.toLocaleDateString()}</td>
-          ${isAdmin ? `<td><button class="delete-attempt-btn secondary-btn" data-id="${attempt.id}">Delete</button></td>` : ''}
         </tr>
       `;
     });
@@ -458,24 +509,7 @@ document.addEventListener('DOMContentLoaded', function() {
     leaderboardList.innerHTML = tableHTML;
     
     makeTableSortable();
-    
-    if (isAdmin) {
-      document.querySelectorAll('.delete-attempt-btn').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          const attemptId = e.target.dataset.id;
-          if (confirm('Are you sure you want to delete this attempt?')) {
-            database.ref('attempts').child(attemptId).remove()
-              .then(() => {
-                loadLeaderboard();
-              })
-              .catch(error => {
-                console.error('Error deleting attempt:', error);
-                alert('Failed to delete attempt');
-              });
-          }
-        });
-      });
-    }
+    updateDeleteButtonState();
   }
 
   function makeTableSortable() {
@@ -507,13 +541,39 @@ document.addEventListener('DOMContentLoaded', function() {
         header.classList.add(`sorted-${currentSortDirection}`);
       }
     });
+
+    // Add row selection
+    const rows = document.querySelectorAll('.leaderboard-list tbody tr');
+    rows.forEach(row => {
+      row.classList.add('leaderboard-row-selectable');
+      row.addEventListener('click', (e) => {
+        // Don't toggle selection if clicking on a link or button
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+          return;
+        }
+
+        const attemptId = row.dataset.id;
+        if (selectedLeaderboardRows.includes(attemptId)) {
+          selectedLeaderboardRows = selectedLeaderboardRows.filter(id => id !== attemptId);
+          row.classList.remove('selected-row');
+        } else {
+          selectedLeaderboardRows.push(attemptId);
+          row.classList.add('selected-row');
+        }
+        updateDeleteButtonState();
+      });
+    });
+  }
+
+  function updateDeleteButtonState() {
+    deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0;
   }
 
   // Auto-delete old data function
   function cleanupOldData() {
-    const threeMonthsAgo = new Date();
-    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-    const timestampThreshold = threeMonthsAgo.getTime();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const timestampThreshold = sixMonthsAgo.getTime();
 
     database.ref('attempts').once('value').then(snapshot => {
       const updates = {};
@@ -524,18 +584,6 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       if (Object.keys(updates).length > 0) {
         database.ref('attempts').update(updates);
-      }
-    });
-
-    database.ref('tests').once('value').then(snapshot => {
-      const updates = {};
-      snapshot.forEach(child => {
-        if (child.val().timestamp < timestampThreshold) {
-          updates[child.key] = null;
-        }
-      });
-      if (Object.keys(updates).length > 0) {
-        database.ref('tests').update(updates);
       }
     });
   }
@@ -1151,11 +1199,15 @@ document.addEventListener('DOMContentLoaded', function() {
     
     database.ref('tests').orderByChild('timestamp').once('value')
       .then(snapshot => {
-        globalTestsList.innerHTML = '';
+        const carouselTrack = document.querySelector('.carousel-track');
+        const dotsContainer = document.querySelector('.carousel-dots');
+        carouselTrack.innerHTML = '';
+        dotsContainer.innerHTML = '';
+        
         const tests = snapshot.val();
         
         if (!tests) {
-          globalTestsList.innerHTML = '<p>No community tests yet. Be the first to share one!</p>';
+          carouselTrack.innerHTML = '<p>No community tests yet. Be the first to share one!</p>';
           return;
         }
         
@@ -1164,17 +1216,21 @@ document.addEventListener('DOMContentLoaded', function() {
           ...test
         })).sort((a, b) => b.timestamp - a.timestamp);
         
+        // Filter by category if not "all"
         const filteredTests = category === 'all' 
           ? testsArray 
           : testsArray.filter(test => test.category === category);
         
-        const recentTests = filteredTests.slice(0, 6);
+        if (filteredTests.length === 0) {
+          carouselTrack.innerHTML = '<p>No tests match your filter.</p>';
+          return;
+        }
         
-        recentTests.forEach(test => {
+        // Create test cards
+        filteredTests.forEach((test, index) => {
           const testCard = document.createElement('div');
           testCard.className = 'test-card';
           testCard.dataset.category = test.category;
-          testCard.dataset.id = test.id;
           testCard.innerHTML = `
             <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
             <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
@@ -1183,9 +1239,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <img src="${test.userPhoto}" alt="${test.userName}">
               <span>Added by ${test.userName}</span>
             </div>
-            ${isAdmin ? '<button class="delete-test-btn secondary-btn">Delete Test</button>' : ''}
           `;
-
           testCard.addEventListener('click', () => {
             document.querySelectorAll('.test-card').forEach(card => {
               card.classList.remove('selected');
@@ -1207,104 +1261,94 @@ document.addEventListener('DOMContentLoaded', function() {
               if (existingVideo) existingVideo.remove();
             }
           });
-
-          if (isAdmin) {
-            const deleteBtn = testCard.querySelector('.delete-test-btn');
-            deleteBtn.addEventListener('click', (e) => {
-              e.stopPropagation();
-              if (confirm('Are you sure you want to delete this test?')) {
-                database.ref('tests').child(test.id).remove()
-                  .then(() => {
-                    testCard.remove();
-                    loadGlobalTests();
-                  })
-                  .catch(error => {
-                    console.error('Error deleting test:', error);
-                    alert('Failed to delete test');
-                  });
-              }
-            });
-          }
-
-          globalTestsList.appendChild(testCard);
+          carouselTrack.appendChild(testCard);
         });
         
-        if (filteredTests.length > 6) {
-          const showMoreBtn = document.createElement('button');
-          showMoreBtn.className = 'secondary-btn';
-          showMoreBtn.textContent = 'Show More Tests';
-          showMoreBtn.style.marginTop = '1rem';
-          showMoreBtn.addEventListener('click', () => {
-            globalTestsList.innerHTML = '';
-            filteredTests.forEach(test => {
-              const testCard = document.createElement('div');
-              testCard.className = 'test-card';
-              testCard.dataset.category = test.category;
-              testCard.dataset.id = test.id;
-              testCard.innerHTML = `
-                <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
-                <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
-                ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
-                <div class="test-author">
-                  <img src="${test.userPhoto}" alt="${test.userName}">
-                  <span>Added by ${test.userName}</span>
-                </div>
-                ${isAdmin ? '<button class="delete-test-btn secondary-btn">Delete Test</button>' : ''}
-              `;
-              testCard.addEventListener('click', () => {
-                document.querySelectorAll('.test-card').forEach(card => {
-                  card.classList.remove('selected');
-                });
-                testCard.classList.add('selected');
-                originalTextEl.value = test.text;
-                originalTextGroup.classList.add('hidden');
-                timerOptions.classList.remove('hidden');
-                timerButtons.forEach(btn => {
-                  btn.disabled = false;
-                  btn.style.opacity = '1';
-                });
-                
-                if (test.videoUrl) {
-                  embedVideo(test.videoUrl);
-                } else {
-                  const existingVideo = document.getElementById('testVideoPlayer');
-                  if (existingVideo) existingVideo.remove();
-                }
-              });
-
-              if (isAdmin) {
-                const deleteBtn = testCard.querySelector('.delete-test-btn');
-                deleteBtn.addEventListener('click', (e) => {
-                  e.stopPropagation();
-                  if (confirm('Are you sure you want to delete this test?')) {
-                    database.ref('tests').child(test.id).remove()
-                      .then(() => {
-                        testCard.remove();
-                        loadGlobalTests();
-                      })
-                      .catch(error => {
-                        console.error('Error deleting test:', error);
-                        alert('Failed to delete test');
-                      });
-                  }
-                });
-              }
-
-              globalTestsList.appendChild(testCard);
-            });
-            
-            showMoreBtn.textContent = 'Show Less';
-            showMoreBtn.onclick = () => {
-              loadGlobalTests();
-            };
-          });
-          globalTestsList.parentNode.appendChild(showMoreBtn);
-        }
+        // Initialize carousel after cards are created
+        initializeCarousel();
       })
       .catch(error => {
         console.error('Error loading tests:', error);
-        globalTestsList.innerHTML = '<p>Error loading community tests. Please try again later.</p>';
+        document.querySelector('.carousel-track').innerHTML = '<p>Error loading community tests. Please try again later.</p>';
       });
+  }
+
+  function initializeCarousel() {
+    const track = document.querySelector('.carousel-track');
+    const dotsContainer = document.querySelector('.carousel-dots');
+    const cards = document.querySelectorAll('.test-card');
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    
+    if (cards.length === 0) return;
+    
+    const cardWidth = cards[0].offsetWidth + 16; // including gap
+    let currentIndex = 0;
+    
+    // Determine how many cards to show based on screen width
+    function getVisibleCards() {
+      if (window.innerWidth < 480) return 1;
+      if (window.innerWidth < 768) return 2;
+      return 3;
+    }
+    
+    let visibleCards = getVisibleCards();
+    const dotCount = Math.ceil(cards.length / visibleCards);
+    
+    // Create dots
+    dotsContainer.innerHTML = '';
+    for (let i = 0; i < dotCount; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'carousel-dot';
+      if (i === 0) dot.classList.add('active');
+      dot.addEventListener('click', () => {
+        currentIndex = i;
+        updateCarousel();
+      });
+      dotsContainer.appendChild(dot);
+    }
+    
+    function updateCarousel() {
+      const offset = -currentIndex * (visibleCards * cardWidth);
+      track.style.transform = `translateX(${offset}px)`;
+      
+      // Update active dot
+      document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+      });
+      
+      // Disable/enable buttons
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex >= dotCount - 1;
+    }
+    
+    // Navigation handlers
+    prevBtn.addEventListener('click', () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCarousel();
+      }
+    });
+    
+    nextBtn.addEventListener('click', () => {
+      if (currentIndex < dotCount - 1) {
+        currentIndex++;
+        updateCarousel();
+      }
+    });
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      const newVisibleCards = getVisibleCards();
+      if (newVisibleCards !== visibleCards) {
+        visibleCards = newVisibleCards;
+        currentIndex = 0;
+        updateCarousel();
+      }
+    });
+    
+    // Initialize
+    updateCarousel();
   }
 
   function getCategoryName(category) {
@@ -1451,3 +1495,4 @@ if (localStorage.getItem('darkMode') === 'true') {
   document.getElementById('darkModeToggle').checked = true;
   document.body.classList.add('dark-mode');
 }
+```
