@@ -1258,6 +1258,21 @@ body.dark-mode .selected-row {
     font-size: 1rem;
   }
 }
+/* Add these styles for the edit modal */
+#editTestModal .modal-content {
+  max-width: 600px;
+  width: 90%;
+}
+
+#editTestModal .input-group {
+  margin-bottom: 1rem;
+}
+
+#editTestModal .modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1.5rem;
+}
 
 @media (max-width: 480px) {
   .test-card {
