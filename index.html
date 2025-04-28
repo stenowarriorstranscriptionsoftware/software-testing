@@ -12,7 +12,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 <style>
+/* CSS Styles */
 :root {
+  /* Color Palette */
   --primary: #4361ee;
   --primary-light: #4895ef;
   --secondary: #3f37c9;
@@ -24,12 +26,14 @@
   --gray: #6c757d;
 }
 
+/* Global Resets and Box Sizing */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* Body Styling */
 body {
   font-family: 'Poppins', sans-serif;
   background: linear-gradient(135deg, #f5f7fa 0%, #e2e8f0 100%);
@@ -40,6 +44,7 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
+/* Dark Mode Styling */
 body.dark-mode {
   background: #121212;
   color: #e0e0e0;
@@ -50,6 +55,7 @@ body.dark-mode .container {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* Main Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -60,6 +66,7 @@ body.dark-mode .container {
   transition: all 0.3s ease;
 }
 
+/* Header Styling */
 header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: white;
@@ -69,6 +76,7 @@ header {
   overflow: hidden;
 }
 
+/* Header Background Animation */
 header::before {
   content: '';
   position: absolute;
@@ -98,11 +106,13 @@ header h1 {
   letter-spacing: 0.5px;
 }
 
+/* Header Animation Keyframes */
 @keyframes rotate {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
 
+/* Theme Toggle Button */
 .theme-toggle {
   position: absolute;
   top: 1.5rem;
@@ -128,17 +138,19 @@ header h1 {
 }
 
 #darkModeToggle {
-  display: none;
+  display: none; /* Hide the actual checkbox */
 }
 
 .toggle-icon {
   font-size: 1.2rem;
 }
 
+/* Input Section Styling */
 .input-section {
   padding: 2rem;
 }
 
+/* Input Group (Label Floating Effect) */
 .input-group {
   position: relative;
   margin-bottom: 2rem;
@@ -151,14 +163,15 @@ header h1 {
   color: var(--gray);
   transition: all 0.3s ease;
   pointer-events: none;
-  background: white;
+  background: white; /* Match container background */
   padding: 0 0.5rem;
 }
 
 body.dark-mode .input-group label {
-  background: #1e1e1e;
+  background: #1e1e1e; /* Match dark container background */
 }
 
+/* Label floating behavior */
 .input-group textarea:focus + label,
 .input-group textarea:not(:placeholder-shown) + label,
 .input-group input:focus + label,
@@ -171,6 +184,7 @@ body.dark-mode .input-group label {
   color: var(--primary);
 }
 
+/* Textarea and Input Styling */
 textarea, input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="search"], select {
   width: 100%;
   padding: 1.2rem;
@@ -178,12 +192,13 @@ textarea, input[type="text"], input[type="email"], input[type="password"], input
   border-radius: 10px;
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
-  resize: vertical;
+  resize: vertical; /* Allow vertical resize for textareas */
   transition: all 0.3s;
   background: transparent;
-  z-index: 1;
+  z-index: 1; /* Ensure input is above label background */
 }
 
+/* Dark Mode Input Styling */
 body.dark-mode textarea,
 body.dark-mode input[type="text"],
 body.dark-mode input[type="email"],
@@ -195,6 +210,7 @@ body.dark-mode select {
   color: #e0e0e0;
 }
 
+/* Input Focus Styling */
 textarea:focus,
 input[type="text"]:focus,
 input[type="email"]:focus,
@@ -207,12 +223,14 @@ select:focus {
   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
 }
 
+/* Button Group Layout */
 .button-group {
   display: flex;
   gap: 0.8rem;
   margin-top: 1rem;
 }
 
+/* General Button Styling */
 button {
   background-color: var(--primary);
   color: white;
@@ -225,9 +243,10 @@ button {
   transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* For ripple effect */
 }
 
+/* Button Ripple Effect */
 button::after {
   content: '';
   position: absolute;
@@ -257,6 +276,7 @@ button:focus:not(:active)::after {
   }
 }
 
+/* Button Hover and Active States */
 button:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
@@ -267,11 +287,12 @@ button:active {
   box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
 }
 
+/* Specific Button Styles */
 .secondary-btn {
   background-color: var(--gray);
   padding: 0.6rem 1.2rem;
   font-size: 0.9rem;
-  flex: initial;
+  flex: initial; /* Don't grow to fill space */
 }
 
 .download-btn {
@@ -283,17 +304,20 @@ button:active {
 
 .close-results-btn {
   background-color: var(--danger);
-  margin-left: auto;
+  margin-left: auto; /* Push to the right in flex container */
 }
 
+/* Results and Full Text Section Padding */
 #results, #fullTextSection {
   padding: 0 2rem 2rem;
 }
 
+/* Utility Class to Hide Elements */
 .hidden {
   display: none !important; /* Use important to ensure override */
 }
 
+/* Results Header Styling */
 .results-header {
   display: flex;
   justify-content: space-between;
@@ -301,10 +325,10 @@ button:active {
   margin-bottom: 1.5rem;
   padding: 1.5rem;
   border-radius: 15px;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.8); /* Semi-transparent background */
+  backdrop-filter: blur(10px); /* Frosted glass effect */
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Subtle border */
 }
 
 body.dark-mode .results-header {
@@ -320,6 +344,7 @@ body.dark-mode .results-header {
   margin-top: 0.5rem;
 }
 
+/* Full Text Header Styling */
 .fulltext-header {
   display: flex;
   justify-content: space-between;
@@ -333,16 +358,14 @@ body.dark-mode .fulltext-header {
   border-bottom-color: #444;
 }
 
-/* Comparison Text Styles - Updated */
+/* Comparison Text Styles */
 .correct { color: #2ecc71; font-weight: bold; } /* Green */
-.missing { color: #e74c3c; font-weight: bold; background-color: rgba(231, 76, 60, 0.1); padding: 0 2px; border-radius: 3px;} /* Red, background, NO strikethrough */
-.addition { color: #3498db; font-weight: bold; background-color: rgba(52, 152, 219, 0.1); padding: 0 2px; border-radius: 3px; text-decoration: line-through;} /* Blue, background, YES strikethrough */
-.spelling { color: #e67e22; font-weight: bold; text-decoration: underline wavy rgba(230, 126, 34, 0.7); } /* Orange, wavy underline - KEEPING FOR POTENTIAL FUTURE USE */
+.missing { color: #e74c3c; font-weight: bold; background-color: rgba(231, 76, 60, 0.1); padding: 0 2px; border-radius: 3px;} /* Red, background */
+.addition { color: #3498db; font-weight: bold; background-color: rgba(52, 152, 219, 0.1); padding: 0 2px; border-radius: 3px; text-decoration: line-through;} /* Blue, background, strikethrough */
 .capitalization { color: #9b59b6; font-weight: bold; border-bottom: 2px dotted rgba(155, 89, 182, 0.7); } /* Purple, dotted underline */
-/* NEW: Punctuation style */
 .punctuation { color: #f39c12; font-weight: bold; border-bottom: 2px dashed rgba(243, 156, 18, 0.7); } /* Orange, dashed underline */
 
-
+/* Legend Box Styling */
 .legend-box {
   border: 1px solid #e2e8f0;
   padding: 1rem;
@@ -363,25 +386,25 @@ body.dark-mode .legend-box {
   font-size: 0.9rem;
 }
 
-.legend-row span {
+.legend-row span { /* The colored square/indicator */
   margin-right: 8px;
-  font-size: 1.2rem; /* Keep box size consistent */
-  display: inline-block; /* Needed for background color */
-  padding: 0 2px; /* Match padding */
-  border-radius: 3px; /* Match border radius */
-  line-height: 1.2; /* Adjust line height for visual consistency */
-  min-width: 1.5em; /* Ensure some width */
+  font-size: 1.2rem;
+  display: inline-block;
+  padding: 0 2px;
+  border-radius: 3px;
+  line-height: 1.2;
+  min-width: 1.5em;
   text-align: center;
+  color: transparent; /* Hide the default square character */
 }
-/* Apply styles directly to legend spans - Updated */
-.legend-row .correct { background-color: transparent; text-decoration: none; border-bottom: none; }
-.legend-row .missing { background-color: rgba(231, 76, 60, 0.1); text-decoration: none; border-bottom: none; } /* NO strikethrough */
-.legend-row .addition { background-color: rgba(52, 152, 219, 0.1); text-decoration: line-through; border-bottom: none; } /* YES strikethrough */
+/* Apply specific styles to legend indicators */
+.legend-row .correct { background-color: #2ecc71; text-decoration: none; border-bottom: none; }
+.legend-row .missing { background-color: rgba(231, 76, 60, 0.1); border: 1px solid #e74c3c; text-decoration: none; border-bottom: none; }
+.legend-row .addition { background-color: rgba(52, 152, 219, 0.1); border: 1px solid #3498db; text-decoration: line-through; border-bottom: none; }
 .legend-row .capitalization { background-color: transparent; text-decoration: none; border-bottom: 2px dotted rgba(155, 89, 182, 0.7); }
-/* NEW: Legend for punctuation */
 .legend-row .punctuation { background-color: transparent; text-decoration: none; border-bottom: 2px dashed rgba(243, 156, 18, 0.7); }
 
-
+/* Result, Stats, Feedback, Text Display Boxes */
 .result-box, .stats-box, .feedback-box, .text-display {
   background: white;
   padding: 1.5rem;
@@ -398,12 +421,13 @@ body.dark-mode .text-display {
   border-color: #444;
 }
 
-.result-box {
+.result-box { /* Comparison text area */
   line-height: 1.8;
-  white-space: pre-wrap; /* Ensure whitespace is handled correctly */
-  word-wrap: break-word; /* Allow long words to break */
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
+/* Comparison Section Container */
 .comparison-section {
   margin-bottom: 2rem;
   background: rgba(255, 255, 255, 0.8);
@@ -419,6 +443,7 @@ body.dark-mode .comparison-section {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Analysis Section (Stats & Feedback) Layout */
 .analysis-section {
   display: flex;
   gap: 1.5rem;
@@ -426,7 +451,7 @@ body.dark-mode .comparison-section {
 }
 
 .analysis-column {
-  flex: 1;
+  flex: 1; /* Each column takes equal space */
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
   border-radius: 15px;
@@ -440,26 +465,28 @@ body.dark-mode .analysis-column {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+/* Statistics Box Layout */
 .stats-box {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Responsive grid */
   gap: 1rem;
 }
 
+/* Individual Stat Item Styling */
 .stat-item {
   background: rgba(255, 255, 255, 0.9);
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   position: relative;
-  overflow: hidden;
+  overflow: hidden; /* For animated underline */
 }
 
 body.dark-mode .stat-item {
   background: rgba(30, 30, 30, 0.9);
 }
 
-.stat-item h4 {
+.stat-item h4 { /* Stat title */
   color: var(--gray);
   font-size: 0.9rem;
   margin-bottom: 0.5rem;
@@ -467,7 +494,7 @@ body.dark-mode .stat-item {
   z-index: 1;
 }
 
-.stat-item p {
+.stat-item p { /* Stat value */
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--primary);
@@ -475,6 +502,7 @@ body.dark-mode .stat-item {
   z-index: 1;
 }
 
+/* Stat Item Underline Animation */
 .stat-item::after {
   content: '';
   position: absolute;
@@ -492,6 +520,7 @@ body.dark-mode .stat-item {
   transform: scaleX(1);
 }
 
+/* Feedback Box Styling */
 .feedback-box h3 {
   color: var(--primary);
   margin-bottom: 1rem;
@@ -505,6 +534,7 @@ body.dark-mode .stat-item {
   margin-bottom: 0.5rem;
 }
 
+/* Full Text Display Columns */
 .columns {
   display: flex;
   gap: 1.5rem;
@@ -514,16 +544,17 @@ body.dark-mode .stat-item {
   flex: 1;
 }
 
-.text-display {
+.text-display { /* Area showing full original/user text */
   height: 400px;
   overflow-y: auto;
-  white-space: pre-wrap;
+  white-space: pre-wrap; /* Preserve whitespace and wrap */
 }
 
 body.dark-mode .text-display {
   color: #e0e0e0;
 }
 
+/* Footer Styling */
 footer {
   text-align: center;
   padding: 1.5rem;
@@ -580,6 +611,7 @@ body.dark-mode footer {
   100% { opacity: 1; }
 }
 
+/* Test Controls Layout */
 .test-controls {
   display: flex;
   justify-content: space-between;
@@ -587,6 +619,7 @@ body.dark-mode footer {
   margin-top: 1rem;
 }
 
+/* Locked Textarea Styling */
 .locked-textarea {
   background-color: var(--light);
   cursor: not-allowed;
@@ -596,7 +629,7 @@ body.dark-mode .locked-textarea {
   background-color: #2a2a2a;
 }
 
-/* Auth Styles */
+/* Authentication Button Styling */
 .auth-btn {
   background-color: var(--primary);
   color: white;
@@ -615,6 +648,7 @@ body.dark-mode .locked-textarea {
   transform: translateY(-2px);
 }
 
+/* User Info Display (Header) */
 .user-photo {
   width: 40px;
   height: 40px;
@@ -630,7 +664,7 @@ body.dark-mode .locked-textarea {
   margin-top: 1rem;
 }
 
-/* Login Prompt */
+/* Login Prompt Section */
 .login-prompt {
   max-width: 500px;
   margin: 2rem auto;
@@ -656,7 +690,7 @@ body.dark-mode .login-prompt {
   color: var(--gray);
 }
 
-.login-prompt a {
+.login-prompt a { /* Register/Login link */
   color: var(--primary);
   text-decoration: none;
   font-weight: 500;
@@ -680,27 +714,27 @@ body.dark-mode .global-tests-section {
   border-color: #444;
 }
 
+/* Test Filters Layout */
 .test-filters {
-  margin-bottom: 1.5rem; /* Increased margin */
-  display: flex; /* Use flexbox for alignment */
-  gap: 1rem; /* Space between elements */
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  margin-bottom: 1.5rem;
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .test-filters select,
-.test-filters input[type="search"] { /* Style both select and search */
-  padding: 0.8rem; /* Consistent padding */
-  border-radius: 8px; /* Consistent radius */
+.test-filters input[type="search"] {
+  padding: 0.8rem;
+  border-radius: 8px;
   border: 1px solid #e2e8f0;
   background: white;
-  font-size: 0.9rem; /* Slightly smaller font */
+  font-size: 0.9rem;
   flex-grow: 1; /* Allow elements to grow */
 }
 
 .test-filters input[type="search"] {
     min-width: 200px; /* Minimum width for search */
 }
-
 
 body.dark-mode .test-filters select,
 body.dark-mode .test-filters input[type="search"] {
@@ -709,6 +743,7 @@ body.dark-mode .test-filters input[type="search"] {
   color: #e0e0e0;
 }
 
+/* Test Card Grid (Fallback if Carousel fails) */
 .tests-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -716,68 +751,62 @@ body.dark-mode .test-filters input[type="search"] {
   margin-top: 1rem;
 }
 
+/* Individual Test Card Styling */
 .test-card {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 15px;
   border: none;
-  /* cursor: pointer; /* Remove cursor from whole card */
   transition: all 0.3s ease;
-  box-shadow: 8px 8px 16px #e2e8f0,
-              -8px -8px 16px #ffffff;
+  box-shadow: 8px 8px 16px #e2e8f0, -8px -8px 16px #ffffff; /* Neumorphic style */
   margin-bottom: 1.5rem;
-  display: flex; /* Use flexbox for better layout */
-  flex-direction: column; /* Stack content vertically */
+  display: flex;
+  flex-direction: column;
 }
 
 body.dark-mode .test-card {
   background: #2a2a2a;
-  box-shadow: 8px 8px 16px #1a1a1a,
-              -8px -8px 16px #3a3a3a;
+  box-shadow: 8px 8px 16px #1a1a1a, -8px -8px 16px #3a3a3a;
 }
 
 .test-card:hover {
   transform: translateY(-5px);
-  box-shadow: 12px 12px 24px #d1d9e6,
-              -12px -12px 24px #ffffff;
+  box-shadow: 12px 12px 24px #d1d9e6, -12px -12px 24px #ffffff;
 }
 
 body.dark-mode .test-card:hover {
-  box-shadow: 12px 12px 24px #1a1a1a,
-              -12px -12px 24px #3a3a3a;
+  box-shadow: 12px 12px 24px #1a1a1a, -12px -12px 24px #3a3a3a;
 }
 
-.test-card.selected {
-  box-shadow: inset 4px 4px 8px #d1d9e6,
-              inset -4px -4px 8px #ffffff;
+.test-card.selected { /* Style for selected test */
+  box-shadow: inset 4px 4px 8px #d1d9e6, inset -4px -4px 8px #ffffff;
   border: 2px solid var(--primary-light);
 }
 
 body.dark-mode .test-card.selected {
-  box-shadow: inset 4px 4px 8px #1a1a1a,
-              inset -4px -4px 8px #3a3a3a;
+  box-shadow: inset 4px 4px 8px #1a1a1a, inset -4px -4px 8px #3a3a3a;
 }
 
-.test-card h4 {
+.test-card h4 { /* Test title */
   color: var(--primary);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
 }
 
-.test-card p {
+.test-card p { /* Test description snippet */
   color: var(--gray);
   font-size: 0.9rem;
-  flex-grow: 1; /* Allow paragraph to take up space */
-  margin-bottom: 1rem; /* Add space before author/buttons */
+  flex-grow: 1; /* Push author/buttons down */
+  margin-bottom: 1rem;
 }
 
 .test-author {
   display: flex;
   align-items: center;
-  margin-top: auto; /* Push author and buttons to the bottom */
+  margin-top: auto; /* Push to bottom */
   font-size: 0.8rem;
-  margin-bottom: 0.5rem; /* Space between author and buttons */
+  margin-bottom: 0.5rem;
 }
 
 .test-author img {
@@ -787,37 +816,27 @@ body.dark-mode .test-card.selected {
   margin-right: 8px;
 }
 
-/* NEW: Styles for Edit/Delete buttons */
+/* Edit/Delete Buttons on Test Cards */
 .test-card-actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.5rem; /* Space above buttons */
+  margin-top: 0.5rem;
 }
 
 .test-card-actions button {
   padding: 0.3rem 0.6rem;
   font-size: 0.8rem;
   border-radius: 6px;
-  flex: 1; /* Make buttons take equal width */
+  flex: 1; /* Equal width */
 }
 
-.edit-test-btn {
-  background-color: var(--warning);
-}
-.edit-test-btn:hover {
-  background-color: #d97706; /* Darker warning */
-}
-
-.delete-test-btn {
-  background-color: var(--danger);
-}
-.delete-test-btn:hover {
-  background-color: #d11a5e; /* Darker danger */
-}
-/* --- End of New Styles --- */
+.edit-test-btn { background-color: var(--warning); }
+.edit-test-btn:hover { background-color: #d97706; }
+.delete-test-btn { background-color: var(--danger); }
+.delete-test-btn:hover { background-color: #d11a5e; }
 
 
-/* Leaderboard Styles */
+/* Leaderboard Section */
 .leaderboard-section {
   padding: 2rem;
   margin: 2rem 0;
@@ -852,22 +871,22 @@ body.dark-mode .leaderboard-controls select {
   color: #e0e0e0;
 }
 
-/* Updated Leaderboard List Styles for Horizontal Scrolling */
-.leaderboard-list {
+/* Leaderboard Table Styling */
+.leaderboard-list { /* Container for horizontal scroll */
   overflow-x: auto;
   width: 100%;
-  -webkit-overflow-scrolling: touch;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
 .leaderboard-list table {
-  min-width: 1000px;
+  min-width: 1000px; /* Ensure table is wide enough for columns */
   width: 100%;
   border-collapse: collapse;
 }
 
 .leaderboard-list th,
 .leaderboard-list td {
-  white-space: nowrap;
+  white-space: nowrap; /* Prevent text wrapping */
   padding: 0.8rem 1rem;
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
@@ -878,11 +897,11 @@ body.dark-mode .leaderboard-list td {
   border-bottom-color: #444;
 }
 
-.leaderboard-list th {
+.leaderboard-list th { /* Table header */
   background-color: var(--primary-light);
   color: white;
   font-weight: 500;
-  position: relative;
+  position: relative; /* For sort indicator */
   cursor: pointer;
 }
 
@@ -890,6 +909,7 @@ body.dark-mode .leaderboard-list td {
   background-color: var(--secondary);
 }
 
+/* Sort Indicators */
 .leaderboard-list th::after {
   content: "↕";
   position: absolute;
@@ -897,33 +917,16 @@ body.dark-mode .leaderboard-list td {
   opacity: 0.5;
   font-size: 0.8rem;
 }
+.leaderboard-list th.sorted-asc::after { content: "↑"; opacity: 1; }
+.leaderboard-list th.sorted-desc::after { content: "↓"; opacity: 1; }
 
-.leaderboard-list th.sorted-asc::after {
-  content: "↑";
-  opacity: 1;
-}
+/* Table Row Styling */
+.leaderboard-list tr:nth-child(even) { background-color: #f8f9fa; }
+body.dark-mode .leaderboard-list tr:nth-child(even) { background-color: #2a2a2a; }
+.leaderboard-list tr:hover { background-color: #e9ecef; }
+body.dark-mode .leaderboard-list tr:hover { background-color: #3a3a3a; }
 
-.leaderboard-list th.sorted-desc::after {
-  content: "↓";
-  opacity: 1;
-}
-
-.leaderboard-list tr:nth-child(even) {
-  background-color: #f8f9fa;
-}
-
-body.dark-mode .leaderboard-list tr:nth-child(even) {
-  background-color: #2a2a2a;
-}
-
-.leaderboard-list tr:hover {
-  background-color: #e9ecef;
-}
-
-body.dark-mode .leaderboard-list tr:hover {
-  background-color: #3a3a3a;
-}
-
+/* Leaderboard User Display */
 .leaderboard-user {
   display: flex;
   align-items: center;
@@ -936,22 +939,13 @@ body.dark-mode .leaderboard-list tr:hover {
   border-radius: 50%;
 }
 
-.accuracy-cell {
-  font-weight: 600;
-}
+/* Accuracy Cell Styling */
+.accuracy-cell { font-weight: 600; }
+.accuracy-high { color: #2ecc71; }
+.accuracy-medium { color: #f39c12; }
+.accuracy-low { color: #e74c3c; }
 
-.accuracy-high {
-  color: #2ecc71;
-}
-
-.accuracy-medium {
-  color: #f39c12;
-}
-
-.accuracy-low {
-  color: #e74c3c;
-}
-
+/* Pagination Info Text */
 .pagination-info {
   text-align: center;
   margin-top: 1rem;
@@ -964,7 +958,7 @@ body.dark-mode .leaderboard-list tr:hover {
   background: #f1f5fb;
   border: 1px solid #dce3f0;
   padding: 2rem;
-  margin: 2rem;
+  margin: 2rem; /* Add margin around the section */
   border-radius: 10px;
 }
 
@@ -978,7 +972,7 @@ body.dark-mode .custom-test-section {
   color: var(--primary);
 }
 
-/* Video Container */
+/* Video Container Styling */
 .video-container {
   margin: 1.5rem 0;
   position: relative;
@@ -988,15 +982,18 @@ body.dark-mode .custom-test-section {
   border-radius: 10px;
 }
 
-.video-container iframe {
+.video-container iframe,
+.video-container video { /* Style both iframe and video */
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   border-radius: 8px;
+  border: none; /* Remove default iframe border */
 }
 
+/* Video Indicator on Test Card */
 .test-card .video-indicator {
   font-size: 0.8rem;
   color: var(--primary);
@@ -1006,13 +1003,13 @@ body.dark-mode .custom-test-section {
   gap: 0.3rem;
 }
 
-.test-card .video-indicator svg {
+.test-card .video-indicator svg { /* Simple play icon */
   width: 14px;
   height: 14px;
   fill: currentColor;
 }
 
-/* Badge Styles */
+/* Badge Styles (Leaderboard Ranks) */
 .badge {
   display: inline-block;
   padding: 0.25em 0.4em;
@@ -1025,62 +1022,39 @@ body.dark-mode .custom-test-section {
   border-radius: 0.25rem;
   margin-left: 0.5rem;
 }
+.badge-gold { color: #212529; background-color: #ffd700; }
+.badge-silver { color: #212529; background-color: #c0c0c0; }
+.badge-bronze { color: #212529; background-color: #cd7f32; }
 
-.badge-gold {
-  color: #212529;
-  background-color: #ffd700;
-}
-
-.badge-silver {
-  color: #212529;
-  background-color: #c0c0c0;
-}
-
-.badge-bronze {
-  color: #212529;
-  background-color: #cd7f32;
-}
-
+/* Category Badge Styles */
 .category-badge {
   color: white;
   padding: 0.2rem 0.5rem;
-  border-radius: 50px;
+  border-radius: 50px; /* Pill shape */
   font-size: 0.7rem;
   margin-left: 0.5rem;
+  text-transform: capitalize; /* Capitalize category names */
 }
+.category-general { background-color: #e74c3c; }
+.category-kailash { background-color: #2ecc71; }
+.category-progressive { background-color: #9b59b6; }
+.category-legal { background-color: #3498db; }
+.category-previous { background-color: #f39c12; }
+.category-test { background-color: #607d8b; } /* Added style for 'test' category */
 
-.category-general {
-  background-color: #e74c3c;
-}
 
-.category-kailash {
-  background-color: #2ecc71;
-}
-
-.category-progressive {
-  background-color: #9b59b6;
-}
-
-.category-legal {
-  background-color: #3498db;
-}
-
-.category-previous {
-  background-color: #f39c12;
-}
-
-/* Modal Styles */
+/* Modal Styles (Confirmation, Manage Tests) */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent overlay */
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1000; /* Ensure modal is on top */
 }
 
 .modal-content {
@@ -1089,7 +1063,7 @@ body.dark-mode .custom-test-section {
   border-radius: 10px;
   width: 90%;
   max-width: 500px;
-  max-height: 80vh;
+  max-height: 80vh; /* Limit height and allow scrolling */
   overflow-y: auto;
 }
 
@@ -1102,11 +1076,18 @@ body.dark-mode .modal-content {
   color: var(--primary);
 }
 
-.test-selection {
+.test-selection { /* Container for checkboxes in Manage Tests modal */
   margin: 1.5rem 0;
+  max-height: 40vh;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin-bottom: 1rem;
 }
+body.dark-mode .test-selection { border-color: #444; }
 
-.test-item {
+
+.test-item { /* Individual test item in Manage Tests modal */
   padding: 0.8rem;
   border-bottom: 1px solid #e2e8f0;
   display: flex;
@@ -1117,7 +1098,7 @@ body.dark-mode .test-item {
   border-bottom-color: #444;
 }
 
-.test-item input {
+.test-item input[type="checkbox"] {
   margin-right: 0.8rem;
 }
 
@@ -1128,7 +1109,7 @@ body.dark-mode .test-item {
   margin-top: 1.5rem;
 }
 
-.danger-btn {
+.danger-btn { /* Specific style for delete/confirm buttons */
   background-color: var(--danger) !important;
 }
 
@@ -1136,148 +1117,59 @@ body.dark-mode .test-item {
   background-color: #d11a5e !important;
 }
 
-/* Responsive styles */
+/* Responsive Styles */
 @media (max-width: 768px) {
-  header h1 {
-    font-size: 2rem;
-    margin-top: 1rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  .theme-toggle {
-    top: 1rem;
-    right: 1rem;
-  }
-
-  .analysis-section {
-    flex-direction: column;
-  }
-
-  .button-group {
-    flex-direction: column;
-  }
-
-  button {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
-
-  .columns {
-    flex-direction: column;
-  }
-
-  .text-display {
-    height: 300px;
-  }
-
-  .timer-options {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .test-controls {
-    flex-direction: column;
-    gap: 0.8rem;
-  }
-   .test-controls button { /* Ensure buttons in test-controls stack */
-      width: 100%;
-   }
-
-
-  .close-results-btn {
-    margin-left: 0;
-    width: 100%;
-  }
-
-  .leaderboard-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .leaderboard-controls select {
-    width: 100%;
-  }
-
-  .input-group label {
-    font-size: 0.9rem;
-  }
-
-  .stat-item {
-    padding: 1rem;
-  }
-
-  .results-header, .fulltext-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .result-meta {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .test-filters {
-      flex-direction: column; /* Stack filters vertically */
-  }
-}
-/* Add to existing styles.css */
-.delete-checkbox {
-  margin-right: 10px;
+  header h1 { font-size: 2rem; margin-top: 1rem; }
+  .subtitle { font-size: 1rem; }
+  .theme-toggle { top: 1rem; right: 1rem; }
+  .analysis-section { flex-direction: column; } /* Stack stats/feedback */
+  .button-group { flex-direction: column; } /* Stack buttons */
+  button { width: 100%; margin-bottom: 0.5rem; }
+  .columns { flex-direction: column; } /* Stack full text columns */
+  .text-display { height: 300px; }
+  .timer-options { flex-direction: column; align-items: center; }
+  .test-controls { flex-direction: column; gap: 0.8rem; }
+  .test-controls button { width: 100%; } /* Ensure buttons stack */
+  .close-results-btn { margin-left: 0; width: 100%; }
+  .leaderboard-controls { flex-direction: column; align-items: stretch; }
+  .leaderboard-controls select { width: 100%; }
+  .input-group label { font-size: 0.9rem; }
+  .stat-item { padding: 1rem; }
+  .results-header, .fulltext-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  .result-meta { flex-direction: column; gap: 0.5rem; }
+  .test-filters { flex-direction: column; } /* Stack test filters */
 }
 
-.admin-controls {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
+/* Admin Controls (Delete Checkbox, Selectable Rows) */
+.delete-checkbox { margin-right: 10px; }
+.admin-controls { display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.leaderboard-row-selectable { cursor: pointer; }
+.leaderboard-row-selectable:hover { background-color: #f0f0f0 !important; }
+body.dark-mode .leaderboard-row-selectable:hover { background-color: #3a3a3a !important; }
+.selected-row { background-color: #e3f2fd !important; } /* Highlight selected row */
+body.dark-mode .selected-row { background-color: #2c3e50 !important; }
 
-.leaderboard-row-selectable {
-  cursor: pointer;
-}
 
-.leaderboard-row-selectable:hover {
-  background-color: #f0f0f0 !important;
-}
-
-body.dark-mode .leaderboard-row-selectable:hover {
-  background-color: #3a3a3a !important;
-}
-
-.selected-row {
-  background-color: #e3f2fd !important;
-}
-
-body.dark-mode .selected-row {
-  background-color: #2c3e50 !important;
-}
-
-.category-test {
-  background-color: #607d8b;
-}
 /* Carousel Styles */
 .tests-carousel {
   position: relative;
   margin: 1rem 0;
-  overflow: hidden;
+  overflow: hidden; /* Hide overflowing cards */
 }
 
 .carousel-container {
-  overflow: hidden;
-  margin: 0 2.5rem; /* Adjust margin to account for button width */
+  overflow: hidden; /* Hide overflowing track */
+  margin: 0 2.5rem; /* Space for prev/next buttons */
 }
 
 .carousel-track {
   display: flex;
-  transition: transform 0.5s ease;
-  gap: 1rem; /* Gap between cards */
-  padding: 0.5rem 0; /* Padding for shadow visibility */
+  transition: transform 0.5s ease; /* Smooth sliding animation */
+  gap: 1rem; /* Space between cards */
+  padding: 0.5rem 0; /* Allow shadows to be visible */
 }
 
-.carousel-btn {
+.carousel-btn { /* Prev/Next buttons */
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
@@ -1296,18 +1188,11 @@ body.dark-mode .selected-row {
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
-.carousel-btn:hover {
-  background: var(--secondary);
-}
+.carousel-btn:hover { background: var(--secondary); }
+.prev-btn { left: 0; }
+.next-btn { right: 0; }
 
-.prev-btn {
-  left: 0;
-}
-
-.next-btn {
-  right: 0;
-}
-
+/* Carousel Dots Navigation */
 .carousel-dots {
   display: flex;
   justify-content: center;
@@ -1331,36 +1216,28 @@ body.dark-mode .selected-row {
 
 /* Adjust test card size for carousel */
 .test-card {
-  min-width: 280px; /* Minimum width for a card */
-  /* Calculate flex-basis dynamically in JS or use media queries */
-  flex-shrink: 0; /* Prevent cards from shrinking */
-  margin-bottom: 0; /* Remove bottom margin for carousel */
+  min-width: 280px; /* Ensure cards have a minimum width */
+  flex-shrink: 0; /* Prevent cards from shrinking to fit */
+  margin-bottom: 0; /* Remove bottom margin when in carousel */
 }
 
-@media (min-width: 1024px) { /* Large screens: 3 cards */
+/* Responsive Carousel Card Sizing */
+@media (min-width: 1024px) { /* Large screens: ~3 cards visible */
   .test-card {
-    flex-basis: calc(33.333% - (2 * 1rem / 3)); /* 1rem gap */
+    flex-basis: calc(33.333% - (2 * 1rem / 3)); /* Adjust basis for 1rem gap */
   }
 }
-
-@media (min-width: 640px) and (max-width: 1023px) { /* Medium screens: 2 cards */
+@media (min-width: 640px) and (max-width: 1023px) { /* Medium screens: ~2 cards visible */
   .test-card {
-    flex-basis: calc(50% - (1 * 1rem / 2)); /* 1rem gap */
+    flex-basis: calc(50% - (1 * 1rem / 2)); /* Adjust basis for 1rem gap */
   }
 }
-
-@media (max-width: 639px) { /* Small screens: 1 card */
+@media (max-width: 639px) { /* Small screens: 1 card visible */
   .test-card {
     flex-basis: 100%;
   }
-    .carousel-container {
-      margin: 0 1rem; /* Reduce margin on small screens */
-  }
-  .carousel-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 1rem;
-  }
+  .carousel-container { margin: 0 1rem; } /* Reduce side margin */
+  .carousel-btn { width: 30px; height: 30px; font-size: 1rem; } /* Smaller buttons */
 }
 
 </style>
@@ -1371,15 +1248,13 @@ body.dark-mode .selected-row {
       <div class="theme-toggle">
         <input type="checkbox" id="darkModeToggle">
         <label for="darkModeToggle" class="toggle-label">
-          <span class="toggle-icon">🌙</span>
-        </label>
+          <span class="toggle-icon">🌙</span> </label>
       </div>
       <h1>Steno Warriors</h1>
       <p class="subtitle">Advanced Transcription Comparison Tool</p>
       <div id="authSection">
         <button id="loginBtn" class="auth-btn">Login with Google</button>
-        <div id="userInfo" class="hidden">
-          <img id="userPhoto" class="user-photo">
+        <div id="userInfo" class="hidden"> <img id="userPhoto" class="user-photo" alt="User Photo">
           <span id="userName"></span>
           <button id="logoutBtn" class="auth-btn secondary-btn">Logout</button>
         </div>
@@ -1429,15 +1304,15 @@ body.dark-mode .selected-row {
       <section id="leaderboardSection" class="hidden leaderboard-section">
         <h3>Leaderboard</h3>
         <div class="leaderboard-controls">
-          <select id="leaderboardFilter">
-            <option value="all">All Tests</option>
+          <select id="leaderboardFilter" aria-label="Filter leaderboard by time">
+            <option value="all">All Time</option>
             <option value="week">This Week</option>
             <option value="month">This Month</option>
           </select>
-          <select id="testNameFilter">
+          <select id="testNameFilter" aria-label="Filter leaderboard by test name">
             <option value="all">All Tests</option>
-          </select>
-          <select id="categoryFilter">
+            </select>
+          <select id="categoryFilter" aria-label="Filter leaderboard by category">
             <option value="all">All Categories</option>
             <option value="general">General Matter</option>
             <option value="kailash">Kailash Chandra</option>
@@ -1448,16 +1323,16 @@ body.dark-mode .selected-row {
           </select>
           <button id="prevPageBtn" class="secondary-btn" disabled>Previous</button>
           <button id="nextPageBtn" class="secondary-btn">Next</button>
-          <button id="deleteLeaderboardBtn" class="danger-btn hidden">Delete Selected</button>
-        </div>
-        <div id="leaderboardList" class="leaderboard-list"></div>
+          <button id="deleteLeaderboardBtn" class="danger-btn hidden">Delete Selected</button> </div>
+        <div id="leaderboardList" class="leaderboard-list">
+            </div>
         <div id="leaderboardPagination" class="pagination-info"></div>
       </section>
 
       <section id="globalTestsSection" class="hidden global-tests-section">
         <h3>Community Tests</h3>
-         <div class="test-filters">
-          <select id="testCategoryFilter">
+        <div class="test-filters">
+          <select id="testCategoryFilter" aria-label="Filter community tests by category">
             <option value="all">All Categories</option>
             <option value="general">General Matter</option>
             <option value="kailash">Kailash Chandra</option>
@@ -1466,27 +1341,27 @@ body.dark-mode .selected-row {
             <option value="previous">Previous Year</option>
             <option value="test">Test</option>
           </select>
-          <input type="search" id="testSearchInput" placeholder="Search by title or content...">
+          <input type="search" id="testSearchInput" placeholder="Search by title or content..." aria-label="Search community tests">
         </div>
         <div id="globalTestsList" class="tests-carousel">
-          <button class="carousel-btn prev-btn" disabled><</button>
+          <button class="carousel-btn prev-btn" disabled aria-label="Previous test"><</button>
           <div class="carousel-container">
-            <div class="carousel-track"></div>
+            <div class="carousel-track">
+                </div>
           </div>
-          <button class="carousel-btn next-btn" disabled>></button>
+          <button class="carousel-btn next-btn" disabled aria-label="Next test">></button>
         </div>
         <div class="carousel-dots"></div>
       </section>
 
       <section id="customTestSection" class="hidden custom-test-section">
         <h3 id="customTestTitleHeader">Add Your Own Test</h3>
-        <input type="hidden" id="editingTestId">
-        <div class="input-group">
+        <input type="hidden" id="editingTestId"> <div class="input-group">
           <input type="text" id="customTitle" placeholder=" ">
           <label for="customTitle">Test Title</label>
         </div>
         <div class="input-group">
-          <select id="customCategory">
+          <select id="customCategory" aria-label="Select test category">
             <option value="general">General Matter</option>
             <option value="kailash">Kailash Chandra</option>
             <option value="progressive">Progressive</option>
@@ -1497,7 +1372,7 @@ body.dark-mode .selected-row {
           <label for="customCategory">Test Category</label>
         </div>
         <div class="input-group">
-          <textarea id="customOriginal" placeholder=" "></textarea>
+          <textarea id="customOriginal" placeholder=" " rows="6"></textarea>
           <label for="customOriginal">Original Text</label>
         </div>
         <div class="input-group">
@@ -1513,22 +1388,18 @@ body.dark-mode .selected-row {
 
       <section class="input-section">
         <div class="input-group" id="originalTextGroup">
-          <textarea id="originalText" placeholder=" "></textarea>
-          <label for="originalText">Original Text</label>
+          <textarea id="originalText" placeholder=" " rows="8"></textarea>
+          <label for="originalText">Original Text (Paste here or select a test)</label>
         </div>
-
         <div id="timerOptions" class="timer-options hidden">
           <button class="timer-option" data-minutes="40">40 Minutes</button>
           <button class="timer-option" data-minutes="50">50 Minutes</button>
-        </div>
-
+          </div>
         <div id="timerDisplay" class="timer-display hidden"></div>
-
         <div class="input-group">
-          <textarea id="userText" placeholder=" "></textarea>
+          <textarea id="userText" placeholder=" " rows="8"></textarea>
           <label for="userText">Your Transcription</label>
         </div>
-
         <div class="button-group test-controls">
           <button id="compareBtn">Compare Texts</button>
           <button id="showFullTextBtn" class="secondary-btn hidden">View Full Texts</button>
@@ -1547,26 +1418,27 @@ body.dark-mode .selected-row {
           </div>
           <button id="downloadPdfBtn" class="download-btn">Download as PDF</button>
         </div>
-
         <div class="comparison-section">
           <div class="legend-box">
-            <div class="legend-row"><span class="correct">■</span> Correct</div>
-            <div class="legend-row"><span class="missing">■</span> Missing (from Original)</div>
-            <div class="legend-row"><span class="addition">■</span> Added (in Your Text)</div>
-            <div class="legend-row"><span class="capitalization">■</span> Capitalization Difference (½ Mistake)</div>
-            <div class="legend-row"><span class="punctuation">■</span> Punctuation Difference (½ Mistake)</div>
-            </div>
-          <div id="comparisonResult" class="result-box"></div>
+            <div class="legend-row"><span class="correct"></span> Correct</div>
+            <div class="legend-row"><span class="missing"></span> Missing (from Original)</div>
+            <div class="legend-row"><span class="addition"></span> Added (in Your Text)</div>
+            <div class="legend-row"><span class="capitalization"></span> Capitalization Difference (½ Mistake)</div>
+            <div class="legend-row"><span class="punctuation"></span> Punctuation Difference (½ Mistake)</div>
+          </div>
+          <div id="comparisonResult" class="result-box">
+              </div>
         </div>
-
         <div class="analysis-section">
           <div class="analysis-column">
             <h3>Statistics</h3>
-            <div id="stats" class="stats-box"></div>
+            <div id="stats" class="stats-box">
+                </div>
           </div>
           <div class="analysis-column">
             <h3>Feedback</h3>
-            <div id="feedback" class="feedback-box"></div>
+            <div id="feedback" class="feedback-box">
+                </div>
           </div>
         </div>
       </section>
@@ -1590,14 +1462,11 @@ body.dark-mode .selected-row {
     </main>
 
     <footer>
-      <p>© 2023 Steno Warriors | Professional Transcription Tool</p>
-    </footer>
-  </div>
-
-
-<script>
-// Initialize Firebase
+      <p>© 2024 Steno Warriors | Professional Transcription Tool</p> </footer>
+  </div> <script>
+// --- Firebase Initialization ---
 const firebaseConfig = {
+  // IMPORTANT: Replace with your actual Firebase config object if different
   apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
   authDomain: "setup-login-page.firebaseapp.com",
   databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
@@ -1608,22 +1477,42 @@ const firebaseConfig = {
   measurementId: "G-ZXFC7NR9HV"
 };
 
+// Initialize Firebase App, Auth, and Database using compat libraries
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const database = firebase.database();
 
-// Initialize jsPDF
+// Initialize jsPDF (ensure the script is loaded in <head>)
 const { jsPDF } = window.jspdf;
 
+// --- Wait for DOM to be fully loaded ---
 document.addEventListener('DOMContentLoaded', function() {
-  // --- DOM elements ---
+
+  // --- DOM Element References ---
+  // Input & Text Areas
   const originalTextEl = document.getElementById('originalText');
   const userTextEl = document.getElementById('userText');
+  const originalTextGroup = document.getElementById('originalTextGroup');
+  // Buttons
   const compareBtn = document.getElementById('compareBtn');
   const showFullTextBtn = document.getElementById('showFullTextBtn');
   const backToResultsBtn = document.getElementById('backToResultsBtn');
   const downloadPdfBtn = document.getElementById('downloadPdfBtn');
   const closeResultsBtn = document.getElementById('closeResultsBtn');
+  const loginBtn = document.getElementById('loginBtn'); // Header login
+  const logoutBtn = document.getElementById('logoutBtn');
+  const emailLoginBtn = document.getElementById('emailLoginBtn');
+  const googleLoginBtn = document.getElementById('googleLoginBtn'); // Prompt login
+  const registerBtn = document.getElementById('registerBtn');
+  const showRegister = document.getElementById('showRegister');
+  const showLogin = document.getElementById('showLogin');
+  const saveTestBtn = document.getElementById('saveTestBtn');
+  const clearCustomFormBtn = document.getElementById('clearCustomFormBtn');
+  const clearTestsBtn = document.getElementById('clearTestsBtn'); // Manage My Tests button
+  const deleteLeaderboardBtn = document.getElementById('deleteLeaderboardBtn');
+  const prevPageBtn = document.getElementById('prevPageBtn');
+  const nextPageBtn = document.getElementById('nextPageBtn');
+  // Sections & Display Areas
   const resultsSection = document.getElementById('results');
   const fullTextSection = document.getElementById('fullTextSection');
   const comparisonResultEl = document.getElementById('comparisonResult');
@@ -1632,91 +1521,90 @@ document.addEventListener('DOMContentLoaded', function() {
   const originalDisplayEl = document.getElementById('originalDisplay');
   const userDisplayEl = document.getElementById('userDisplay');
   const resultDateEl = document.getElementById('resultDate');
-  const originalTextGroup = document.getElementById('originalTextGroup');
-  const timerOptions = document.getElementById('timerOptions');
-  const timerDisplay = document.getElementById('timerDisplay');
-  const loginBtn = document.getElementById('loginBtn'); // Button in header
-  const logoutBtn = document.getElementById('logoutBtn');
+  const loginPrompt = document.getElementById('loginPrompt');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
   const userInfo = document.getElementById('userInfo');
   const userPhoto = document.getElementById('userPhoto');
   const userName = document.getElementById('userName');
-  const loginPrompt = document.getElementById('loginPrompt');
   const customTestSection = document.getElementById('customTestSection');
   const globalTestsSection = document.getElementById('globalTestsSection');
-  const globalTestsList = document.getElementById('globalTestsList');
+  const globalTestsList = document.getElementById('globalTestsList'); // Carousel container
   const leaderboardSection = document.getElementById('leaderboardSection');
-  const leaderboardList = document.getElementById('leaderboardList');
-  const leaderboardFilter = document.getElementById('leaderboardFilter');
-  const testNameFilter = document.getElementById('testNameFilter');
-  const categoryFilter = document.getElementById('categoryFilter');
-  const testCategoryFilter = document.getElementById('testCategoryFilter');
-  const testSearchInput = document.getElementById('testSearchInput');
-  const prevPageBtn = document.getElementById('prevPageBtn');
-  const nextPageBtn = document.getElementById('nextPageBtn');
+  const leaderboardList = document.getElementById('leaderboardList'); // Table container
   const leaderboardPagination = document.getElementById('leaderboardPagination');
-  const saveTestBtn = document.getElementById('saveTestBtn');
-  const clearTestsBtn = document.getElementById('clearTestsBtn');
-  const clearCustomFormBtn = document.getElementById('clearCustomFormBtn');
-  const customTitle = document.getElementById('customTitle');
-  const customOriginal = document.getElementById('customOriginal');
-  const customVideoUrl = document.getElementById('customVideoUrl');
-  const customCategory = document.getElementById('customCategory');
-  const customTestTitleHeader = document.getElementById('customTestTitleHeader');
-  const editingTestIdInput = document.getElementById('editingTestId');
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const emailLoginBtn = document.getElementById('emailLoginBtn');
-  const googleLoginBtn = document.getElementById('googleLoginBtn'); // Button in login prompt
-  const registerBtn = document.getElementById('registerBtn');
-  const showRegister = document.getElementById('showRegister');
-  const showLogin = document.getElementById('showLogin');
+  // Form Inputs
   const loginEmail = document.getElementById('loginEmail');
   const loginPassword = document.getElementById('loginPassword');
   const registerName = document.getElementById('registerName');
   const registerEmail = document.getElementById('registerEmail');
   const registerPassword = document.getElementById('registerPassword');
   const confirmPassword = document.getElementById('confirmPassword');
-  const deleteLeaderboardBtn = document.getElementById('deleteLeaderboardBtn');
-  // --- End DOM elements ---
+  const customTitle = document.getElementById('customTitle');
+  const customOriginal = document.getElementById('customOriginal');
+  const customVideoUrl = document.getElementById('customVideoUrl');
+  const customCategory = document.getElementById('customCategory');
+  const editingTestIdInput = document.getElementById('editingTestId');
+  const customTestTitleHeader = document.getElementById('customTestTitleHeader');
+  // Filters
+  const leaderboardFilter = document.getElementById('leaderboardFilter');
+  const testNameFilter = document.getElementById('testNameFilter');
+  const categoryFilter = document.getElementById('categoryFilter');
+  const testCategoryFilter = document.getElementById('testCategoryFilter');
+  const testSearchInput = document.getElementById('testSearchInput');
+  // Timer Elements
+  const timerOptions = document.getElementById('timerOptions');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const timerButtons = document.querySelectorAll('.timer-option'); // NodeList
+  // Theme Toggle
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const toggleIcon = document.querySelector('.toggle-icon');
+  // --- End DOM Element References ---
 
-  // --- Global state ---
-  let currentUser = null;
-  const adminEmails = [
+  // --- Global State Variables ---
+  let currentUser = null; // Stores the logged-in user object
+  const adminEmails = [ // List of emails with admin privileges
       "anishkumar18034@gmail.com",
       "anishkumar1803@gmail.com",
-      "admin2@example.com"
+      "admin2@example.com" // Add other admin emails here
   ];
-  let allFetchedTests = [];
-  let timerInterval;
-  let endTime;
-  let testActive = false;
-  let timerButtons = document.querySelectorAll('.timer-option');
-  let currentPage = 1;
-  const entriesPerPage = 10;
-  let allAttempts = [];
-  let filteredAttempts = [];
-  let uniqueTestNames = new Set();
-  let currentSortColumn = 'accuracy';
-  let currentSortDirection = 'desc';
-  let selectedLeaderboardRows = [];
-  let carouselTrack;
-  let carouselDotsContainer;
-  let carouselCards = [];
-  let carouselPrevBtn;
-  let carouselNextBtn;
-  let cardWidth = 0;
-  let carouselCurrentIndex = 0;
-  let carouselVisibleCards = 3;
-  let startTime = null;
-  // --- End Global state ---
+  let allFetchedTests = []; // Cache for community tests to enable client-side filtering
+  // Timer State
+  let timerInterval; // Holds the setInterval ID for the timer
+  let endTime; // Timestamp when the timer should end
+  let testActive = false; // Flag indicating if a timed test is in progress
+  let startTime = null; // Timestamp when user starts typing for WPM calc
+  // Leaderboard State
+  let currentPage = 1; // Current page number for leaderboard pagination
+  const entriesPerPage = 10; // Number of entries per leaderboard page
+  let allAttempts = []; // Cache for all leaderboard attempts
+  let filteredAttempts = []; // Attempts currently displayed after filtering
+  let uniqueTestNames = new Set(); // Set of unique test names for filtering
+  let currentSortColumn = 'accuracy'; // Default sort column
+  let currentSortDirection = 'desc'; // Default sort direction
+  let selectedLeaderboardRows = []; // Array of attempt IDs selected for deletion (admin)
+  // Carousel State
+  let carouselTrack; // The element containing the sliding cards
+  let carouselDotsContainer; // The element containing the navigation dots
+  let carouselCards = []; // Array of test card elements in the carousel
+  let carouselPrevBtn; // Previous button element
+  let carouselNextBtn; // Next button element
+  let cardWidth = 0; // Calculated width of a single card (including gap)
+  let carouselCurrentIndex = 0; // Index of the current 'page' in the carousel
+  let carouselVisibleCards = 3; // Estimated number of cards visible at once
+  // --- End Global State Variables ---
 
   // --- Helper Functions ---
+
+  /**
+   * Initiates Google Sign-In using Firebase Auth popup.
+   * Handles common errors like popup blocked or closed.
+   */
   const googleSignIn = () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
       .catch(error => {
         console.error('Google login error:', error);
-        // Provide more specific feedback if possible
         if (error.code === 'auth/popup-closed-by-user') {
           alert('Login cancelled. Please try again.');
         } else if (error.code === 'auth/popup-blocked') {
@@ -1726,229 +1614,872 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       });
   };
+
+  /**
+   * Gets the display name for a category key.
+   * @param {string} category - The category key (e.g., 'kailash').
+   * @returns {string} The display name (e.g., 'Kailash Chandra').
+   */
+   function getCategoryName(category) {
+       const categories = {
+           'general': 'General Matter',
+           'kailash': 'Kailash Chandra',
+           'progressive': 'Progressive',
+           'legal': 'Legal',
+           'previous': 'Previous Year',
+           'test': 'Test'
+       };
+       // Return the display name or the key itself if not found
+       return categories[category] || category;
+   }
+
+   /**
+    * Resets the custom test form fields and button text.
+    */
+   function resetCustomTestForm() {
+       editingTestIdInput.value = ''; // Clear hidden ID field
+       customTitle.value = '';
+       customOriginal.value = '';
+       customVideoUrl.value = '';
+       customCategory.value = 'general'; // Reset to default category
+       saveTestBtn.textContent = 'Save & Share Test'; // Reset button text
+       customTestTitleHeader.textContent = 'Add Your Own Test'; // Reset header
+   }
+
+   /**
+    * Shows a confirmation modal dialog.
+    * @param {string} message - The message to display in the modal.
+    * @param {function} onConfirm - Callback function to execute if confirmed.
+    */
+   function showConfirmationModal(message, onConfirm) {
+       // Create modal elements dynamically
+       const modal = document.createElement('div');
+       modal.className = 'modal'; // Apply modal overlay style
+       modal.innerHTML = `
+           <div class="modal-content">
+               <h3>Confirm Action</h3>
+               <p>${message}</p>
+               <div class="modal-buttons">
+                   <button id="cancelActionModal" class="secondary-btn">Cancel</button>
+                   <button id="confirmActionModal" class="danger-btn">Confirm</button>
+               </div>
+           </div>`;
+       document.body.appendChild(modal); // Add modal to the page
+
+       // Get references to modal buttons
+       const closeModal = () => document.body.removeChild(modal); // Function to remove modal
+       const cancelBtn = modal.querySelector('#cancelActionModal');
+       const confirmBtn = modal.querySelector('#confirmActionModal');
+
+       // Add event listeners
+       cancelBtn.addEventListener('click', closeModal);
+       confirmBtn.addEventListener('click', () => {
+           onConfirm(); // Execute the confirmation callback
+           closeModal(); // Close the modal
+       });
+       // Allow closing by clicking outside the modal content
+       modal.addEventListener('click', (e) => {
+           if (e.target === modal) {
+               closeModal();
+           }
+       });
+   }
+
+   /**
+    * Performs a Firebase database operation (push or update).
+    * Shows success/error alerts and refreshes relevant UI parts.
+    * @param {Promise} operationPromise - The Firebase database operation (e.g., ref.update()).
+    * @param {string} successMessage - Message to show on success.
+    */
+   function performDbOperation(operationPromise, successMessage) {
+       operationPromise
+           .then(() => {
+               alert(successMessage);
+               resetCustomTestForm(); // Clear the form after saving/updating
+               fetchAndDisplayGlobalTests(); // Refresh the community tests list
+           })
+           .catch(error => {
+               console.error('Error saving/updating test:', error);
+               alert('Failed to save/update test. See console for details.');
+           });
+   }
+
+   /**
+    * Cleans up leaderboard entries older than 6 months.
+    * Runs periodically and on initial load for logged-in users.
+    */
+   function cleanupOldData() {
+       const sixMonthsAgo = new Date();
+       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+       const timestampThreshold = sixMonthsAgo.getTime();
+
+       // Query for entries older than the threshold
+       database.ref('attempts').orderByChild('timestamp').endAt(timestampThreshold).once('value')
+           .then(snapshot => {
+               const updates = {};
+               let count = 0;
+               snapshot.forEach(child => {
+                   updates[child.key] = null; // Mark for deletion by setting value to null
+                   count++;
+               });
+               if (count > 0) {
+                   console.log(`Cleaning up ${count} old leaderboard entries...`);
+                   // Perform the multi-path update to delete old entries
+                   database.ref('attempts').update(updates)
+                       .then(() => console.log('Old entries cleanup complete.'))
+                       .catch(err => console.error('Error cleaning up old entries:', err));
+               }
+           });
+   }
+   // Schedule cleanup (e.g., once a week) - optional
+   // setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
+
   // --- End Helper Functions ---
 
-  // --- Event Listeners and Initial Setup ---
+
+  // --- Event Listener Setup ---
+
+  // Typing start detection for WPM
   userTextEl.addEventListener('input', function() {
-    if (!startTime) {
+    if (!startTime && testActive) { // Only start WPM timer if a test is active
       startTime = new Date();
     }
   });
-  showRegister.addEventListener('click', (e) => { e.preventDefault(); loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); });
-  showLogin.addEventListener('click', (e) => { e.preventDefault(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); });
 
-  // Email/password login handler
+  // Toggle between Login and Register forms
+  showRegister.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+  });
+  showLogin.addEventListener('click', (e) => {
+    e.preventDefault();
+    registerForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+  });
+
+  // Email/Password Login
   emailLoginBtn.addEventListener('click', () => {
     const email = loginEmail.value.trim();
     const password = loginPassword.value.trim();
-
     if (!email || !password) {
       alert('Please enter both email and password');
       return;
     }
-
     auth.signInWithEmailAndPassword(email, password)
-      .then(() => {
-        console.log('Login successful');
-        // No alert needed, onAuthStateChanged will handle UI update
-      })
+      .then(() => { console.log('Email login successful'); }) // onAuthStateChanged handles UI
       .catch(error => {
-        console.error('Login error:', error);
+        console.error('Email login error:', error);
         let message = 'Login failed: ';
-        if (error.code === 'auth/user-not-found') {
-            message += 'No user found with this email.';
-        } else if (error.code === 'auth/wrong-password') {
-            message += 'Incorrect password.';
-        } else {
-            message += error.message;
-        }
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-email') { message += 'No user found with this email.'; }
+        else if (error.code === 'auth/wrong-password') { message += 'Incorrect password.'; }
+        else { message += error.message; }
         alert(message);
       });
   });
 
-  // Registration handler
+  // Email/Password Registration
   registerBtn.addEventListener('click', () => {
     const name = registerName.value.trim();
     const email = registerEmail.value.trim();
     const password = registerPassword.value.trim();
     const confirm = confirmPassword.value.trim();
 
-    if (!name || !email || !password || !confirm) {
-      alert('Please fill in all fields');
-      return;
-    }
-    if (password !== confirm) {
-      alert('Passwords do not match');
-      return;
-    }
-    if (password.length < 6) {
-      alert('Password should be at least 6 characters');
-      return;
-    }
+    if (!name || !email || !password || !confirm) { alert('Please fill in all fields'); return; }
+    if (password !== confirm) { alert('Passwords do not match'); return; }
+    if (password.length < 6) { alert('Password should be at least 6 characters'); return; }
 
     auth.createUserWithEmailAndPassword(email, password)
-      .then((userCredential) => {
-        // Update profile directly after creation
-        return userCredential.user.updateProfile({
-          displayName: name
-        });
-      })
+      .then((userCredential) => userCredential.user.updateProfile({ displayName: name })) // Update profile
       .then(() => {
         alert('Registration successful! You are now logged in.');
-        // Clear form fields
-        registerName.value = '';
-        registerEmail.value = '';
-        registerPassword.value = '';
-        confirmPassword.value = '';
-        // Show login form again (optional, as onAuthStateChanged will handle main UI)
-        registerForm.classList.add('hidden');
-        loginForm.classList.remove('hidden');
+        registerName.value = ''; registerEmail.value = ''; registerPassword.value = ''; confirmPassword.value = '';
+        registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); // Show login form
       })
       .catch(error => {
         console.error('Registration error:', error);
         let message = 'Registration failed: ';
-         if (error.code === 'auth/email-already-in-use') {
-            message += 'This email address is already registered.';
-        } else if (error.code === 'auth/weak-password') {
-            message += 'Password is too weak.';
-        } else {
-            message += error.message;
-        }
+        if (error.code === 'auth/email-already-in-use') { message += 'This email address is already registered.'; }
+        else if (error.code === 'auth/weak-password') { message += 'Password is too weak.'; }
+        else { message += error.message; }
         alert(message);
       });
   });
 
-  // Google login handler (for button within the login prompt)
+  // Google Login Button Handlers (Header and Prompt)
   googleLoginBtn.addEventListener('click', googleSignIn);
-
-  // *** FIX: Add Google login handler for the button in the header ***
   loginBtn.addEventListener('click', googleSignIn);
 
-  // Auth state listener (Handles UI changes on login/logout)
-  auth.onAuthStateChanged(user => {
-    currentUser = user;
-    if (user) {
-      // User is signed in
-      loginBtn.classList.add('hidden'); // Hide header login button
-      userInfo.classList.remove('hidden'); // Show user info in header
-      loginPrompt.classList.add('hidden'); // Hide the main login/register prompt section
-
-      // Update user info display
-      userPhoto.src = user.photoURL || 'https://www.gravatar.com/avatar/' + user.uid + '?d=identicon&s=40';
-      userName.textContent = user.displayName || 'User';
-
-      // Show/hide sections based on login state and admin status
-      const isAdmin = adminEmails.includes(user.email);
-      customTestSection.classList.remove('hidden'); // Show custom test section for all logged-in users
-      deleteLeaderboardBtn.classList.toggle('hidden', !isAdmin); // Show delete button only for admins
-
-      globalTestsSection.classList.remove('hidden');
-      leaderboardSection.classList.remove('hidden');
-
-      // Load relevant data
-      fetchAndDisplayGlobalTests();
-      loadLeaderboard();
-      cleanupOldData(); // Consider if this needs to run every time
-
-    } else {
-      // User is signed out
-      loginBtn.classList.remove('hidden'); // Show header login button
-      userInfo.classList.add('hidden'); // Hide user info in header
-      loginPrompt.classList.remove('hidden'); // Show the main login/register prompt section
-
-      // Hide sections that require login
-      customTestSection.classList.add('hidden');
-      globalTestsSection.classList.add('hidden');
-      leaderboardSection.classList.add('hidden');
-      deleteLeaderboardBtn.classList.add('hidden');
-
-      // Reset forms and results
-      loginForm.classList.remove('hidden'); // Ensure login form is visible within prompt
-      registerForm.classList.add('hidden');
-      originalTextEl.value = '';
-      userTextEl.value = '';
-      comparisonResultEl.innerHTML = '';
-      statsEl.innerHTML = '';
-      feedbackEl.innerHTML = '';
-      resultsSection.classList.add('hidden');
-      fullTextSection.classList.add('hidden');
-      showFullTextBtn.classList.add('hidden');
-      if(carouselTrack) carouselTrack.innerHTML = ''; // Clear tests if needed
-      if(leaderboardList) leaderboardList.innerHTML = ''; // Clear leaderboard if needed
-      allFetchedTests = []; // Clear stored tests
-    }
-    // Always reset the custom test form on auth state change
-    resetCustomTestForm();
-  });
-
-  // Logout handler
+  // Logout Button Handler
   logoutBtn.addEventListener('click', () => {
     auth.signOut()
         .then(() => console.log("User signed out."))
         .catch(error => console.error("Sign out error:", error));
   });
 
-  // Other event listeners (filters, pagination, compare, etc.)
-  testCategoryFilter.addEventListener('change', filterAndDisplayGlobalTests);
-  testSearchInput.addEventListener('input', filterAndDisplayGlobalTests);
+  // --- Firebase Auth State Change Listener ---
+  // This is the central place to update the UI based on login status
+  auth.onAuthStateChanged(user => {
+    currentUser = user; // Update global user state
+    if (user) {
+      // --- User is Logged In ---
+      loginBtn.classList.add('hidden'); // Hide header login button
+      userInfo.classList.remove('hidden'); // Show user info (photo, name, logout)
+      loginPrompt.classList.add('hidden'); // Hide the main login/register section
+
+      // Display user details
+      userPhoto.src = user.photoURL || `https://www.gravatar.com/avatar/${user.uid}?d=identicon&s=40`; // Gravatar fallback
+      userName.textContent = user.displayName || 'User'; // Use display name or generic 'User'
+
+      // Determine if user is admin
+      const isAdmin = adminEmails.includes(user.email);
+
+      // Show sections relevant to logged-in users
+      customTestSection.classList.remove('hidden'); // Allow all users to add tests
+      globalTestsSection.classList.remove('hidden');
+      leaderboardSection.classList.remove('hidden');
+      deleteLeaderboardBtn.classList.toggle('hidden', !isAdmin); // Only show delete button for admins
+
+      // Load data relevant to logged-in state
+      fetchAndDisplayGlobalTests(); // Fetch community tests
+      loadLeaderboard(); // Fetch leaderboard data
+      cleanupOldData(); // Run cleanup check
+
+    } else {
+      // --- User is Logged Out ---
+      loginBtn.classList.remove('hidden'); // Show header login button
+      userInfo.classList.add('hidden'); // Hide user info block
+      loginPrompt.classList.remove('hidden'); // Show the main login/register section
+
+      // Hide sections requiring login
+      customTestSection.classList.add('hidden');
+      globalTestsSection.classList.add('hidden');
+      leaderboardSection.classList.add('hidden');
+      deleteLeaderboardBtn.classList.add('hidden'); // Hide admin button
+
+      // Reset UI elements
+      loginForm.classList.remove('hidden'); // Ensure login form is default view in prompt
+      registerForm.classList.add('hidden');
+      originalTextEl.value = ''; // Clear text areas
+      userTextEl.value = '';
+      comparisonResultEl.innerHTML = ''; // Clear results
+      statsEl.innerHTML = '';
+      feedbackEl.innerHTML = '';
+      resultsSection.classList.add('hidden'); // Hide results sections
+      fullTextSection.classList.add('hidden');
+      showFullTextBtn.classList.add('hidden'); // Hide results-related buttons
+      if(carouselTrack) carouselTrack.innerHTML = ''; // Clear dynamic content
+      if(leaderboardList) leaderboardList.innerHTML = '';
+      allFetchedTests = []; // Clear cached data
+      allAttempts = [];
+      filteredAttempts = [];
+      selectedLeaderboardRows = [];
+    }
+    // Always reset the custom test form regardless of login state
+    resetCustomTestForm();
+    // Reset timer state on auth change
+    stopTimer();
+    testActive = false;
+    startTime = null;
+    timerDisplay.classList.add('hidden');
+    timerOptions.classList.add('hidden');
+  });
+  // --- End Auth State Change Listener ---
+
+
+  // --- Test and Comparison Listeners ---
+  // Show timer options when pasting/selecting text (if not already active)
+  originalTextEl.addEventListener('paste', function() {
+     // Deselect any selected test card on paste
+    document.querySelectorAll('.test-card.selected').forEach(card => card.classList.remove('selected'));
+    // Use setTimeout to allow paste action to complete before checking value
+    setTimeout(() => {
+        if (originalTextEl.value.trim() !== '' && !testActive) {
+            originalTextGroup.classList.add('hidden'); // Hide original text input
+            timerOptions.classList.remove('hidden'); // Show timer buttons
+            timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; });
+        }
+    }, 0);
+  });
+
+  // Start timer when an option is clicked
+  timerButtons.forEach(button => {
+    button.addEventListener('click', function() {
+        const minutes = parseInt(this.dataset.minutes);
+        startTimer(minutes);
+        timerOptions.classList.add('hidden'); // Hide options once selected
+        timerDisplay.classList.remove('hidden'); // Show the countdown
+        testActive = true; // Mark test as active
+        startTime = null; // Reset WPM start time until user types
+        userTextEl.focus(); // Focus on transcription area
+    });
+  });
+
+  // Compare button click
+  compareBtn.addEventListener('click', function() {
+    if (testActive) { // If timer was running, stop it
+        stopTimer();
+    }
+    compareTexts(); // Perform comparison
+    if (testActive) { // If timer was running, disable options after compare
+        disableTimerOptions();
+    }
+  });
+
+  // Show/Hide Full Text View
+  showFullTextBtn.addEventListener('click', showFullTexts);
+  backToResultsBtn.addEventListener('click', showResults);
+
+  // Download Results as PDF
+  downloadPdfBtn.addEventListener('click', downloadAsPdf);
+
+  // Close Results View (Reset)
+  closeResultsBtn.addEventListener('click', function() {
+    // Remove video player if it exists
+    const existingVideo = document.getElementById('testVideoPlayer');
+    if (existingVideo) existingVideo.remove();
+
+    // Reset input fields and state
+    originalTextEl.value = '';
+    userTextEl.value = '';
+    comparisonResultEl.innerHTML = '';
+    statsEl.innerHTML = '';
+    feedbackEl.innerHTML = '';
+    resultsSection.classList.add('hidden');
+    fullTextSection.classList.add('hidden');
+    showFullTextBtn.classList.add('hidden');
+    originalTextGroup.classList.remove('hidden'); // Show original input again
+    userTextEl.readOnly = false; // Unlock user text area
+    userTextEl.classList.remove('locked-textarea');
+    compareBtn.disabled = false; // Re-enable compare button
+    closeResultsBtn.classList.add('hidden'); // Hide close button itself
+
+    // Reset timer state completely
+    stopTimer();
+    testActive = false;
+    startTime = null;
+    timerDisplay.classList.add('hidden');
+    timerOptions.classList.add('hidden'); // Hide timer options
+
+    // Deselect any selected test card
+    document.querySelectorAll('.test-card.selected').forEach(card => card.classList.remove('selected'));
+  });
+  // --- End Test and Comparison Listeners ---
+
+
+  // --- Custom Test Form Listeners ---
+  saveTestBtn.addEventListener('click', () => {
+    if (!currentUser) { alert('Please login to save tests.'); return; } // Check login status
+
+    const title = customTitle.value.trim();
+    const text = customOriginal.value.trim();
+    const videoUrl = customVideoUrl.value.trim();
+    const category = customCategory.value;
+    const editingTestId = editingTestIdInput.value; // Get ID if editing
+
+    if (!title || !text) { alert('Please enter both a title and the original text.'); return; }
+
+    // Prepare test data object
+    const testData = {
+        title,
+        text,
+        videoUrl: videoUrl || null, // Store null if empty
+        userId: currentUser.uid,
+        userName: currentUser.displayName || 'Anonymous',
+        userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=24`,
+        category
+    };
+
+    let dbOperation;
+    let successMessage;
+
+    if (editingTestId) {
+        // --- Update existing test ---
+        testData.updatedAt = firebase.database.ServerValue.TIMESTAMP; // Add updated timestamp
+        // Check permissions (simple check: user must be admin or original author)
+        database.ref('tests/' + editingTestId).once('value').then(snapshot => {
+            const existingTest = snapshot.val();
+            if (!existingTest) {
+                alert("Error: Test not found for updating.");
+                return;
+            }
+            const isAdmin = adminEmails.includes(currentUser.email);
+            const isAuthor = existingTest.userId === currentUser.uid;
+            if (isAdmin || isAuthor) {
+                dbOperation = database.ref('tests/' + editingTestId).update(testData);
+                successMessage = 'Test updated successfully!';
+                performDbOperation(dbOperation, successMessage);
+            } else {
+                alert("You don't have permission to edit this test.");
+            }
+        }).catch(error => {
+            console.error("Error fetching test for permission check:", error);
+            alert("Could not verify edit permissions.");
+        });
+    } else {
+        // --- Create new test ---
+        testData.timestamp = firebase.database.ServerValue.TIMESTAMP; // Add created timestamp
+        dbOperation = database.ref('tests').push(testData);
+        successMessage = 'Test saved and shared successfully!';
+        performDbOperation(dbOperation, successMessage);
+    }
+  });
+
+  // Clear Custom Test Form
+  clearCustomFormBtn.addEventListener('click', resetCustomTestForm);
+
+  // "Manage My Tests" Button -> Show Modal
+  clearTestsBtn.addEventListener('click', () => {
+    if (!currentUser) return; // Should not happen if button is visible, but check anyway
+    // Fetch tests created by the current user
+    database.ref('tests').orderByChild('userId').equalTo(currentUser.uid).once('value')
+      .then(snapshot => {
+          const userTests = snapshot.val();
+          if (!userTests || Object.keys(userTests).length === 0) {
+              // Fallback check by username if userId might be missing on older entries
+              return database.ref('tests').orderByChild('userName').equalTo(currentUser.displayName).once('value');
+          }
+          return snapshot; // Pass the snapshot along if tests were found by UID
+      })
+      .then(snapshot => {
+          const userTests = snapshot.val();
+          if (!userTests || Object.keys(userTests).length === 0) {
+              alert('You haven\'t added any tests yet.');
+              return;
+          }
+          showManageTestsModal(userTests); // Show the modal with fetched tests
+      })
+      .catch(error => {
+          console.error('Error fetching user tests:', error);
+          alert('Failed to fetch your tests.');
+      });
+  });
+  // --- End Custom Test Form Listeners ---
+
+
+  // --- Leaderboard Listeners ---
+  // Filter changes
   leaderboardFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
   testNameFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
   categoryFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
+
+  // Pagination buttons
   prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; updatePagination(); } });
-  nextPageBtn.addEventListener('click', () => { const totalPages = Math.ceil(filteredAttempts.length / entriesPerPage); if (currentPage < totalPages) { currentPage++; updatePagination(); } });
-  deleteLeaderboardBtn.addEventListener('click', () => { /* ... existing delete logic ... */ });
-  originalTextEl.addEventListener('paste', function() { /* ... existing paste logic ... */ });
-  timerButtons.forEach(button => { button.addEventListener('click', function() { const minutes = parseInt(this.dataset.minutes); startTimer(minutes); timerOptions.classList.add('hidden'); timerDisplay.classList.remove('hidden'); testActive = true; }); });
-  compareBtn.addEventListener('click', function() { stopTimer(); compareTexts(); disableTimerOptions(); });
-  showFullTextBtn.addEventListener('click', showFullTexts);
-  backToResultsBtn.addEventListener('click', showResults);
-  downloadPdfBtn.addEventListener('click', downloadAsPdf);
-  closeResultsBtn.addEventListener('click', function() { /* ... existing close results logic ... */ });
-  saveTestBtn.addEventListener('click', () => { /* ... existing save test logic ... */ });
-  clearCustomFormBtn.addEventListener('click', resetCustomTestForm);
-  clearTestsBtn.addEventListener('click', () => { /* ... existing manage tests logic ... */ });
-  // --- End Event Listeners ---
+  nextPageBtn.addEventListener('click', () => {
+    const totalPages = Math.ceil(filteredAttempts.length / entriesPerPage);
+    if (currentPage < totalPages) { currentPage++; updatePagination(); }
+  });
+
+  // Delete selected leaderboard entries (Admin only)
+  deleteLeaderboardBtn.addEventListener('click', () => {
+      if (!currentUser || !adminEmails.includes(currentUser.email)) return; // Security check
+      if (selectedLeaderboardRows.length === 0) return; // No rows selected
+
+      showConfirmationModal(
+          `Are you sure you want to delete ${selectedLeaderboardRows.length} selected leaderboard entries? This action cannot be undone.`,
+          () => { // Confirmation callback
+              const updates = {};
+              selectedLeaderboardRows.forEach(id => {
+                  updates[`attempts/${id}`] = null; // Mark selected entries for deletion
+              });
+              // Perform multi-path update to delete all selected entries at once
+              database.ref().update(updates)
+                  .then(() => {
+                      alert(`${selectedLeaderboardRows.length} entries deleted successfully.`);
+                      selectedLeaderboardRows = []; // Clear selection
+                      loadLeaderboard(); // Refresh the leaderboard
+                  })
+                  .catch(error => {
+                      console.error('Error deleting leaderboard entries:', error);
+                      alert('Failed to delete entries.');
+                  });
+          }
+      );
+  });
+  // --- End Leaderboard Listeners ---
 
 
-  // --- Core Functions (Keep existing functions like timer, leaderboard, tests, etc.) ---
-  // Make sure all functions referenced above are defined here or elsewhere in the script
-  function loadLeaderboard() { /* ... existing leaderboard loading logic ... */ }
-  function sortAttempts(column, direction) { /* ... existing sorting logic ... */ }
-  function updateTestNameFilter(attempts) { /* ... existing filter update logic ... */ }
-  function updatePagination() { /* ... existing pagination logic ... */ }
-  function renderLeaderboardTable(attempts, startRank) { /* ... existing table rendering logic ... */ }
-  function makeTableSortable() { /* ... existing sortable logic ... */ }
-  function addLeaderboardRowSelectionListeners() { /* ... existing selection logic ... */ }
-  function updateDeleteButtonState() { /* ... existing delete button logic ... */ }
-  function cleanupOldData() { /* ... existing cleanup logic ... */ }
-  function startTimer(minutes) { /* ... existing timer start logic ... */ }
-  function stopTimer() { clearInterval(timerInterval); timerDisplay.classList.add('hidden'); }
-  function disableTimerOptions() { /* ... existing disable logic ... */ }
-  function updateTimerDisplay() { /* ... existing timer display logic ... */ }
-  function lockTest() { /* ... existing lock logic ... */ }
-  function showFullTexts() { resultsSection.classList.add('hidden'); fullTextSection.classList.remove('hidden'); }
-  function showResults() { fullTextSection.classList.add('hidden'); resultsSection.classList.remove('hidden'); }
-  function downloadAsPdf() { /* ... existing PDF download logic ... */ }
-  function embedVideo(url) { /* ... existing video embed logic ... */ }
-  function fetchAndDisplayGlobalTests() { /* ... existing fetch/display logic ... */ }
-  function filterAndDisplayGlobalTests() { /* ... existing filter/display logic ... */ }
-  function renderGlobalTests(filteredTests) { /* ... existing render logic ... */ }
-  function disableCarouselButtons() { /* ... existing disable logic ... */ }
-  function selectTest(testCardElement, testData) { /* ... existing select logic ... */ }
-  function editTest(testId, testData) { /* ... existing edit logic ... */ }
-  function deleteTest(testId, testTitle) { /* ... existing delete logic ... */ }
-  function showConfirmationModal(message, onConfirm) { /* ... existing confirm modal logic ... */ }
-  function initializeCarousel() { /* ... existing carousel init logic ... */ }
-  function updateCarouselVisuals() { /* ... existing carousel update logic ... */ }
-  function getCategoryName(category) { /* ... existing category name logic ... */ }
-  function performDbOperation(operationPromise, successMessage) { /* ... existing DB operation logic ... */ }
-  function resetCustomTestForm() { /* ... existing reset form logic ... */ }
-  function showManageTestsModal(userTests) { /* ... existing manage tests modal logic ... */ }
-  function getOverallAssessment(accuracy, wpm) { /* ... existing assessment logic ... */ }
-  function displayFullTexts(original, user) { originalDisplayEl.textContent = original; userDisplayEl.textContent = user; }
-  function displayComparison(comparison) { comparisonResultEl.innerHTML = comparison.html; }
+  // --- Community Test Filters ---
+  testCategoryFilter.addEventListener('change', filterAndDisplayGlobalTests);
+  testSearchInput.addEventListener('input', filterAndDisplayGlobalTests); // Filter as user types
+  // --- End Community Test Filters ---
+
+
+  // --- Dark Mode Toggle ---
+  darkModeToggle.addEventListener('change', function() {
+      document.body.classList.toggle('dark-mode');
+      // Update icon based on mode
+      toggleIcon.textContent = this.checked ? '☀️' : '🌙';
+      // Save preference to localStorage
+      localStorage.setItem('darkMode', this.checked);
+  });
+  // Apply saved theme on load
+  if (localStorage.getItem('darkMode') === 'true') {
+      darkModeToggle.checked = true;
+      document.body.classList.add('dark-mode');
+      toggleIcon.textContent = '☀️';
+  } else {
+       toggleIcon.textContent = '🌙';
+  }
+  // --- End Dark Mode Toggle ---
+
+
+  // --- Core Functions Definitions ---
+
+  // --- Timer Functions ---
+  function startTimer(minutes) {
+    endTime = new Date();
+    endTime.setMinutes(endTime.getMinutes() + minutes);
+    updateTimerDisplay(); // Initial display
+    // Clear any existing interval before starting a new one
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        updateTimerDisplay();
+        const now = new Date();
+        if (now >= endTime) { // Timer finished
+            stopTimer();
+            timerDisplay.classList.add('timer-ended');
+            timerDisplay.textContent = "TIME'S UP!";
+            compareTexts(); // Automatically compare when time is up
+            lockTest(); // Lock input area
+            disableTimerOptions(); // Prevent restarting timer
+        }
+    }, 1000); // Update every second
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval); // Stop the interval
+    // timerDisplay.classList.add('hidden'); // Hide timer display (optional)
+  }
+
+  function disableTimerOptions() {
+    timerButtons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.cursor = 'not-allowed';
+    });
+  }
+
+  function updateTimerDisplay() {
+    const now = new Date();
+    const remaining = endTime - now; // Time remaining in milliseconds
+    if (remaining <= 0) return; // Avoid displaying negative time
+
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+    // Format as MM:SS
+    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function lockTest() {
+    userTextEl.readOnly = true; // Make textarea non-editable
+    userTextEl.classList.add('locked-textarea'); // Apply visual style
+    compareBtn.disabled = true; // Disable compare button after auto-compare
+    closeResultsBtn.classList.remove('hidden'); // Ensure close button is visible
+  }
+  // --- End Timer Functions ---
+
+
+  // --- View Switching Functions ---
+  function showFullTexts() {
+    resultsSection.classList.add('hidden');
+    fullTextSection.classList.remove('hidden');
+  }
+
+  function showResults() {
+    fullTextSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+  }
+  // --- End View Switching Functions ---
+
+
+  // --- PDF Download Function ---
+  function downloadAsPdf() {
+    const resultsElement = document.getElementById('results');
+    // Options for html2canvas for better quality
+    const options = {
+        scale: 1.5, // Increase scale for better resolution
+        useCORS: true, // Allow loading cross-origin images (if any)
+        allowTaint: true,
+        logging: false // Disable console logging from html2canvas
+    };
+
+    html2canvas(resultsElement, options).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 0.9); // Use JPEG with high quality
+        const pdf = new jsPDF('p', 'mm', 'a4'); // Portrait, mm, A4 size
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+
+        const imgWidth = pdfWidth - 20; // Content width with 10mm margins
+        const imgHeight = imgWidth / ratio;
+        let heightLeft = imgHeight;
+        let position = 10; // Initial top margin
+
+        // Add the first page
+        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+        heightLeft -= (pdfHeight - 20); // Subtract visible height (considering margins)
+
+        // Add subsequent pages if content overflows
+        while (heightLeft > 0) {
+            position = heightLeft - imgHeight + 10; // Calculate position for the overflow part
+            pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+            heightLeft -= (pdfHeight - 20);
+        }
+
+        pdf.save('steno-warriors-results.pdf'); // Save the PDF
+    }).catch(err => {
+        console.error("Error generating PDF:", err);
+        alert("Could not generate PDF. Check console for errors.");
+    });
+  }
+  // --- End PDF Download Function ---
+
+
+  // --- Text Processing and Comparison Logic ---
+  /**
+   * Processes raw text into an array of words, preserving punctuation attached to words.
+   * Normalizes whitespace and quotes.
+   * @param {string} text - The raw input text.
+   * @returns {string[]} An array of words.
+   */
+  function processText(text) {
+    return text
+      .replace(/<[^>]*>/g, '') // Remove potential HTML tags
+      .replace(/[\u2018\u2019]/g, "'") // Normalize single quotes
+      .replace(/[\u201C\u201D]/g, '"') // Normalize double quotes
+      .trim() // Remove leading/trailing whitespace
+      .split(/\s+/) // Split into words by whitespace
+      .filter(word => word.length > 0); // Remove empty strings resulting from multiple spaces
+  }
+
+  /**
+   * Compares original and user text using Longest Common Subsequence (LCS).
+   * Identifies correct words, missing words, added words, capitalization differences,
+   * and punctuation differences. Capitalization and punctuation are counted as half mistakes.
+   * @param {string[]} originalWords - Array of words from the original text.
+   * @param {string[]} userWords - Array of words from the user's transcription.
+   * @returns {object} An object containing the HTML diff string and statistics.
+   */
+  function compareParagraphsLCS(originalWords, userWords) {
+    // Helper function to strip common punctuation and convert to lowercase for base word matching
+    const stripPunctuationAndLower = (word) => {
+      // Remove common trailing punctuation for comparison, keep internal hyphens/apostrophes
+      return word.replace(/[.,!?;:]+$/, '').toLowerCase();
+    };
+
+    const m = originalWords.length;
+    const n = userWords.length;
+
+    // --- LCS Table Calculation (Based on stripped, lowercased words) ---
+    const getLcsTable = (arr1, arr2) => {
+        const dp = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0));
+        for (let i = 1; i <= m; i++) {
+            for (let j = 1; j <= n; j++) {
+                if (stripPunctuationAndLower(arr1[i - 1]) === stripPunctuationAndLower(arr2[j - 1])) {
+                     dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                     dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        return dp;
+    };
+    const lcsTable = getLcsTable(originalWords, userWords);
+    // --- End LCS Table Calculation ---
+
+    // --- Backtrack through LCS table to build diff ---
+    let i = m;
+    let j = n;
+    const diffResult = []; // Array to store diff objects { type, word, originalWord?, userWord? }
+    while (i > 0 || j > 0) {
+        const originalWord = i > 0 ? originalWords[i - 1] : '';
+        const userWord = j > 0 ? userWords[j - 1] : '';
+        const originalWordBase = stripPunctuationAndLower(originalWord);
+        const userWordBase = stripPunctuationAndLower(userWord);
+
+        // Condition 1: Base words match (case/punctuation insensitive)
+        if (i > 0 && j > 0 && originalWordBase === userWordBase) {
+            if (originalWord === userWord) { // Exact match
+                diffResult.push({ type: 'correct', word: originalWord });
+            } else if (originalWord.toLowerCase() === userWord.toLowerCase()) { // Case matches, punctuation differs
+                 diffResult.push({ type: 'punctuation', originalWord: originalWord, userWord: userWord });
+            } else { // Base words match, but case differs (prioritize case diff over punctuation if both exist)
+                diffResult.push({ type: 'capitalization', originalWord: originalWord, userWord: userWord });
+            }
+            i--; j--; // Move diagonally up-left
+        }
+        // Condition 2: Word added in user text
+        else if (j > 0 && (i === 0 || lcsTable[i][j - 1] >= lcsTable[i - 1][j])) {
+             diffResult.push({ type: 'addition', word: userWord });
+             j--; // Move left
+        }
+        // Condition 3: Word missing from user text
+        else if (i > 0 && (j === 0 || lcsTable[i][j - 1] < lcsTable[i - 1][j])) {
+             diffResult.push({ type: 'missing', word: originalWord });
+             i--; // Move up
+        }
+        // End condition (should not be reached in standard LCS)
+         else { break; }
+    }
+    diffResult.reverse(); // Result is built backwards, so reverse it
+    // --- End Backtrack ---
+
+    // --- Process diff results to generate HTML and count mistakes ---
+    let comparedText = ''; // The HTML string for display
+    let numHalfDiff = 0; // Count of capitalization/punctuation errors (0.5 mistake each)
+    let numFullDiff = 0; // Count of missing/added errors (1 mistake each)
+    let correctCount = 0; // Count of correctly matched base words
+
+    diffResult.forEach(diff => {
+        switch (diff.type) {
+            case 'correct':
+                comparedText += `<span class="correct">${diff.word}</span> `;
+                correctCount++;
+                break;
+            case 'capitalization':
+                comparedText += `<span class="capitalization">${diff.userWord}</span> `;
+                numHalfDiff++;
+                correctCount++; // Base word is correct
+                break;
+            case 'punctuation':
+                 comparedText += `<span class="punctuation">${diff.userWord}</span> `;
+                 numHalfDiff++;
+                 correctCount++; // Base word is correct
+                 break;
+            case 'missing':
+                comparedText += `<span class="missing">${diff.word}</span> `;
+                numFullDiff++;
+                break;
+            case 'addition':
+                comparedText += `<span class="addition">${diff.word}</span> `;
+                numFullDiff++;
+                break;
+        }
+    });
+    // --- End processing diff results ---
+
+    // --- Calculate Statistics ---
+    const totalOriginalWords = originalWords.length;
+    const effectiveCorrect = correctCount - (numHalfDiff / 2.0); // Apply half penalty
+    const accuracyPercentage = totalOriginalWords > 0
+        ? Math.max(0, Math.min(100, (effectiveCorrect / totalOriginalWords) * 100))
+        : (userWords.length === 0 ? 100 : 0); // Handle empty original text
+
+    const errorPercentage = 100 - accuracyPercentage;
+    const keystrokesCount = userTextEl.value.length;
+    const endTimeCalc = new Date(); // Use current time for calculation if timer wasn't running
+    const timeTakenSeconds = startTime ? Math.round((endTimeCalc - startTime) / 1000) : 0;
+    const typingTimeMinutes = timeTakenSeconds / 60;
+    const wordsTyped = userWords.length;
+    const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
+    // --- End Statistics Calculation ---
+
+    return {
+        html: comparedText.trim(),
+        stats: {
+            totalOriginal: totalOriginalWords, totalUser: wordsTyped,
+            halfMistakes: numHalfDiff, fullMistakes: numFullDiff,
+            keystrokes: keystrokesCount, wpm: wpm,
+            accuracy: accuracyPercentage, errorRate: errorPercentage,
+            timeTaken: timeTakenSeconds
+        }
+    };
+  }
+
+  /**
+   * Main function to trigger text comparison and display results.
+   */
+  function compareTexts() {
+    const originalTextRaw = originalTextEl.value;
+    const userTextRaw = userTextEl.value;
+
+    if (!originalTextRaw && !userTextRaw) { // Allow comparison even if one is empty
+        alert('Please provide text in at least one of the input fields.');
+        return;
+    }
+     if (!originalTextRaw) {
+        alert('Please provide the original text to compare against.');
+        return;
+    }
+     if (!userTextRaw) {
+        alert('Please provide your transcription to compare.');
+        return;
+    }
+
+
+    // Determine test title and category
+    let testTitle = "Custom Test";
+    let testCategory = 'general';
+    const selectedTestCard = document.querySelector('.test-card.selected');
+    if (selectedTestCard) {
+        const titleElement = selectedTestCard.querySelector('h4');
+        testTitle = titleElement ? titleElement.firstChild.textContent.trim() : 'Selected Test';
+        testCategory = selectedTestCard.dataset.category || 'general';
+    }
+
+    // Process texts
+    const originalWords = processText(originalTextRaw);
+    const userWords = processText(userTextRaw);
+
+    // Perform comparison
+    const comparison = compareParagraphsLCS(originalWords, userWords);
+
+    // Display results
+    displayComparison(comparison);
+    displayStats(comparison.stats);
+    displayFeedback(comparison.stats); // Pass stats to feedback function
+    displayFullTexts(originalTextRaw, userTextRaw);
+
+    // Update metadata
+    resultDateEl.textContent = new Date().toLocaleString();
+
+    // Show relevant sections
+    showResults();
+    showFullTextBtn.classList.remove('hidden');
+    closeResultsBtn.classList.remove('hidden'); // Ensure close button is visible after compare
+
+    // Save attempt if logged in
+    if (currentUser) {
+      const attemptData = {
+        userId: currentUser.uid, userName: currentUser.displayName || 'Anonymous',
+        userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=30`,
+        testTitle: testTitle, category: testCategory,
+        stats: comparison.stats, timestamp: firebase.database.ServerValue.TIMESTAMP
+      };
+      database.ref('attempts').push(attemptData)
+        .then(() => { console.log('Attempt saved.'); loadLeaderboard(); }) // Refresh leaderboard on save
+        .catch(error => console.error('Error saving attempt:', error));
+    }
+  }
+  // --- End Text Processing and Comparison Logic ---
+
+
+  // --- Display Functions ---
+  /**
+   * Displays the comparison result HTML.
+   * @param {object} comparison - The comparison object from compareParagraphsLCS.
+   */
+  function displayComparison(comparison) {
+    comparisonResultEl.innerHTML = comparison.html || '<p>Comparison could not be generated.</p>';
+  }
+
+  /**
+   * Displays the calculated statistics.
+   * @param {object} stats - The stats object from the comparison result.
+   */
   function displayStats(stats) {
-      // Improved stats display logic (example)
+      stats = stats || {}; // Ensure stats object exists
+      const formatTime = (seconds) => {
+          if (seconds == null || isNaN(seconds)) return 'N/A';
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins}:${secs.toString().padStart(2, '0')}`;
+      };
       statsEl.innerHTML = `
           <div class="stat-item"><h4>Original Words</h4><p>${stats.totalOriginal ?? 'N/A'}</p></div>
           <div class="stat-item"><h4>Your Words</h4><p>${stats.totalUser ?? 'N/A'}</p></div>
@@ -1956,26 +2487,947 @@ document.addEventListener('DOMContentLoaded', function() {
           <div class="stat-item"><h4>Full Mistakes</h4><p>${stats.fullMistakes ?? 'N/A'}</p></div>
           <div class="stat-item"><h4>Keystrokes</h4><p>${stats.keystrokes ?? 'N/A'}</p></div>
           <div class="stat-item"><h4>Typing Speed (WPM)</h4><p>${stats.wpm ?? 'N/A'}</p></div>
-          <div class="stat-item"><h4>Accuracy</h4><p>${stats.accuracy?.toFixed(1) ?? 'N/A'}%</p></div>
-          <div class="stat-item"><h4>Time Taken</h4><p>${stats.timeTaken != null ? `${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}` : 'N/A'}</p></div>
+          <div class="stat-item"><h4>Accuracy</h4><p>${stats.accuracy != null ? stats.accuracy.toFixed(1) : 'N/A'}%</p></div>
+          <div class="stat-item"><h4>Time Taken</h4><p>${formatTime(stats.timeTaken)}</p></div>
       `;
   }
-  function displayFeedback(stats, originalWords, userWords) { /* ... existing feedback display logic ... */ }
-  // --- End Core Functions ---
+
+  /**
+   * Generates and displays feedback based on statistics.
+   * @param {object} stats - The stats object from the comparison result.
+   */
+  function displayFeedback(stats) {
+      stats = stats || {}; // Ensure stats object exists
+      let feedbackHTML = `<h4>Overall Assessment</h4> ${getOverallAssessment(stats.accuracy, stats.wpm)} <h4>Mistake Summary</h4><ul>`;
+      const halfMistakes = stats.halfMistakes ?? 0;
+      const fullMistakes = stats.fullMistakes ?? 0;
+      const accuracy = stats.accuracy ?? 0;
+      const wpm = stats.wpm ?? 0;
+
+      if (halfMistakes > 0) { feedbackHTML += `<li>Found ${halfMistakes} capitalization/punctuation difference(s) (counted as ½ mistake each).</li>`; }
+      if (fullMistakes > 0) { feedbackHTML += `<li>Found ${fullMistakes} missing/added word(s) (counted as 1 mistake each).</li>`; }
+
+      if (halfMistakes === 0 && fullMistakes === 0) {
+           feedbackHTML += `<li>Excellent! No significant word, capitalization, or punctuation errors found.</li>`;
+      } else if (accuracy >= 98) {
+           feedbackHTML += `<li>Very few minor errors found. Great job!</li>`;
+      }
+
+      feedbackHTML += `</ul> <h4>Improvement Suggestions</h4><ul>`;
+      if (accuracy < 95 && accuracy >= 85) { feedbackHTML += `<li>Good work! Focus on reducing minor errors like capitalization or punctuation for higher accuracy.</li>`; }
+      else if (accuracy < 85) { feedbackHTML += `<li>Focus on accuracy. Review the comparison carefully to identify patterns in missed/added words or other errors. Slowing down slightly might help.</li>`; }
+
+      if (halfMistakes > 5) { feedbackHTML += `<li>Pay close attention to capitalization rules and exact punctuation from the original text.</li>`; }
+      if (fullMistakes > (stats.totalOriginal ?? 100) * 0.05) { // If more than 5% full mistakes
+          feedbackHTML += `<li>Review the text for skipped words or words you added that weren't in the original. Reading slightly ahead might help prevent omissions.</li>`;
+      }
+      if (wpm < 40 && wpm > 0) { feedbackHTML += `<li>Continue practicing regularly to build typing speed and muscle memory.</li>`; }
+      else if (wpm === 0 && stats.timeTaken > 0) { feedbackHTML += `<li>WPM could not be calculated accurately (perhaps too little text or time).</li>`; }
+
+      if (accuracy >= 95 && wpm >= 50) { feedbackHTML += `<li>Excellent balance of speed and accuracy! Keep it up!</li>`; }
+      else { feedbackHTML += `<li>Consistent practice is key to improving both speed and accuracy.</li>`; }
+
+      feedbackHTML += `</ul>`;
+      feedbackEl.innerHTML = feedbackHTML;
+  }
+
+  /**
+   * Generates a brief overall assessment based on accuracy and WPM.
+   * @param {number} accuracy - The accuracy percentage.
+   * @param {number} wpm - The words per minute.
+   * @returns {string} HTML string with the assessment.
+   */
+  function getOverallAssessment(accuracy, wpm) {
+      accuracy = accuracy ?? 0; // Default to 0 if null/undefined
+      wpm = wpm ?? 0;
+      let assessment = '';
+      if (accuracy >= 98) { assessment += '<p>🌟 <strong>Outstanding accuracy!</strong></p>'; }
+      else if (accuracy >= 95) { assessment += '<p>👍 <strong>Excellent accuracy!</strong></p>'; }
+      else if (accuracy >= 90) { assessment += '<p>✅ <strong>Good accuracy.</strong></p>'; }
+      else if (accuracy >= 80) { assessment += '<p>📝 <strong>Fair accuracy. Needs attention.</strong></p>'; }
+      else { assessment += '<p>⚠️ <strong>Accuracy needs significant improvement.</strong></p>'; }
+
+      if (wpm >= 70) { assessment += '<p>⚡ <strong>Blazing Fast Typer!</strong></p>'; }
+      else if (wpm >= 55) { assessment += '<p>🚀 <strong>Very Fast Typer!</strong></p>'; }
+      else if (wpm >= 40) { assessment += '<p>🏃 <strong>Good Speed.</strong></p>'; }
+      else if (wpm > 0) { assessment += '<p>🐢 <strong>Developing Speed. Keep practicing!</strong></p>'; }
+      // Add no comment if WPM is 0
+
+      return assessment;
+  }
+
+  /**
+   * Displays the full original and user text in their respective areas.
+   * @param {string} original - The original text.
+   * @param {string} user - The user's transcribed text.
+   */
+  function displayFullTexts(original, user) {
+    originalDisplayEl.textContent = original;
+    userDisplayEl.textContent = user;
+  }
+  // --- End Display Functions ---
 
 
-  // --- Text Processing and Comparison (Keep the updated compareParagraphsLCS) ---
-  function processText(text) { /* ... existing processText logic ... */ }
-  function compareParagraphsLCS(originalWordsRaw, userWordsRaw) { /* ... existing compareParagraphsLCS logic ... */ }
-  function compareTexts() { /* ... existing compareTexts logic ... */ }
-  // --- End Text Processing and Comparison ---
+  // --- Community Test Functions ---
+  /**
+   * Fetches all community tests from Firebase and stores them locally.
+   * Calls filterAndDisplayGlobalTests to render the initial list.
+   */
+  function fetchAndDisplayGlobalTests() {
+      const testsRef = database.ref('tests');
+      testsRef.orderByChild('timestamp').once('value') // Order by timestamp initially
+          .then(snapshot => {
+              const tests = snapshot.val();
+              if (tests) {
+                  // Convert tests object to an array and sort newest first
+                  allFetchedTests = Object.entries(tests).map(([id, test]) => ({
+                      id, ...test
+                  })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+              } else {
+                  allFetchedTests = []; // No tests found
+              }
+              filterAndDisplayGlobalTests(); // Display based on current filters (initially all)
+          })
+          .catch(error => {
+              console.error('Error fetching global tests:', error);
+              allFetchedTests = []; // Reset cache on error
+              filterAndDisplayGlobalTests(); // Display empty state
+          });
+  }
+
+  /**
+   * Filters the cached `allFetchedTests` based on selected category and search term.
+   * Calls `renderGlobalTests` to update the UI.
+   */
+  function filterAndDisplayGlobalTests() {
+      const category = testCategoryFilter.value;
+      const searchTerm = testSearchInput.value.trim().toLowerCase();
+
+      let filteredTests = allFetchedTests; // Start with all cached tests
+
+      // Filter by category
+      if (category !== 'all') {
+          filteredTests = filteredTests.filter(test => test.category === category);
+      }
+
+      // Filter by search term (check title and text content)
+      if (searchTerm) {
+          filteredTests = filteredTests.filter(test =>
+              (test.title && test.title.toLowerCase().includes(searchTerm)) ||
+              (test.text && test.text.toLowerCase().includes(searchTerm))
+          );
+      }
+
+      renderGlobalTests(filteredTests); // Render the filtered list
+  }
+
+  /**
+   * Renders the filtered list of tests into the carousel.
+   * @param {object[]} filteredTests - Array of test objects to display.
+   */
+  function renderGlobalTests(filteredTests) {
+      // Ensure carousel elements are selected (might not exist on initial load before login)
+      carouselTrack = document.querySelector('.carousel-track');
+      carouselDotsContainer = document.querySelector('.carousel-dots');
+      carouselPrevBtn = document.querySelector('.prev-btn');
+      carouselNextBtn = document.querySelector('.next-btn');
+
+      if (!carouselTrack || !carouselDotsContainer || !carouselPrevBtn || !carouselNextBtn) {
+          // console.warn("Carousel elements not found, skipping render.");
+          return; // Exit if elements aren't ready
+      }
+
+      carouselTrack.innerHTML = ''; // Clear existing cards
+      carouselDotsContainer.innerHTML = ''; // Clear existing dots
+      carouselCards = []; // Reset card array
+
+      // Display message if no tests match filters
+      if (filteredTests.length === 0) {
+          let message = '<p style="padding: 1rem; text-align: center; width: 100%;">No tests match your current filters.</p>';
+          // More specific message if there are truly no tests at all
+          if (!testSearchInput.value.trim() && testCategoryFilter.value === 'all' && allFetchedTests.length === 0) {
+              message = '<p style="padding: 1rem; text-align: center; width: 100%;">No community tests available yet. Add one!</p>';
+          }
+          carouselTrack.innerHTML = message;
+          disableCarouselButtons(); // Disable nav buttons
+          return;
+      }
+
+      // Check if current user is admin for showing edit/delete buttons
+      const isAdmin = currentUser && adminEmails.includes(currentUser.email);
+
+      // Create and append test cards
+      filteredTests.forEach((test) => {
+          const testCard = document.createElement('div');
+          testCard.className = 'test-card';
+          testCard.dataset.id = test.id; // Store test ID
+          testCard.dataset.category = test.category; // Store category
+
+          // Determine if the current user can modify this test
+          const canModify = isAdmin || (currentUser && test.userId && test.userId === currentUser.uid);
+
+          // Truncate long text for display
+          const shortText = test.text.length > 100 ? test.text.substring(0, 97) + '...' : test.text;
+
+          testCard.innerHTML = `
+              <div class="test-card-content" style="cursor: pointer;" title="Click to load this test">
+                  <h4>${test.title || 'Untitled Test'} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
+                  <p>${shortText}</p>
+                  ${test.videoUrl ? `<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>` : ''}
+                  <div class="test-author">
+                      <img src="${test.userPhoto || `https://www.gravatar.com/avatar/${test.id}?d=identicon&s=24`}" alt="${test.userName || 'User'}">
+                      <span>Added by ${test.userName || 'User'}</span>
+                  </div>
+              </div>
+              ${canModify ? `
+              <div class="test-card-actions">
+                  <button class="edit-test-btn" data-id="${test.id}" aria-label="Edit test ${test.title}">Edit</button>
+                  <button class="delete-test-btn" data-id="${test.id}" aria-label="Delete test ${test.title}">Delete</button>
+              </div>` : ''}
+          `;
+
+          // Add click listener to load the test
+          const contentArea = testCard.querySelector('.test-card-content');
+          if (contentArea) {
+              contentArea.addEventListener('click', () => { selectTest(testCard, test); });
+          }
+
+          // Add listeners for edit/delete buttons if they exist
+          if (canModify) {
+              const editBtn = testCard.querySelector('.edit-test-btn');
+              const deleteBtn = testCard.querySelector('.delete-test-btn');
+              if (editBtn) { editBtn.addEventListener('click', (e) => { e.stopPropagation(); editTest(test.id, test); }); }
+              if (deleteBtn) { deleteBtn.addEventListener('click', (e) => { e.stopPropagation(); deleteTest(test.id, test.title); }); }
+          }
+
+          carouselTrack.appendChild(testCard); // Add card to the track
+          carouselCards.push(testCard); // Add to the array for carousel logic
+      });
+
+      // Initialize or re-initialize the carousel if there are cards
+      if (carouselCards.length > 0) {
+          initializeCarousel();
+      } else {
+          disableCarouselButtons();
+      }
+  }
+
+  /**
+   * Disables the carousel previous/next buttons.
+   */
+  function disableCarouselButtons() {
+      if (carouselPrevBtn) carouselPrevBtn.disabled = true;
+      if (carouselNextBtn) carouselNextBtn.disabled = true;
+  }
+
+  /**
+   * Handles selecting a test from the community list.
+   * Populates the original text area, sets up timer options, and embeds video if available.
+   * @param {HTMLElement} testCardElement - The clicked test card element.
+   * @param {object} testData - The data object for the selected test.
+   */
+  function selectTest(testCardElement, testData) {
+      // Highlight the selected card
+      document.querySelectorAll('.test-card.selected').forEach(card => card.classList.remove('selected'));
+      testCardElement.classList.add('selected');
+
+      // Populate original text area and hide it
+      originalTextEl.value = testData.text;
+      originalTextGroup.classList.add('hidden');
+
+      // Show timer options and enable them
+      timerOptions.classList.remove('hidden');
+      timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; });
+
+      // Embed video if URL exists, otherwise remove any existing player
+      if (testData.videoUrl) {
+          embedVideo(testData.videoUrl);
+      } else {
+          const existingVideo = document.getElementById('testVideoPlayer');
+          if (existingVideo) existingVideo.remove();
+      }
+
+      // Clear user input and reset results/timer state
+      userTextEl.value = '';
+      userTextEl.readOnly = false; // Ensure user can type
+      userTextEl.classList.remove('locked-textarea');
+      startTime = null; // Reset WPM timer start
+      stopTimer(); // Stop any previous timer
+      testActive = false;
+      timerDisplay.classList.add('hidden'); // Hide timer display
+      resultsSection.classList.add('hidden'); // Hide results sections
+      fullTextSection.classList.add('hidden');
+      showFullTextBtn.classList.add('hidden'); // Hide results buttons
+      closeResultsBtn.classList.add('hidden');
+      compareBtn.disabled = false; // Ensure compare button is enabled
+
+      // Scroll to the transcription area (optional)
+      userTextEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      userTextEl.focus();
+  }
+
+  /**
+   * Populates the custom test form for editing.
+   * @param {string} testId - The ID of the test to edit.
+   * @param {object} testData - The data of the test to edit.
+   */
+  function editTest(testId, testData) {
+      editingTestIdInput.value = testId; // Store ID in hidden input
+      customTitle.value = testData.title;
+      customOriginal.value = testData.text;
+      customVideoUrl.value = testData.videoUrl || ''; // Handle null/undefined URL
+      customCategory.value = testData.category;
+      saveTestBtn.textContent = 'Update Test'; // Change button text
+      customTestTitleHeader.textContent = 'Edit Test'; // Change section header
+      // Scroll to the form for visibility
+      customTestSection.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  /**
+   * Shows a confirmation modal before deleting a community test.
+   * @param {string} testId - The ID of the test to delete.
+   * @param {string} testTitle - The title of the test for the confirmation message.
+   */
+  function deleteTest(testId, testTitle) {
+      showConfirmationModal(
+          `Are you sure you want to delete the test "${testTitle || 'Untitled Test'}"? This action cannot be undone.`,
+          () => { // Confirmation callback
+              database.ref('tests/' + testId).remove()
+                  .then(() => {
+                      alert(`Test "${testTitle || 'Untitled Test'}" deleted.`);
+                      fetchAndDisplayGlobalTests(); // Refresh the list after deletion
+                  })
+                  .catch(error => {
+                      console.error('Error deleting test:', error);
+                      alert('Failed to delete test.');
+                  });
+          }
+      );
+  }
+
+  /**
+   * Embeds a video player (YouTube or direct URL) above the transcription area.
+   * @param {string} url - The URL of the video.
+   */
+  function embedVideo(url) {
+      // Remove any previously embedded video player
+      const existingVideo = document.getElementById('testVideoPlayer');
+      if (existingVideo) existingVideo.remove();
+      if (!url) return; // Exit if no URL provided
+
+      const videoContainer = document.createElement('div');
+      videoContainer.className = 'video-container';
+      videoContainer.id = 'testVideoPlayer';
+
+      let videoId;
+      let embedHtml = '';
+
+      try {
+          const urlObj = new URL(url); // Use URL object for robust parsing
+          // YouTube URL Parsing (various formats)
+          if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+              if (urlObj.pathname === '/watch') {
+                  videoId = urlObj.searchParams.get('v');
+              } else if (urlObj.pathname.length > 1) { // Handles youtu.be/VIDEO_ID format
+                  videoId = urlObj.pathname.substring(1);
+              }
+              if (videoId) {
+                  // Use youtube-nocookie.com for enhanced privacy
+                  embedHtml = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen title="YouTube video player"></iframe>`;
+              }
+          }
+      } catch (e) {
+          console.warn("Could not parse URL for YouTube embedding:", e);
+          // Fallback or treat as direct URL if parsing fails or not YouTube
+      }
 
 
-}); // End DOMContentLoaded
+      // If not a recognized YouTube URL or parsing failed, assume direct video link
+      if (!embedHtml) {
+           // Basic check for common video file extensions
+           if (/\.(mp4|webm|ogg)$/i.test(url)) {
+                embedHtml = `<video controls style="width:100%; height:100%; position:absolute; top:0; left:0; border-radius: 8px;"><source src="${url}" type="video/${url.split('.').pop()}">Your browser does not support the video tag.</video>`;
+           } else {
+               console.warn("Unsupported video URL format:", url);
+               embedHtml = '<p style="text-align: center; padding: 1rem; color: var(--danger);">Could not load video preview.</p>';
+           }
+      }
 
-// Dark mode toggle
-document.getElementById('darkModeToggle').addEventListener('change', function() { document.body.classList.toggle('dark-mode'); localStorage.setItem('darkMode', this.checked); });
-if (localStorage.getItem('darkMode') === 'true') { document.getElementById('darkModeToggle').checked = true; document.body.classList.add('dark-mode'); }
+      videoContainer.innerHTML = embedHtml;
+      // Insert the video container right after the original text input group
+      originalTextGroup.parentNode.insertBefore(videoContainer, originalTextGroup.nextSibling);
+  }
+  // --- End Community Test Functions ---
+
+
+  // --- Carousel Logic ---
+  /**
+   * Initializes the carousel functionality, calculating card widths and setting up navigation.
+   */
+  function initializeCarousel() {
+      if (!carouselTrack || carouselCards.length === 0) {
+          disableCarouselButtons();
+          return;
+      }
+
+      // Calculate card width including gap (assuming gap is 1rem = 16px, adjust if needed)
+      const cardStyle = window.getComputedStyle(carouselCards[0]);
+      const cardMargin = parseFloat(cardStyle.marginLeft) + parseFloat(cardStyle.marginRight);
+      const gap = 16; // Assuming 1rem gap defined in CSS
+      cardWidth = carouselCards[0].offsetWidth + gap; // Use offsetWidth for actual rendered width
+
+
+      const containerWidth = carouselTrack.parentElement.offsetWidth;
+      // Calculate how many cards fit (at least 1)
+      carouselVisibleCards = Math.max(1, Math.floor(containerWidth / cardWidth));
+
+      const totalCards = carouselCards.length;
+      const dotCount = Math.ceil(totalCards / carouselVisibleCards); // Number of pages/dots
+
+      // Generate navigation dots
+      carouselDotsContainer.innerHTML = ''; // Clear previous dots
+      if (dotCount > 1) { // Only show dots if there's more than one page
+          for (let i = 0; i < dotCount; i++) {
+              const dot = document.createElement('div');
+              dot.className = 'carousel-dot';
+              if (i === 0) dot.classList.add('active'); // Activate first dot initially
+              dot.addEventListener('click', () => {
+                  carouselCurrentIndex = i; // Go to the clicked dot's page
+                  updateCarouselVisuals();
+              });
+              carouselDotsContainer.appendChild(dot);
+          }
+      }
+
+      // Reset index and update visuals
+      carouselCurrentIndex = 0;
+      updateCarouselVisuals();
+
+      // Re-attach event listeners to buttons (cloning helps avoid multiple listeners)
+      const newPrevBtn = carouselPrevBtn.cloneNode(true);
+      carouselPrevBtn.parentNode.replaceChild(newPrevBtn, carouselPrevBtn);
+      carouselPrevBtn = newPrevBtn;
+
+      const newNextBtn = carouselNextBtn.cloneNode(true);
+      carouselNextBtn.parentNode.replaceChild(newNextBtn, carouselNextBtn);
+      carouselNextBtn = newNextBtn;
+
+      carouselPrevBtn.addEventListener('click', () => {
+          if (carouselCurrentIndex > 0) {
+              carouselCurrentIndex--;
+              updateCarouselVisuals();
+          }
+      });
+      carouselNextBtn.addEventListener('click', () => {
+          const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1;
+          if (carouselCurrentIndex < maxIndex) {
+              carouselCurrentIndex++;
+              updateCarouselVisuals();
+          }
+      });
+
+      // Add resize listener to recalculate layout if window size changes significantly
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(() => {
+              const newContainerWidth = carouselTrack.parentElement.offsetWidth;
+              const newVisibleCards = Math.max(1, Math.floor(newContainerWidth / cardWidth));
+              // Re-initialize only if the number of visible cards changes
+              if (newVisibleCards !== carouselVisibleCards) {
+                  initializeCarousel();
+              } else {
+                  // Otherwise, just update the translation in case container size changed slightly
+                  updateCarouselVisuals();
+              }
+          }, 250); // Debounce resize events
+      });
+  }
+
+  /**
+   * Updates the carousel's visual state (translation, button disabled state, active dot).
+   */
+  function updateCarouselVisuals() {
+      if (!carouselTrack || carouselCards.length === 0) return;
+
+      const totalCards = carouselCards.length;
+      const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1;
+
+      // Ensure index stays within bounds
+      carouselCurrentIndex = Math.max(0, Math.min(carouselCurrentIndex, maxIndex));
+
+      // Calculate the translation offset
+      // We move by the number of visible cards * card width for each page index
+      const offset = -carouselCurrentIndex * (carouselVisibleCards * cardWidth);
+      carouselTrack.style.transform = `translateX(${offset}px)`;
+
+      // Update active dot
+      document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+          dot.classList.toggle('active', index === carouselCurrentIndex);
+      });
+
+      // Enable/disable prev/next buttons
+      carouselPrevBtn.disabled = carouselCurrentIndex === 0;
+      carouselNextBtn.disabled = carouselCurrentIndex >= maxIndex; // Use >= for safety
+  }
+  // --- End Carousel Logic ---
+
+
+  // --- Leaderboard Functions ---
+  /**
+   * Loads leaderboard data from Firebase based on current filters.
+   */
+   function loadLeaderboard() {
+       const filter = leaderboardFilter.value;
+       const category = categoryFilter.value;
+       const selectedTestName = testNameFilter.value;
+
+       let query = database.ref('attempts').orderByChild('timestamp'); // Base query
+
+       // Apply time filter if not 'all'
+       if (filter === 'week') {
+           const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+           query = query.startAt(oneWeekAgo.getTime());
+       } else if (filter === 'month') {
+           const oneMonthAgo = new Date(); oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+           query = query.startAt(oneMonthAgo.getTime());
+       }
+
+       query.once('value')
+           .then(snapshot => {
+               const attempts = snapshot.val();
+               if (!attempts) { // Handle case where no attempts exist at all
+                   leaderboardList.innerHTML = '<p>No attempts recorded yet.</p>';
+                   leaderboardPagination.innerHTML = '';
+                   allAttempts = []; filteredAttempts = []; selectedLeaderboardRows = [];
+                   updateTestNameFilter([]); // Clear test name filter
+                   updatePagination(); // Update button states etc.
+                   return;
+               }
+
+               // Convert attempts object to array and add IDs
+               allAttempts = Object.entries(attempts).map(([id, attempt]) => ({ id, ...attempt }));
+
+               // Update the test name filter dropdown based on ALL attempts fetched
+               updateTestNameFilter(allAttempts);
+
+               // Apply client-side filtering for test name and category
+               filteredAttempts = allAttempts.filter(attempt => {
+                   const nameMatch = selectedTestName === 'all' || (attempt.testTitle || 'Custom Test') === selectedTestName;
+                   const categoryMatch = category === 'all' || attempt.category === category;
+                   return nameMatch && categoryMatch;
+               });
+
+               // Sort the filtered attempts based on current column/direction
+               sortAttempts(currentSortColumn, currentSortDirection); // Sort AFTER filtering
+
+               currentPage = 1; // Reset to first page after filtering/sorting
+               updatePagination(); // Render the first page
+           })
+           .catch(error => {
+               console.error('Error loading leaderboard:', error);
+               leaderboardList.innerHTML = '<p>Error loading leaderboard data.</p>';
+               leaderboardPagination.innerHTML = '';
+           });
+   }
+
+
+  /**
+   * Sorts the `filteredAttempts` array based on the selected column and direction.
+   * @param {string} column - The key of the stat/property to sort by.
+   * @param {string} direction - 'asc' or 'desc'.
+   */
+  function sortAttempts(column, direction) {
+      // Ensure filteredAttempts is an array
+      if (!Array.isArray(filteredAttempts)) { filteredAttempts = []; }
+
+      filteredAttempts.sort((a, b) => {
+          const statsA = a.stats || {}; // Handle missing stats object
+          const statsB = b.stats || {};
+          let aValue, bValue;
+
+          // Get values based on the column
+          switch (column) {
+              case 'accuracy': case 'wpm': case 'totalOriginal': case 'totalUser':
+              case 'halfMistakes': case 'fullMistakes': case 'timeTaken':
+                  aValue = statsA[column] ?? -Infinity; // Default to a low number for sorting
+                  bValue = statsB[column] ?? -Infinity;
+                  break;
+              case 'userName':
+                  aValue = (a.userName || '').toLowerCase(); // Case-insensitive string sort
+                  bValue = (b.userName || '').toLowerCase();
+                  break;
+              case 'testTitle':
+                  aValue = (a.testTitle || 'Custom Test').toLowerCase();
+                  bValue = (b.testTitle || 'Custom Test').toLowerCase();
+                  break;
+              case 'date': // Sort by timestamp
+                  aValue = a.timestamp || 0;
+                  bValue = b.timestamp || 0;
+                  break;
+              default: // Default case for rank or unknown column
+                  return 0;
+          }
+
+          // Perform comparison based on value type
+          let comparison = 0;
+          if (typeof aValue === 'number' && typeof bValue === 'number') {
+              comparison = aValue - bValue;
+          } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+              comparison = aValue.localeCompare(bValue);
+          }
+
+          // Apply direction (descending or ascending)
+          return direction === 'asc' ? comparison : (comparison * -1);
+      });
+  }
+
+  /**
+   * Updates the 'Test Name' filter dropdown with unique names from attempts.
+   * @param {object[]} attempts - The array of all attempt objects.
+   */
+   function updateTestNameFilter(attempts) {
+       // Get unique test titles, defaulting 'Custom Test' if title is missing
+       uniqueTestNames = new Set(attempts.map(attempt => attempt.testTitle || 'Custom Test'));
+       const currentTestFilter = testNameFilter.value; // Preserve current selection if possible
+
+       testNameFilter.innerHTML = '<option value="all">All Tests</option>'; // Reset dropdown
+
+       // Sort names alphabetically and add options
+       const sortedTestNames = Array.from(uniqueTestNames).sort((a, b) => a.localeCompare(b));
+       sortedTestNames.forEach(testName => {
+           const option = document.createElement('option');
+           option.value = testName;
+           option.textContent = testName;
+           testNameFilter.appendChild(option);
+       });
+
+       // Restore previous selection if it still exists in the list
+       if (uniqueTestNames.has(currentTestFilter)) {
+           testNameFilter.value = currentTestFilter;
+       } else {
+           testNameFilter.value = 'all'; // Default back to 'All Tests' if previous selection is gone
+       }
+   }
+
+
+  /**
+   * Updates the leaderboard table display and pagination controls.
+   */
+   function updatePagination() {
+       const totalEntries = filteredAttempts.length;
+       const totalPages = Math.ceil(totalEntries / entriesPerPage);
+
+       // Ensure currentPage is within valid bounds
+       currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
+
+       // Calculate start and end indices for the current page
+       const startIdx = (currentPage - 1) * entriesPerPage;
+       const endIdx = Math.min(startIdx + entriesPerPage, totalEntries);
+
+       // Get the attempts for the current page
+       const pageAttempts = filteredAttempts.slice(startIdx, endIdx);
+
+       // Update pagination button states
+       prevPageBtn.disabled = currentPage === 1;
+       nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+       // Update pagination info text
+       if (totalEntries > 0) {
+           leaderboardPagination.innerHTML = `Showing ${startIdx + 1}-${endIdx} of ${totalEntries} entries`;
+       } else {
+           leaderboardPagination.innerHTML = 'No entries found matching filters.';
+       }
+
+       // Render the table for the current page
+       renderLeaderboardTable(pageAttempts, startIdx); // Pass start index for rank calculation
+   }
+
+
+  /**
+   * Renders the leaderboard table HTML for the given attempts.
+   * @param {object[]} attempts - Array of attempt objects for the current page.
+   * @param {number} startIdx - The starting index for rank calculation.
+   */
+   function renderLeaderboardTable(attempts, startIdx) {
+       if (!leaderboardList) return; // Exit if element doesn't exist
+
+       if (attempts.length === 0) {
+           leaderboardList.innerHTML = '<p style="padding: 1rem; text-align: center;">No attempts match your filters.</p>';
+           return;
+       }
+
+       const isAdmin = currentUser && adminEmails.includes(currentUser.email);
+       // Start table HTML
+       let tableHTML = `
+           <table>
+               <thead>
+                   <tr>
+                       ${isAdmin ? '<th>Select</th>' : ''} <th data-column="rank">Rank</th>
+                       <th data-column="userName">User</th>
+                       <th data-column="testTitle">Test</th>
+                       <th data-column="accuracy">Accuracy</th>
+                       <th data-column="wpm">Speed (WPM)</th>
+                       <th data-column="totalOriginal">Original Words</th>
+                       <th data-column="totalUser">Typed Words</th>
+                       <th data-column="timeTaken">Time Taken</th>
+                       <th data-column="halfMistakes">Half Mistakes</th>
+                       <th data-column="fullMistakes">Full Mistakes</th>
+                       <th data-column="date">Date</th>
+                   </tr>
+               </thead>
+               <tbody>
+       `;
+
+       // Add rows for each attempt
+       attempts.forEach((attempt, index) => {
+           const date = new Date(attempt.timestamp || 0);
+           const stats = attempt.stats || {}; // Handle missing stats
+           const accuracy = stats.accuracy ?? 0;
+           const timeTaken = stats.timeTaken ?? 0;
+
+           // Determine accuracy class for styling
+           const accuracyClass = accuracy >= 95 ? 'accuracy-high' : accuracy >= 85 ? 'accuracy-medium' : 'accuracy-low';
+           // Format time as MM:SS
+           const minutes = Math.floor(timeTaken / 60);
+           const seconds = timeTaken % 60;
+           const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+           // Calculate overall rank based on page and index
+           const overallRank = startIdx + index + 1;
+           let badge = ''; // Rank badge (Gold, Silver, Bronze)
+           if (overallRank === 1 && currentPage === 1) { badge = '<span class="badge badge-gold">🥇</span>'; }
+           else if (overallRank === 2 && currentPage === 1) { badge = '<span class="badge badge-silver">🥈</span>'; }
+           else if (overallRank === 3 && currentPage === 1) { badge = '<span class="badge badge-bronze">🥉</span>'; }
+
+           // Check if row is selected for deletion
+           const isSelected = selectedLeaderboardRows.includes(attempt.id);
+
+           // Add table row HTML
+           tableHTML += `
+               <tr data-id="${attempt.id}" class="${isAdmin ? 'leaderboard-row-selectable' : ''} ${isSelected ? 'selected-row' : ''}">
+                   ${isAdmin ? `<td><input type="checkbox" class="delete-checkbox" data-id="${attempt.id}" ${isSelected ? 'checked' : ''} aria-label="Select entry by ${attempt.userName || 'User'}"></td>` : ''}
+                   <td>${overallRank} ${badge}</td>
+                   <td class="leaderboard-user">
+                       <img src="${attempt.userPhoto || `https://www.gravatar.com/avatar/${attempt.id}?d=identicon&s=30`}" alt="${attempt.userName || 'User'}">
+                       <span>${attempt.userName || 'User'}</span>
+                   </td>
+                   <td>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
+                   <td class="accuracy-cell ${accuracyClass}">${accuracy.toFixed(1)}%</td>
+                   <td>${stats.wpm ?? 0}</td>
+                   <td>${stats.totalOriginal ?? 0}</td>
+                   <td>${stats.totalUser ?? 0}</td>
+                   <td>${timeFormatted}</td>
+                   <td>${stats.halfMistakes ?? 0}</td>
+                   <td>${stats.fullMistakes ?? 0}</td>
+                   <td>${date.toLocaleDateString()}</td>
+               </tr>
+           `;
+       });
+
+       tableHTML += `</tbody></table>`; // Close table
+       leaderboardList.innerHTML = tableHTML; // Update the DOM
+
+       // Re-apply sortability and selection listeners to the new table
+       makeTableSortable();
+       addLeaderboardRowSelectionListeners();
+       updateDeleteButtonState(); // Update delete button based on selection
+   }
+
+
+  /**
+   * Adds click listeners to leaderboard table headers for sorting.
+   */
+   function makeTableSortable() {
+       const headers = document.querySelectorAll('.leaderboard-list th[data-column]');
+       headers.forEach(header => {
+           // Clone and replace to remove old listeners before adding new ones
+           const newHeader = header.cloneNode(true);
+           header.parentNode.replaceChild(newHeader, header);
+
+           newHeader.style.cursor = 'pointer'; // Indicate clickable header
+           newHeader.addEventListener('click', () => {
+               const column = newHeader.getAttribute('data-column');
+               if (!column || column === 'rank') return; // Don't sort by rank
+
+               // Determine new sort direction
+               if (currentSortColumn === column) {
+                   currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+               } else {
+                   currentSortColumn = column;
+                   currentSortDirection = 'desc'; // Default to descending for new column
+               }
+
+               // Sort and re-render
+               sortAttempts(currentSortColumn, currentSortDirection);
+               currentPage = 1; // Go back to first page after sorting
+               updatePagination();
+
+               // Update visual indicators on headers
+               document.querySelectorAll('.leaderboard-list th[data-column]').forEach(h => {
+                   h.classList.remove('sorted-asc', 'sorted-desc');
+                   if (h.getAttribute('data-column') === currentSortColumn) {
+                       h.classList.add(`sorted-${currentSortDirection}`);
+                   }
+               });
+           });
+
+           // Add initial sort indicator if this is the current sort column
+           if (newHeader.getAttribute('data-column') === currentSortColumn) {
+               newHeader.classList.add(`sorted-${currentSortDirection}`);
+           }
+       });
+   }
+
+
+  /**
+   * Adds click listeners to leaderboard rows and checkboxes for selection (Admin only).
+   */
+  function addLeaderboardRowSelectionListeners() {
+      const isAdmin = currentUser && adminEmails.includes(currentUser.email);
+      if (!isAdmin) return; // Only add listeners for admins
+
+      const checkboxes = document.querySelectorAll('.leaderboard-list .delete-checkbox');
+      checkboxes.forEach(checkbox => {
+          checkbox.addEventListener('change', (e) => {
+              const attemptId = e.target.dataset.id;
+              const row = e.target.closest('tr');
+              if (e.target.checked) { // Add to selection
+                  if (!selectedLeaderboardRows.includes(attemptId)) {
+                      selectedLeaderboardRows.push(attemptId);
+                  }
+                  row.classList.add('selected-row');
+              } else { // Remove from selection
+                  selectedLeaderboardRows = selectedLeaderboardRows.filter(id => id !== attemptId);
+                  row.classList.remove('selected-row');
+              }
+              updateDeleteButtonState(); // Enable/disable delete button
+          });
+      });
+
+      // Allow clicking anywhere on the row (except the checkbox itself) to toggle the checkbox
+      const rows = document.querySelectorAll('.leaderboard-list tbody tr.leaderboard-row-selectable');
+      rows.forEach(row => {
+          row.addEventListener('click', (e) => {
+              // Prevent toggling if clicking directly on the checkbox input
+              if (e.target.tagName !== 'INPUT') {
+                  const checkbox = row.querySelector('.delete-checkbox');
+                  if (checkbox) {
+                      checkbox.checked = !checkbox.checked;
+                      // Manually trigger the change event to update selection array and button state
+                      checkbox.dispatchEvent(new Event('change'));
+                  }
+              }
+          });
+      });
+  }
+
+  /**
+   * Enables or disables the 'Delete Selected' button based on row selection.
+   */
+   function updateDeleteButtonState() {
+       const isAdmin = currentUser && adminEmails.includes(currentUser.email);
+       if (isAdmin) {
+           deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0;
+       } else {
+           deleteLeaderboardBtn.disabled = true; // Always disabled if not admin
+       }
+   }
+
+  // --- End Leaderboard Functions ---
+
+
+  // --- Manage Tests Modal Function ---
+  /**
+   * Shows a modal dialog for managing (deleting) tests created by the current user.
+   * @param {object} userTests - An object where keys are test IDs and values are test data.
+   */
+  function showManageTestsModal(userTests) {
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.innerHTML = `
+          <div class="modal-content">
+              <h3>Manage Your Tests</h3>
+              <p>Select tests to delete permanently.</p>
+              <div class="test-selection">
+                  </div>
+              <div class="modal-buttons">
+                  <button id="cancelManageTests" class="secondary-btn">Cancel</button>
+                  <button id="confirmDeleteSelectedTests" class="danger-btn" disabled>Delete Selected</button>
+              </div>
+          </div>`;
+      document.body.appendChild(modal);
+
+      const testSelectionContainer = modal.querySelector('.test-selection');
+      const confirmDeleteBtn = modal.querySelector('#confirmDeleteSelectedTests');
+      const checkboxes = []; // Keep track of checkboxes to check selection
+
+      // Populate the modal with user's tests
+      Object.entries(userTests).forEach(([id, test]) => {
+          const testItem = document.createElement('div');
+          testItem.className = 'test-item';
+          const checkboxId = `manage-test-${id}`;
+          testItem.innerHTML = `
+              <input type="checkbox" id="${checkboxId}" data-testid="${id}">
+              <label for="${checkboxId}">${test.title || 'Untitled Test'} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></label>
+          `;
+          testSelectionContainer.appendChild(testItem);
+          const checkbox = testItem.querySelector('input');
+          checkboxes.push(checkbox);
+          // Enable/disable delete button based on selection
+          checkbox.addEventListener('change', () => {
+              const anyChecked = checkboxes.some(cb => cb.checked);
+              confirmDeleteBtn.disabled = !anyChecked;
+          });
+      });
+
+      // Button listeners within the modal
+      modal.querySelector('#cancelManageTests').addEventListener('click', () => {
+          document.body.removeChild(modal);
+      });
+
+      confirmDeleteBtn.addEventListener('click', () => {
+          const selectedTestIds = checkboxes
+              .filter(checkbox => checkbox.checked)
+              .map(checkbox => checkbox.dataset.testid);
+
+          if (selectedTestIds.length === 0) return; // Should be disabled, but double-check
+
+          // Show nested confirmation modal before actual deletion
+          showConfirmationModal(
+              `Are you sure you want to permanently delete ${selectedTestIds.length} selected test(s)? This cannot be undone.`,
+              () => { // Deletion confirmed
+                  const updates = {};
+                  selectedTestIds.forEach(id => {
+                      updates[`/tests/${id}`] = null; // Mark for deletion in Firebase
+                  });
+                  database.ref().update(updates)
+                      .then(() => {
+                          alert(`${selectedTestIds.length} test(s) deleted.`);
+                          fetchAndDisplayGlobalTests(); // Refresh community tests list
+                      })
+                      .catch(error => {
+                          console.error('Error deleting tests:', error);
+                          alert('Failed to delete tests.');
+                      })
+                      .finally(() => {
+                          document.body.removeChild(modal); // Close the manage tests modal
+                      });
+              }
+          );
+      });
+
+      // Close modal if clicking outside the content area
+      modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+              document.body.removeChild(modal);
+          }
+      });
+  }
+  // --- End Manage Tests Modal Function ---
+
+
+}); // --- END DOMContentLoaded ---
 </script>
 </body>
 </html>
