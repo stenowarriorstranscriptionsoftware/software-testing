@@ -694,7 +694,7 @@ body.dark-mode .test-filters select {
   box-shadow: 8px 8px 16px #e2e8f0,
               -8px -8px 16px #ffffff;
   margin-bottom: 1.5rem;
-  position: relative; /* Needed for absolute positioning of edit button */
+  position: relative; /* Needed for absolute positioning of buttons */
 }
 
 body.dark-mode .test-card {
@@ -751,11 +751,17 @@ body.dark-mode .test-card.selected {
   margin-right: 8px;
 }
 
-/* Edit Button Style */
-.edit-test-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+/* Admin Buttons on Test Card */
+.test-card-admin-controls {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px; /* Space between edit and delete buttons */
+    z-index: 5;
+}
+
+.edit-test-btn, .delete-test-btn {
   background-color: var(--warning);
   color: white;
   border: none;
@@ -764,13 +770,22 @@ body.dark-mode .test-card.selected {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s;
-  z-index: 5; /* Ensure it's above other card elements */
+}
+
+.delete-test-btn {
+    background-color: var(--danger); /* Use danger color for delete */
 }
 
 .edit-test-btn:hover {
-  background-color: #d97706; /* Darker warning color */
+  background-color: #d97706; /* Darker warning */
   transform: scale(1.1);
 }
+
+.delete-test-btn:hover {
+    background-color: #d11a5e; /* Darker danger */
+    transform: scale(1.1);
+}
+
 
 /* Leaderboard Styles */
 .leaderboard-section {
@@ -1590,15 +1605,17 @@ body.dark-mode .selected-row {
 <script>
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
-  authDomain: "setup-login-page.firebaseapp.com",
-  databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
-  projectId: "setup-login-page",
-  storageBucket: "setup-login-page.firebasestorage.app",
-  messagingSenderId: "341251531099",
-  appId: "1:341251531099:web:f4263621455541ffdc3a7e",
-  measurementId: "G-ZXFC7NR9HV"
+  // IMPORTANT: Replace with your actual Firebase config
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID" // Optional
 };
+
 
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
@@ -1697,7 +1714,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const adminEmails = [
     "anishkumar18034@gmail.com",
     "anishkumar1803@gmail.com",
-    "admin2@example.com" // Add other admin emails here
+    // Add other admin emails here in lowercase
+    "admin@example.com"
   ];
 
   // Initialize typing timer
@@ -1803,15 +1821,15 @@ document.addEventListener('DOMContentLoaded', function() {
       if (user.photoURL) {
         userPhoto.src = user.photoURL;
       } else {
-        // Use a default placeholder or generate one based on UID
+        // Use a default placeholder or generate one based on UID/Name
         userPhoto.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`;
       }
 
       userName.textContent = user.displayName || 'User';
       loginPrompt.classList.add('hidden');
 
-      // Check if user is admin
-      isAdmin = adminEmails.includes(user.email);
+      // Check if user is admin (case-insensitive)
+      isAdmin = adminEmails.includes((user.email || '').toLowerCase());
 
       if (isAdmin) {
         customTestSection.classList.remove('hidden');
@@ -1917,12 +1935,20 @@ document.addEventListener('DOMContentLoaded', function() {
           alert(`${selectedLeaderboardRows.length} entries deleted successfully.`);
           selectedLeaderboardRows = [];
           closeModal(modal);
-          loadLeaderboard();
+          loadLeaderboard(); // Refresh leaderboard
         })
         .catch(error => {
           console.error('Error deleting leaderboard entries:', error);
           alert('Failed to delete entries. Please try again.');
+          closeModal(modal); // Close modal even on error
         });
+    });
+
+    // Close modal on outside click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            closeModal(modal);
+        }
     });
   });
 
@@ -1932,6 +1958,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const category = categoryFilter.value;
     let query = database.ref('attempts').orderByChild('timestamp');
 
+    // Apply time filters
     if (filter === 'week') {
       const oneWeekAgo = new Date();
       oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -1946,8 +1973,10 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(snapshot => {
         const attempts = snapshot.val();
         if (!attempts) {
+          allAttempts = []; // Ensure allAttempts is empty
           leaderboardList.innerHTML = '<p>No attempts recorded yet. Be the first to complete a test!</p>';
           leaderboardPagination.innerHTML = '';
+          updateTestNameFilter(allAttempts); // Update filter even if empty
           return;
         }
 
@@ -1956,16 +1985,9 @@ document.addEventListener('DOMContentLoaded', function() {
           ...attempt
         }));
 
-        sortAttempts(currentSortColumn, currentSortDirection);
-        updateTestNameFilter(allAttempts);
+        updateTestNameFilter(allAttempts); // Update filter dropdown before sorting/filtering
+        applyLeaderboardFiltersAndSort(); // Apply filters and sort
 
-        filteredAttempts = allAttempts.filter(attempt => {
-          const nameMatch = testNameFilter.value === 'all' || attempt.testTitle === testNameFilter.value;
-          const categoryMatch = category === 'all' || attempt.category === category;
-          return nameMatch && categoryMatch;
-        });
-
-        updatePagination();
       })
       .catch(error => {
         console.error('Error loading leaderboard:', error);
@@ -1974,77 +1996,103 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
 
-  function sortAttempts(column, direction) {
-    allAttempts.sort((a, b) => {
-      let aValue, bValue;
+  // Function to apply filters and sorting to leaderboard data
+  function applyLeaderboardFiltersAndSort() {
+      const selectedTestName = testNameFilter.value;
+      const selectedCategory = categoryFilter.value;
 
-      switch (column) {
-        case 'accuracy':
-        case 'wpm':
-        case 'totalOriginal':
-        case 'totalUser':
-        case 'halfMistakes':
-        case 'fullMistakes':
-        case 'timeTaken':
-          aValue = a.stats[column];
-          bValue = b.stats[column];
-          break;
-        case 'userName':
-          aValue = (a.userName || '').toLowerCase(); // Handle potential null/undefined
-          bValue = (b.userName || '').toLowerCase();
-          break;
-        case 'testTitle':
-          aValue = (a.testTitle || 'Custom Test').toLowerCase();
-          bValue = (b.testTitle || 'Custom Test').toLowerCase();
-          break;
-        case 'date':
-          aValue = a.timestamp;
-          bValue = b.timestamp;
-          break;
-        default:
-          return 0;
-      }
+      // Filter based on selected test name and category
+      filteredAttempts = allAttempts.filter(attempt => {
+          const nameMatch = selectedTestName === 'all' || attempt.testTitle === selectedTestName;
+          const categoryMatch = selectedCategory === 'all' || attempt.category === selectedCategory;
+          return nameMatch && categoryMatch;
+      });
 
-      // Ensure values are comparable
-      aValue = aValue ?? (typeof aValue === 'number' ? 0 : '');
-      bValue = bValue ?? (typeof bValue === 'number' ? 0 : '');
+      // Sort the filtered attempts
+      sortFilteredAttempts(currentSortColumn, currentSortDirection);
 
+      // Update the displayed table
+      updatePagination();
+  }
 
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return direction === 'asc' ? aValue - bValue : bValue - aValue;
-      } else if (typeof aValue === 'string' && typeof bValue === 'string') {
-        return direction === 'asc'
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue); // Corrected localeCompare for desc
-      } else {
-          // Handle mixed types or other cases if necessary
-          return 0;
-      }
-    });
+  // Sorts the `filteredAttempts` array
+  function sortFilteredAttempts(column, direction) {
+      filteredAttempts.sort((a, b) => {
+          let aValue, bValue;
+
+          switch (column) {
+              case 'accuracy':
+              case 'wpm':
+              case 'totalOriginal':
+              case 'totalUser':
+              case 'halfMistakes':
+              case 'fullMistakes':
+              case 'timeTaken':
+                  aValue = a.stats?.[column]; // Use optional chaining
+                  bValue = b.stats?.[column];
+                  break;
+              case 'userName':
+                  aValue = (a.userName || '').toLowerCase();
+                  bValue = (b.userName || '').toLowerCase();
+                  break;
+              case 'testTitle':
+                  aValue = (a.testTitle || 'Custom Test').toLowerCase();
+                  bValue = (b.testTitle || 'Custom Test').toLowerCase();
+                  break;
+              case 'date':
+                  aValue = a.timestamp;
+                  bValue = b.timestamp;
+                  break;
+              default:
+                  return 0;
+          }
+
+          // Ensure values are comparable, default null/undefined numbers to 0, strings to ''
+          aValue = aValue ?? (typeof aValue === 'number' ? 0 : '');
+          bValue = bValue ?? (typeof bValue === 'number' ? 0 : '');
+
+          if (typeof aValue === 'number' && typeof bValue === 'number') {
+              return direction === 'asc' ? aValue - bValue : bValue - aValue;
+          } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+              return direction === 'asc'
+                  ? aValue.localeCompare(bValue)
+                  : bValue.localeCompare(aValue);
+          } else {
+              // Handle mixed types or other cases if necessary
+              return 0;
+          }
+      });
   }
 
 
   function updateTestNameFilter(attempts) {
+    // Get unique test names from the *currently loaded* attempts (allAttempts)
     uniqueTestNames = new Set(attempts.map(attempt => attempt.testTitle || 'Custom Test'));
-    const currentTestFilter = testNameFilter.value;
+    const currentTestFilter = testNameFilter.value; // Store current selection
 
-    testNameFilter.innerHTML = '<option value="all">All Tests</option>';
-    [...uniqueTestNames].sort().forEach(testName => { // Sort test names alphabetically
+    testNameFilter.innerHTML = '<option value="all">All Tests</option>'; // Reset dropdown
+    [...uniqueTestNames].sort().forEach(testName => { // Sort names alphabetically
       const option = document.createElement('option');
       option.value = testName;
       option.textContent = testName;
       testNameFilter.appendChild(option);
     });
 
-    if (currentTestFilter !== 'all' && uniqueTestNames.has(currentTestFilter)) {
+    // Restore previous selection if it still exists in the unique names
+    if (uniqueTestNames.has(currentTestFilter)) {
       testNameFilter.value = currentTestFilter;
     } else {
+      // If previous selection is gone (e.g., due to time filter), default to 'all'
       testNameFilter.value = 'all';
     }
   }
 
   function updatePagination() {
-    const totalPages = Math.ceil(filteredAttempts.length / entriesPerPage);
+    const totalEntries = filteredAttempts.length;
+    const totalPages = Math.ceil(totalEntries / entriesPerPage);
+    // Ensure currentPage is valid
+    currentPage = Math.max(1, Math.min(currentPage, totalPages || 1));
+
     const startIdx = (currentPage - 1) * entriesPerPage;
     const endIdx = startIdx + entriesPerPage;
     const pageAttempts = filteredAttempts.slice(startIdx, endIdx);
@@ -2052,7 +2100,9 @@ document.addEventListener('DOMContentLoaded', function() {
     prevPageBtn.disabled = currentPage === 1;
     nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
 
-    leaderboardPagination.innerHTML = `Showing ${startIdx + 1}-${Math.min(endIdx, filteredAttempts.length)} of ${filteredAttempts.length} entries`;
+    leaderboardPagination.innerHTML = totalEntries > 0
+        ? `Showing ${startIdx + 1}-${Math.min(endIdx, totalEntries)} of ${totalEntries} entries`
+        : 'No entries found';
 
     renderLeaderboardTable(pageAttempts, startIdx + 1);
   }
@@ -2085,21 +2135,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     attempts.forEach((attempt, index) => {
       const date = new Date(attempt.timestamp);
+      const accuracy = attempt.stats?.accuracy ?? 0; // Default to 0 if stats or accuracy missing
       const accuracyClass =
-        attempt.stats.accuracy >= 90 ? 'accuracy-high' :
-        attempt.stats.accuracy >= 70 ? 'accuracy-medium' : 'accuracy-low';
+        accuracy >= 90 ? 'accuracy-high' :
+        accuracy >= 70 ? 'accuracy-medium' : 'accuracy-low';
 
-      const minutes = Math.floor(attempt.stats.timeTaken / 60);
-      const seconds = attempt.stats.timeTaken % 60;
+      const timeTaken = attempt.stats?.timeTaken ?? 0;
+      const minutes = Math.floor(timeTaken / 60);
+      const seconds = timeTaken % 60;
       const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 
-      // Add badges to top 3
+      // Add badges to top 3 based on the *filtered and sorted* list's rank
       let badge = '';
-      if (startRank + index === 1) {
+      const overallRank = (currentPage - 1) * entriesPerPage + index + 1; // Calculate overall rank in filtered list
+      if (overallRank === 1) {
         badge = '<span class="badge badge-gold">🥇</span>';
-      } else if (startRank + index === 2) {
+      } else if (overallRank === 2) {
         badge = '<span class="badge badge-silver">🥈</span>';
-      } else if (startRank + index === 3) {
+      } else if (overallRank === 3) {
         badge = '<span class="badge badge-bronze">🥉</span>';
       }
 
@@ -2108,19 +2161,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
       tableHTML += `
         <tr data-id="${attempt.id}" class="${selectedLeaderboardRows.includes(attempt.id) ? 'selected-row' : ''}">
-          <td>${startRank + index} ${badge}</td>
+          <td>${overallRank} ${badge}</td>
           <td class="leaderboard-user">
             <img src="${userPhotoSrc}" alt="${attempt.userName || 'User'}">
             <span>${attempt.userName || 'Anonymous'}</span>
           </td>
           <td>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
-          <td class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</td>
-          <td>${attempt.stats.wpm}</td>
-          <td>${attempt.stats.totalOriginal}</td>
-          <td>${attempt.stats.totalUser}</td>
+          <td class="accuracy-cell ${accuracyClass}">${accuracy.toFixed(1)}%</td>
+          <td>${attempt.stats?.wpm ?? 0}</td>
+          <td>${attempt.stats?.totalOriginal ?? 0}</td>
+          <td>${attempt.stats?.totalUser ?? 0}</td>
           <td>${timeFormatted}</td>
-          <td>${attempt.stats.halfMistakes}</td>
-          <td>${attempt.stats.fullMistakes}</td>
+          <td>${attempt.stats?.halfMistakes ?? 0}</td>
+          <td>${attempt.stats?.fullMistakes ?? 0}</td>
           <td>${date.toLocaleDateString()}</td>
         </tr>
       `;
@@ -2136,13 +2189,14 @@ document.addEventListener('DOMContentLoaded', function() {
   function makeTableSortable() {
     const headers = document.querySelectorAll('.leaderboard-list th[data-column]');
     headers.forEach(header => {
-      header.style.cursor = 'pointer';
-      // Remove existing listeners to prevent duplicates
+      // Clear previous listeners by cloning (simple approach)
       const newHeader = header.cloneNode(true);
       header.parentNode.replaceChild(newHeader, header);
+      newHeader.style.cursor = 'pointer'; // Ensure cursor style is reapplied
 
       newHeader.addEventListener('click', () => {
         const column = newHeader.getAttribute('data-column');
+        if (!column || column === 'rank') return; // Don't sort by rank
 
         if (currentSortColumn === column) {
           currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
@@ -2151,13 +2205,8 @@ document.addEventListener('DOMContentLoaded', function() {
           currentSortDirection = 'desc'; // Default to desc for new column
         }
 
-        sortAttempts(column, currentSortDirection);
-        // Re-filter based on current filters after sorting
-        filteredAttempts = allAttempts.filter(attempt => {
-            const nameMatch = testNameFilter.value === 'all' || attempt.testTitle === testNameFilter.value;
-            const categoryMatch = categoryFilter.value === 'all' || attempt.category === categoryFilter.value;
-            return nameMatch && categoryMatch;
-        });
+        // Sort the currently filtered data and update display
+        sortFilteredAttempts(currentSortColumn, currentSortDirection);
         currentPage = 1; // Reset to first page after sorting
         updatePagination();
 
@@ -2165,7 +2214,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentHeaders = document.querySelectorAll('.leaderboard-list th[data-column]');
         currentHeaders.forEach(h => {
           h.classList.remove('sorted-asc', 'sorted-desc');
-          if (h.getAttribute('data-column') === column) {
+          if (h.getAttribute('data-column') === currentSortColumn) {
             h.classList.add(`sorted-${currentSortDirection}`);
           }
         });
@@ -2178,13 +2227,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    // Add row selection
+    // Add row selection (needs to be re-applied after table render)
     const rows = document.querySelectorAll('.leaderboard-list tbody tr');
     rows.forEach(row => {
       row.classList.add('leaderboard-row-selectable');
       row.addEventListener('click', (e) => {
-        // Don't toggle selection if clicking on a link or button
-        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+        // Don't toggle selection if clicking on a link or button inside the row
+        if (e.target.closest('a') || e.target.closest('button')) {
           return;
         }
 
@@ -2201,9 +2250,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+
   function updateDeleteButtonState() {
     deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0;
+    deleteLeaderboardBtn.style.opacity = deleteLeaderboardBtn.disabled ? 0.5 : 1;
+    deleteLeaderboardBtn.style.cursor = deleteLeaderboardBtn.disabled ? 'not-allowed' : 'pointer';
   }
+
 
   // Auto-delete old data function
   function cleanupOldData() {
@@ -2211,21 +2264,26 @@ document.addEventListener('DOMContentLoaded', function() {
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
     const timestampThreshold = sixMonthsAgo.getTime();
 
-    database.ref('attempts').once('value').then(snapshot => {
-      const updates = {};
-      snapshot.forEach(child => {
-        if (child.val().timestamp < timestampThreshold) {
-          updates[child.key] = null;
+    database.ref('attempts').orderByChild('timestamp').endAt(timestampThreshold).once('value').then(snapshot => {
+        const updates = {};
+        let count = 0;
+        snapshot.forEach(child => {
+            updates[child.key] = null;
+            count++;
+        });
+        if (count > 0) {
+            console.log(`Cleaning up ${count} old leaderboard entries...`);
+            database.ref('attempts').update(updates)
+                .then(() => console.log("Old entries cleaned up."))
+                .catch(err => console.error("Error cleaning up old entries:", err));
+        } else {
+            console.log("No old leaderboard entries to clean up.");
         }
-      });
-      if (Object.keys(updates).length > 0) {
-          console.log(`Cleaning up ${Object.keys(updates).length} old leaderboard entries...`);
-          database.ref('attempts').update(updates)
-            .then(() => console.log("Old entries cleaned up."))
-            .catch(err => console.error("Error cleaning up old entries:", err));
-      }
+    }).catch(error => {
+        console.error("Error fetching old leaderboard entries for cleanup:", error);
     });
-  }
+}
+
 
   // Run cleanup weekly
   setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
@@ -2238,12 +2296,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     setTimeout(() => {
       if (originalTextEl.value.trim() !== '' && !testActive) {
-        originalTextGroup.classList.add('hidden');
-        timerOptions.classList.remove('hidden');
+        originalTextGroup.classList.remove('hidden'); // Show original text group initially
+        timerOptions.classList.remove('hidden'); // Show timer options
         timerButtons.forEach(btn => {
           btn.disabled = false;
           btn.style.opacity = '1';
         });
+        // Hide the original text group *after* selecting a timer or test
       }
     }, 0);
   });
@@ -2255,13 +2314,22 @@ document.addEventListener('DOMContentLoaded', function() {
       startTimer(minutes);
       timerOptions.classList.add('hidden');
       timerDisplay.classList.remove('hidden');
+      originalTextGroup.classList.add('hidden'); // Hide original text when timer starts
       testActive = true;
+      startTime = new Date(); // Reset/start typing timer
     });
   });
 
   // Compare button click handler
   compareBtn.addEventListener('click', function() {
-    stopTimer();
+    if (!testActive) { // If timer wasn't used, calculate time from first input
+        if (!startTime) { // If user didn't type anything
+           alert("Please type your transcription before comparing.");
+           return;
+        }
+        // Time is calculated inside compareParagraphs if startTime is set
+    }
+    stopTimer(); // Stop timer if it was running
     compareTexts();
     disableTimerOptions();
   });
@@ -2277,16 +2345,40 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Close results button click handler
   closeResultsBtn.addEventListener('click', function() {
+    // Reset UI elements to initial state
+    resultsSection.classList.add('hidden');
+    fullTextSection.classList.add('hidden');
+    originalTextEl.value = '';
+    userTextEl.value = '';
+    userTextEl.readOnly = false; // Unlock textarea
+    userTextEl.classList.remove('locked-textarea');
+    compareBtn.disabled = false; // Enable compare button
+    closeResultsBtn.classList.add('hidden');
+    originalTextGroup.classList.remove('hidden'); // Show original text input
+    timerOptions.classList.add('hidden'); // Hide timer options
+    timerDisplay.classList.add('hidden'); // Hide timer display
+    timerDisplay.classList.remove('timer-ended'); // Reset timer display style
+    testActive = false; // Reset test state
+    startTime = null; // Reset typing timer
+
+    // Remove selected state from test cards
+    document.querySelectorAll('.test-card.selected').forEach(card => {
+        card.classList.remove('selected');
+    });
+
+    // Remove video player if present
     const existingVideo = document.getElementById('testVideoPlayer');
     if (existingVideo) existingVideo.remove();
-    location.reload(); // Reload the page to reset everything
+
+    // Scroll to top
+    window.scrollTo(0, 0);
   });
 
   function startTimer(minutes) {
     endTime = new Date();
     endTime.setMinutes(endTime.getMinutes() + minutes);
 
-    updateTimerDisplay();
+    updateTimerDisplay(); // Initial display
 
     timerInterval = setInterval(() => {
       updateTimerDisplay();
@@ -2296,7 +2388,7 @@ document.addEventListener('DOMContentLoaded', function() {
         stopTimer();
         timerDisplay.classList.add('timer-ended');
         timerDisplay.textContent = "TIME'S UP!";
-        compareTexts();
+        compareTexts(); // Automatically compare when time is up
         lockTest();
         disableTimerOptions();
       }
@@ -2305,7 +2397,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function stopTimer() {
     clearInterval(timerInterval);
-    timerDisplay.classList.add('hidden');
+    // Don't hide timer display here, let compareTexts handle UI changes
   }
 
   function disableTimerOptions() {
@@ -2320,7 +2412,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const now = new Date();
     const remaining = endTime - now;
 
-    if (remaining <= 0) return;
+    if (remaining <= 0) {
+        timerDisplay.textContent = "00:00"; // Show 00:00 when time runs out
+        return;
+    }
 
     const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
@@ -2332,58 +2427,84 @@ document.addEventListener('DOMContentLoaded', function() {
     userTextEl.readOnly = true;
     userTextEl.classList.add('locked-textarea');
     compareBtn.disabled = true;
-    closeResultsBtn.classList.remove('hidden');
+    closeResultsBtn.classList.remove('hidden'); // Show close button after comparison
   }
 
   function compareTexts() {
     const originalText = originalTextEl.value;
     const userText = userTextEl.value;
 
-    if (!originalText || !userText) {
-      alert('Please enter both original text and your transcription.');
+    if (!originalText) {
+      alert('Original text is missing. Please select a test or paste text.');
       return;
     }
+     if (!userText) {
+      alert('Please enter your transcription.');
+      return;
+    }
+
 
     let testTitle = "Custom Test";
     let testCategory = "general"; // Default category for custom tests
     const selectedTestCard = document.querySelector('.test-card.selected');
     if (selectedTestCard) {
-        testTitle = selectedTestCard.querySelector('h4').textContent.split('<span')[0].trim(); // Get title before badge
+        // Extract title safely, removing potential badge HTML
+        const titleElement = selectedTestCard.querySelector('h4');
+        testTitle = titleElement ? titleElement.childNodes[0].nodeValue.trim() : 'Selected Test';
         testCategory = selectedTestCard.dataset.category || "general";
     }
+
+    // Calculate time taken if timer wasn't used
+    let timeTakenSeconds;
+    if (testActive && endTime) { // Timer was used and finished/stopped
+        const testDurationMillis = endTime.getTime() - (endTime.getTime() - (parseInt(timerDisplay.textContent.split(':')[0]) * 60 + parseInt(timerDisplay.textContent.split(':')[1])) * 1000); // Approx start time
+        timeTakenSeconds = Math.round((new Date().getTime() - testDurationMillis) / 1000);
+        // Ensure time taken doesn't exceed the timer limit if stopped early
+        const timerMinutes = parseInt(document.querySelector('.timer-option[disabled]')?.dataset.minutes || '0');
+        if (timerMinutes > 0) {
+            timeTakenSeconds = Math.min(timeTakenSeconds, timerMinutes * 60);
+        }
+    } else if (startTime) { // Timer not used, but user typed
+        timeTakenSeconds = Math.round((new Date() - startTime) / 1000);
+    } else { // Should not happen due to checks, but default
+        timeTakenSeconds = 0;
+    }
+
 
     const originalWords = processText(originalText);
     const userWords = processText(userText);
 
-    const comparison = compareParagraphs(originalWords, userWords);
+    // Pass calculated timeTakenSeconds to comparison function
+    const comparison = compareParagraphs(originalWords, userWords, timeTakenSeconds);
 
     displayComparison(comparison);
     displayStats(comparison.stats);
-    displayFeedback(comparison.stats, originalWords, userWords);
+    displayFeedback(comparison.stats, originalWords, userWords); // Keep basic feedback for now
     displayFullTexts(originalText, userText);
 
     const now = new Date();
     resultDateEl.textContent = now.toLocaleString();
 
-    showResults();
+    showResults(); // Show the results section
+    lockTest(); // Lock input after comparison
 
-    if (testActive) {
-      lockTest();
-    }
-
+    // Save attempt to Firebase if user is logged in
     const user = auth.currentUser;
     if (user) {
       const attemptData = {
-        userName: user.displayName,
+        userName: user.displayName || 'Anonymous',
         userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`,
         testTitle: testTitle,
         category: testCategory,
-        stats: comparison.stats,
+        stats: comparison.stats, // Save calculated stats
         timestamp: Date.now()
       };
 
       database.ref('attempts').push(attemptData)
-        .then(() => loadLeaderboard())
+        .then(() => {
+            console.log("Attempt saved successfully.");
+            loadLeaderboard(); // Refresh leaderboard
+        })
         .catch(error => console.error('Error saving attempt:', error));
     }
   }
@@ -2400,170 +2521,195 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function downloadAsPdf() {
     const resultsElement = document.getElementById('results');
+    // Temporarily remove buttons before capture
+    const downloadBtn = resultsElement.querySelector('#downloadPdfBtn');
+    const closeBtn = document.getElementById('closeResultsBtn'); // Assuming close button is outside results section now
+    const originalDownloadDisplay = downloadBtn.style.display;
+    const originalCloseDisplay = closeBtn.style.display;
+    downloadBtn.style.display = 'none';
+    closeBtn.style.display = 'none'; // Hide close button too if needed
 
     html2canvas(resultsElement, {
-      scale: 1.5,
+      scale: 1.5, // Increase scale for better resolution
       useCORS: true,
-      allowTaint: true
+      allowTaint: true,
+      logging: false // Reduce console noise
     }).then(canvas => {
-      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      // Restore buttons after capture
+      downloadBtn.style.display = originalDownloadDisplay;
+      closeBtn.style.display = originalCloseDisplay;
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG with quality setting
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 295;
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = pdfWidth - 20; // Add some margin
       const imgHeight = canvas.height * imgWidth / canvas.width;
       let heightLeft = imgHeight;
-      let position = 0;
+      let position = 10; // Top margin
 
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+      heightLeft -= (pdfHeight - 20); // Account for top/bottom margin
 
       while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
+        position = heightLeft - imgHeight + 10; // Adjust position for next page
         pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+        heightLeft -= (pdfHeight - 20);
       }
 
-      pdf.save('transcription-comparison.pdf');
+      // Generate filename
+      const dateStr = new Date().toISOString().split('T')[0];
+      const selectedTestCard = document.querySelector('.test-card.selected');
+      const testTitle = selectedTestCard ? selectedTestCard.querySelector('h4').childNodes[0].nodeValue.trim() : 'CustomTest';
+      const filename = `StenoWarriors_${testTitle.replace(/[^a-z0-9]/gi, '_')}_${dateStr}.pdf`;
+
+      pdf.save(filename);
+    }).catch(err => {
+        // Restore buttons even if error occurs
+        downloadBtn.style.display = originalDownloadDisplay;
+        closeBtn.style.display = originalCloseDisplay;
+        console.error("Error generating PDF:", err);
+        alert("Failed to generate PDF. See console for details.");
     });
   }
 
+
   function processText(text) {
+    // Normalize line endings, remove extra spaces, then split
     return text
+      .replace(/\r\n|\r/g, '\n') // Normalize line endings to \n
       .replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/[\u2018\u2019]/g, "'") // Normalize apostrophes
+      .replace(/[\u201C\u201D]/g, '"') // Normalize quotes
+      .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with single space
       .trim()
-      .split(/\s+/); // Split by whitespace
+      .split(' '); // Split by single space
   }
 
+
   function isSimilar(wordA, wordB) {
-    // Basic similarity check (case-insensitive, ignores punctuation)
-    const cleanA = wordA.toLowerCase().replace(/[.,!?;:]/g, '');
-    const cleanB = wordB.toLowerCase().replace(/[.,!?;:]/g, '');
-    return cleanA === cleanB; // Simple equality check for now
+    // Improved similarity: case-insensitive, ignores common punctuation
+    const cleanA = wordA.toLowerCase().replace(/[.,!?;:"']/g, '');
+    const cleanB = wordB.toLowerCase().replace(/[.,!?;:"']/g, '');
+    // Consider them similar if they are identical after cleaning
+    return cleanA === cleanB;
   }
+
 
   function arraysAreEqual(arr1, arr2) {
     if (arr1.length !== arr2.length) return false;
     for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) return false;
+      // Use isSimilar for word comparison within arrays
+      if (!isSimilar(arr1[i], arr2[i])) return false;
     }
     return true;
   }
 
-  function compareParagraphs(paragraphA, paragraphB) {
-    let comparedText = '';
-    let numHalfDiff = 0; // Misspellings, capitalization
-    let numFullDiff = 0; // Omissions, additions, completely wrong words
-    let wordAIndex = 0;
-    let wordBIndex = 0;
 
-    while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
-        const wordA = paragraphA[wordAIndex] || '';
-        const wordB = paragraphB[wordBIndex] || '';
-        const cleanWordA = wordA.replace(/[.,!?;:]/g, ''); // Remove punctuation for comparison
-        const cleanWordB = wordB.replace(/[.,!?;:]/g, '');
+  // Updated compareParagraphs function to accept timeTakenSeconds
+  function compareParagraphs(paragraphA, paragraphB, timeTakenSeconds) {
+    let comparedHtml = '';
+    let halfMistakes = 0;
+    let fullMistakes = 0;
+    let correctWords = 0;
+    let idxA = 0;
+    let idxB = 0;
 
-        if (wordAIndex >= paragraphA.length) { // User typed extra words at the end
-            comparedText += `<span class="addition">${wordB}</span> `;
-            wordBIndex++;
-            numFullDiff++;
-        } else if (wordBIndex >= paragraphB.length) { // User missed words at the end
-            comparedText += `<span class="missing">${wordA}</span> `;
-            wordAIndex++;
-            numFullDiff++;
-        } else if (cleanWordA === cleanWordB) { // Exact match (ignoring punctuation)
-            comparedText += `<span class="correct">${wordA}</span> `; // Display original word with punctuation
-            wordAIndex++;
-            wordBIndex++;
-        } else if (cleanWordA.toLowerCase() === cleanWordB.toLowerCase()) { // Capitalization difference
-            // Display original word, strike through user's word
-            comparedText += `<span class="capitalization">${wordA}</span> <span class="capitalization-strike">${wordB}</span> `;
-            wordAIndex++;
-            wordBIndex++;
-            numHalfDiff++;
+    const lenA = paragraphA.length;
+    const lenB = paragraphB.length;
+
+    while (idxA < lenA || idxB < lenB) {
+        const wordA = paragraphA[idxA] || '';
+        const wordB = paragraphB[idxB] || '';
+        const cleanA = wordA.toLowerCase().replace(/[.,!?;:"']/g, '');
+        const cleanB = wordB.toLowerCase().replace(/[.,!?;:"']/g, '');
+
+        if (idxA >= lenA) { // Extra words in user text
+            comparedHtml += `<span class="addition">${wordB}</span> `;
+            fullMistakes++;
+            idxB++;
+        } else if (idxB >= lenB) { // Missing words in user text
+            comparedHtml += `<span class="missing">${wordA}</span> `;
+            fullMistakes++;
+            idxA++;
+        } else if (cleanA === cleanB) { // Correct word (case-insensitive, punctuation ignored)
+            if (wordA !== wordB) { // Check for exact match including case/punctuation
+                // Mark as capitalization/punctuation difference (half mistake)
+                comparedHtml += `<span class="capitalization">${wordA}</span><span class="capitalization-strike">${wordB}</span> `;
+                halfMistakes++;
+            } else {
+                comparedHtml += `<span class="correct">${wordA}</span> `;
+                correctWords++;
+            }
+            idxA++;
+            idxB++;
         } else {
-            // Look ahead slightly to see if we can resync
-            let foundMatch = false;
-            // Look ahead in user text for original word
-            for (let lookAheadB = 1; lookAheadB <= 3 && (wordBIndex + lookAheadB) < paragraphB.length; lookAheadB++) {
-                if (cleanWordA === paragraphB[wordBIndex + lookAheadB].replace(/[.,!?;:]/g, '')) {
-                    // User added words
-                    for (let i = 0; i < lookAheadB; i++) {
-                        comparedText += `<span class="addition">${paragraphB[wordBIndex + i]}</span> `;
-                        numFullDiff++;
-                    }
-                    comparedText += `<span class="correct">${wordA}</span> `;
-                    wordAIndex++;
-                    wordBIndex += lookAheadB + 1;
-                    foundMatch = true;
-                    break;
-                }
+            // Look ahead for synchronization (simple version)
+            let lookAheadA = idxA + 1;
+            let lookAheadB = idxB + 1;
+            let foundSync = false;
+
+            // Look ahead in B for wordA
+            if (lookAheadB < lenB && isSimilar(wordA, paragraphB[lookAheadB])) {
+                comparedHtml += `<span class="addition">${wordB}</span> `; // B[idxB] is extra
+                fullMistakes++;
+                idxB++; // Consume the extra word in B
+                foundSync = true; // Will match A[idxA] with B[idxB+1] in next iteration
+            }
+            // Look ahead in A for wordB
+            else if (lookAheadA < lenA && isSimilar(paragraphA[lookAheadA], wordB)) {
+                comparedHtml += `<span class="missing">${wordA}</span> `; // A[idxA] is missing
+                fullMistakes++;
+                idxA++; // Consume the missing word in A
+                foundSync = true; // Will match A[idxA+1] with B[idxB] in next iteration
             }
 
-            if (!foundMatch) {
-                // Look ahead in original text for user word
-                for (let lookAheadA = 1; lookAheadA <= 3 && (wordAIndex + lookAheadA) < paragraphA.length; lookAheadA++) {
-                    if (cleanWordB === paragraphA[wordAIndex + lookAheadA].replace(/[.,!?;:]/g, '')) {
-                        // User missed words
-                        for (let i = 0; i < lookAheadA; i++) {
-                            comparedText += `<span class="missing">${paragraphA[wordAIndex + i]}</span> `;
-                            numFullDiff++;
-                        }
-                        comparedText += `<span class="correct">${wordB}</span> `; // Display user word as correct in this context
-                        wordAIndex += lookAheadA + 1;
-                        wordBIndex++;
-                        foundMatch = true;
-                        break;
-                    }
-                }
-            }
-
-            if (!foundMatch) {
-                // No easy resync found, assume spelling error or wrong word
-                // Simple Levenshtein distance could be added here for better spelling detection
-                // For now, mark original as missing, user as added (full mistake)
-                comparedText += `<span class="missing">${wordA}</span> <span class="addition">${wordB}</span> `;
-                wordAIndex++;
-                wordBIndex++;
-                numFullDiff++; // Treat as full mistake for now
+            if (!foundSync) {
+                // No simple sync found, mark as full mistake (spelling/wrong word)
+                comparedHtml += `<span class="missing">${wordA}</span><span class="addition">${wordB}</span> `;
+                fullMistakes++;
+                idxA++;
+                idxB++;
             }
         }
     }
 
+    // Calculate Stats
+    const totalOriginalWords = lenA;
+    const totalUserWords = lenB;
+    const keystrokes = userTextEl.value.length; // Get current length
 
-    const keystrokesCount = userTextEl.value.length;
-    // Calculate error percentage based on original text length
-    const errorPercentage = paragraphA.length > 0 ?
-      Math.min(100, ((numHalfDiff / 2) + numFullDiff) / paragraphA.length * 100) : 0;
-    const accuracyPercentage = Math.max(0, 100 - errorPercentage);
+    // Accuracy calculation: (Correct Words - Half Mistakes / 2) / Total Original Words
+    // Ensure accuracy is not negative and capped at 100%
+    let accuracy = 0;
+    if (totalOriginalWords > 0) {
+        accuracy = Math.max(0, (correctWords - (halfMistakes / 2)) / totalOriginalWords * 100);
+        accuracy = Math.min(100, accuracy); // Cap at 100%
+    }
 
-    const endTime = new Date();
-    const timeTakenSeconds = startTime ? Math.round((endTime - startTime) / 1000) : 0;
+    const errorRate = 100 - accuracy;
 
+    // WPM Calculation: (Keystrokes / 5) / Time in Minutes
     const typingTimeMinutes = timeTakenSeconds / 60;
-    // Calculate WPM based on user's typed words, adjusted for accuracy
-    // A common formula: (Total Characters Typed / 5) / Time in Minutes
-    // Or: (Correct Words Typed) / Time in Minutes
-    // Let's use a simpler WPM based on total user words for now
-    const wordsTyped = paragraphB.length;
-    const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
+    const wpm = typingTimeMinutes > 0 ? Math.round((keystrokes / 5) / typingTimeMinutes) : 0;
+
 
     return {
-      html: comparedText.trim(), // Trim trailing space
-      stats: {
-        totalOriginal: paragraphA.length,
-        totalUser: paragraphB.length,
-        halfMistakes: numHalfDiff,
-        fullMistakes: numFullDiff,
-        keystrokes: keystrokesCount,
-        wpm: wpm,
-        accuracy: accuracyPercentage,
-        errorRate: errorPercentage,
-        timeTaken: timeTakenSeconds
-      }
+        html: comparedHtml.trim(),
+        stats: {
+            totalOriginal: totalOriginalWords,
+            totalUser: totalUserWords,
+            halfMistakes: halfMistakes,
+            fullMistakes: fullMistakes,
+            keystrokes: keystrokes,
+            wpm: wpm,
+            accuracy: accuracy,
+            errorRate: errorRate,
+            timeTaken: timeTakenSeconds // Use the passed-in value
+        }
     };
-  }
+}
 
 
   function displayComparison(comparison) {
@@ -2668,29 +2814,35 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     } catch (e) {
-        console.warn("Invalid video URL format:", url);
+        console.warn("Could not parse video URL:", url, e);
+        // Attempt to treat as direct link if URL parsing fails or it's not YouTube
     }
 
 
     if (videoId) {
+      // Use youtube-nocookie.com for enhanced privacy
       videoContainer.innerHTML = `
-        <iframe src="https://www.youtube.com/embed/${videoId}"
+        <iframe src="https://www.youtube-nocookie.com/embed/${videoId}"
                 frameborder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen></iframe>
       `;
     } else {
-      // Assume direct video link if not YouTube
+      // Assume direct video link
       videoContainer.innerHTML = `
-        <video controls style="width:100%; height: 100%; position: absolute; top: 0; left: 0;">
+        <video controls style="width:100%; height: 100%; position: absolute; top: 0; left: 0; border-radius: 8px;">
           <source src="${url}" type="video/mp4">
-          Your browser does not support the video tag or the video format.
+          <source src="${url}" type="video/webm">
+          <source src="${url}" type="video/ogg">
+          Your browser does not support the video tag or the video format. Try a direct link: <a href="${url}" target="_blank">Video Link</a>
         </video>
       `;
     }
 
-    originalTextGroup.insertAdjacentElement('afterend', videoContainer);
+    // Insert video container *after* the original text group wrapper
+    originalTextGroup.parentNode.insertBefore(videoContainer, originalTextGroup.nextSibling);
   }
+
 
   function loadGlobalTests() {
     const category = testCategoryFilter.value;
@@ -2736,7 +2888,16 @@ document.addEventListener('DOMContentLoaded', function() {
           // Default user photo if none provided
           const userPhotoSrc = test.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(test.userName || 'User')}&background=random&color=fff`;
 
+          // Admin controls HTML (Edit and Delete buttons)
+          const adminControlsHTML = isAdmin ? `
+            <div class="test-card-admin-controls">
+                <button class="edit-test-btn" data-testid="${test.id}" title="Edit Test">✏️</button>
+                <button class="delete-test-btn" data-testid="${test.id}" title="Delete Test">🗑️</button>
+            </div>
+          ` : '';
+
           testCard.innerHTML = `
+            ${adminControlsHTML}
             <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
             <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
             ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
@@ -2744,13 +2905,12 @@ document.addEventListener('DOMContentLoaded', function() {
               <img src="${userPhotoSrc}" alt="${test.userName || 'User'}">
               <span>Added by ${test.userName || 'Anonymous'}</span>
             </div>
-            ${isAdmin ? `<button class="edit-test-btn" data-testid="${test.id}">Edit</button>` : ''}
           `;
 
-          // Add click listener to the card itself (excluding the edit button)
+          // Add click listener to the card itself (excluding admin buttons)
           testCard.addEventListener('click', (e) => {
-            // Prevent card selection if the edit button was clicked
-            if (e.target.classList.contains('edit-test-btn')) {
+            // Prevent card selection if an admin button was clicked
+            if (e.target.closest('.test-card-admin-controls')) {
                 return;
             }
 
@@ -2760,12 +2920,23 @@ document.addEventListener('DOMContentLoaded', function() {
             testCard.classList.add('selected');
 
             originalTextEl.value = test.text;
-            originalTextGroup.classList.add('hidden'); // Hide original text input
+            originalTextGroup.classList.remove('hidden'); // Show original text initially when selected
             timerOptions.classList.remove('hidden'); // Show timer options
             timerButtons.forEach(btn => { // Enable timer buttons
               btn.disabled = false;
               btn.style.opacity = '1';
             });
+            userTextEl.value = ''; // Clear user text when selecting a new test
+            userTextEl.readOnly = false; // Ensure user text is editable
+            userTextEl.classList.remove('locked-textarea');
+            compareBtn.disabled = false; // Ensure compare button is enabled
+            resultsSection.classList.add('hidden'); // Hide results section
+            fullTextSection.classList.add('hidden'); // Hide full text section
+            closeResultsBtn.classList.add('hidden'); // Hide close button
+            timerDisplay.classList.add('hidden'); // Hide timer display
+            timerDisplay.classList.remove('timer-ended');
+            testActive = false; // Reset test active state
+            startTime = null; // Reset typing timer
 
             // Embed video if URL exists
             if (test.videoUrl) {
@@ -2777,12 +2948,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           });
 
-          // Add click listener specifically for the edit button (if it exists)
+          // Add click listeners specifically for the admin buttons (if they exist)
           const editButton = testCard.querySelector('.edit-test-btn');
           if (editButton) {
               editButton.addEventListener('click', (e) => {
-                  e.stopPropagation(); // Prevent the card click listener from firing
+                  e.stopPropagation(); // Prevent card click
                   showEditModal(test); // Pass the full test object
+              });
+          }
+          const deleteButton = testCard.querySelector('.delete-test-btn');
+          if (deleteButton) {
+              deleteButton.addEventListener('click', (e) => {
+                  e.stopPropagation(); // Prevent card click
+                  confirmAndDeleteTest(test.id, test.title); // Pass ID and title for confirmation message
               });
           }
 
@@ -2800,6 +2978,49 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   }
 
+  // Function to show confirmation and delete a specific test
+  function confirmAndDeleteTest(testId, testTitle) {
+      const modal = document.createElement('div');
+      modal.className = 'modal show';
+      modal.innerHTML = `
+          <div class="modal-content">
+              <h3>Confirm Deletion</h3>
+              <p>Are you sure you want to delete the test titled "<strong>${testTitle}</strong>"? This action cannot be undone.</p>
+              <div class="modal-buttons">
+                  <button id="cancelDeleteTest" class="secondary-btn">Cancel</button>
+                  <button id="confirmDeleteTest" class="danger-btn">Delete Test</button>
+              </div>
+          </div>
+      `;
+      document.body.appendChild(modal);
+
+      modal.querySelector('#cancelDeleteTest').addEventListener('click', () => {
+          closeModal(modal);
+      });
+
+      modal.querySelector('#confirmDeleteTest').addEventListener('click', () => {
+          database.ref('tests').child(testId).remove()
+              .then(() => {
+                  alert(`Test "${testTitle}" deleted successfully.`);
+                  closeModal(modal);
+                  loadGlobalTests(); // Refresh the tests list
+              })
+              .catch(error => {
+                  console.error('Error deleting test:', error);
+                  alert('Failed to delete test. Please try again.');
+                  closeModal(modal);
+              });
+      });
+
+      // Close modal on outside click
+      modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+              closeModal(modal);
+          }
+      });
+  }
+
+
   // Function to show the edit modal
   function showEditModal(test) {
       editTestId.value = test.id;
@@ -2808,13 +3029,24 @@ document.addEventListener('DOMContentLoaded', function() {
       editTestText.value = test.text;
       editTestVideoUrl.value = test.videoUrl || ''; // Handle null/undefined videoUrl
 
-      // Trigger reflow for labels if needed (especially for pre-filled fields)
-      [editTestTitle, editTestCategory, editTestText, editTestVideoUrl].forEach(el => {
-          const label = el.nextElementSibling;
-          if (el.value && label) {
+      // Manually trigger label animation for pre-filled fields in modal
+      [editTestTitle, editTestCategory, editTestText, editTestVideoUrl].forEach(input => {
+          const label = input.labels ? input.labels[0] : input.previousElementSibling; // Find associated label
+          if (input.value && label) {
               label.style.top = '-0.6rem';
+              label.style.left = '0.8rem';
               label.style.fontSize = '0.8rem';
               label.style.color = 'var(--primary)';
+              label.style.background = document.body.classList.contains('dark-mode') ? '#1e1e1e' : 'white'; // Match background
+              label.style.padding = '0 0.5rem';
+          } else if (label) {
+              // Reset label style if field is empty (though unlikely when editing)
+              label.style.top = '';
+              label.style.left = '';
+              label.style.fontSize = '';
+              label.style.color = '';
+              label.style.background = '';
+              label.style.padding = '';
           }
       });
 
@@ -2822,19 +3054,17 @@ document.addEventListener('DOMContentLoaded', function() {
       editTestModal.classList.add('show');
   }
 
-  // Function to close any modal
+  // Function to close any modal and clean up dynamically created ones
   function closeModal(modalElement) {
       modalElement.classList.remove('show');
-      // Optional: Add a small delay before removing from DOM if needed for transitions
-      setTimeout(() => {
-          if (modalElement.parentNode === document.body) {
-             // Only remove if it's a direct child of body (to avoid errors)
-             // and if it wasn't the predefined edit modal
-             if (modalElement.id !== 'editTestModal') {
-                document.body.removeChild(modalElement);
-             }
-          }
-      }, 300); // Match transition duration
+      // Use transitionend event to remove dynamically created modals after fade out
+      if (modalElement.id !== 'editTestModal') { // Don't remove the predefined edit modal
+          modalElement.addEventListener('transitionend', () => {
+              if (modalElement.parentNode === document.body) {
+                  document.body.removeChild(modalElement);
+              }
+          }, { once: true }); // Listener removes itself after firing once
+      }
   }
 
 
@@ -2871,7 +3101,7 @@ document.addEventListener('DOMContentLoaded', function() {
           });
   });
 
-  // Close modal if clicking outside the content
+  // Close edit modal if clicking outside the content
   editTestModal.addEventListener('click', (e) => {
       if (e.target === editTestModal) {
           closeModal(editTestModal);
@@ -2888,44 +3118,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const carouselContainer = document.querySelector('.carousel-container');
 
     if (!track || !dotsContainer || !prevBtn || !nextBtn || !carouselContainer || cards.length === 0) {
-        // Hide controls if no cards or elements missing
+        // Hide controls and dots if no cards or elements missing
         prevBtn.style.display = 'none';
         nextBtn.style.display = 'none';
         dotsContainer.style.display = 'none';
+        track.innerHTML = track.innerHTML || '<p>No tests available.</p>'; // Show message if track was empty
         return;
     }
 
     // Ensure controls are visible if there are cards
     prevBtn.style.display = 'flex';
     nextBtn.style.display = 'flex';
-    dotsContainer.style.display = 'flex';
+    // Dots visibility handled in createDots
 
-
-    let cardWidth = cards[0].offsetWidth + parseInt(getComputedStyle(track).gap || '16px');
+    let cardWidth = 0; // Will be calculated
     let currentIndex = 0;
-    let visibleCards = getVisibleCards();
-    let dotCount = Math.ceil(cards.length / visibleCards);
+    let visibleCards = 1; // Default, will be calculated
+    let dotCount = 1; // Default, will be calculated
 
-    // Recalculate card width on resize potentially
-    function recalculateCardWidth() {
+    function calculateDimensions() {
         if (cards.length > 0) {
-            cardWidth = cards[0].offsetWidth + parseInt(getComputedStyle(track).gap || '16px');
+            // Calculate card width including margin/gap
+            const cardStyle = getComputedStyle(cards[0]);
+            const trackStyle = getComputedStyle(track);
+            const cardMargin = parseFloat(cardStyle.marginLeft) + parseFloat(cardStyle.marginRight);
+            const trackGap = parseFloat(trackStyle.gap) || 16; // Use gap, fallback to 1rem (16px)
+            cardWidth = cards[0].offsetWidth + Math.max(cardMargin, trackGap); // Use the larger of margin or gap
+
+            // Calculate visible cards based on container width
+            const containerWidth = carouselContainer.offsetWidth;
+            visibleCards = Math.max(1, Math.floor(containerWidth / cardWidth));
+
+            // Calculate dot count
+            dotCount = Math.ceil(cards.length / visibleCards);
+        } else {
+            // Reset if no cards
+            cardWidth = 0;
+            visibleCards = 1;
+            dotCount = 0;
         }
     }
 
-    function getVisibleCards() {
-      const containerWidth = carouselContainer.offsetWidth;
-      // Estimate based on min-width or flex-basis, fallback needed
-      const cardMinWidth = 280 + 16; // From CSS min-width + gap
-      let count = Math.floor(containerWidth / cardMinWidth);
-      return Math.max(1, count); // Ensure at least 1 is visible
-    }
 
     function createDots() {
         dotsContainer.innerHTML = ''; // Clear existing dots
-        dotCount = Math.ceil(cards.length / visibleCards);
         if (dotCount <= 1) {
-            dotsContainer.style.display = 'none'; // Hide dots if only one page
+            dotsContainer.style.display = 'none'; // Hide dots if only one page or no cards
             return;
         }
         dotsContainer.style.display = 'flex'; // Show dots if more than one page
@@ -2942,7 +3180,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateCarousel() {
-      // Ensure currentIndex is within bounds
+      // Ensure currentIndex is within bounds after potential resize/recalc
       currentIndex = Math.max(0, Math.min(currentIndex, dotCount - 1));
 
       const offset = -currentIndex * (visibleCards * cardWidth);
@@ -2962,15 +3200,15 @@ document.addEventListener('DOMContentLoaded', function() {
       nextBtn.style.cursor = nextBtn.disabled ? 'not-allowed' : 'pointer';
     }
 
-    // Navigation handlers
-    prevBtn.onclick = () => { // Use onclick to ensure single listener
+    // Navigation handlers (using .onclick to avoid multiple listeners on reload)
+    prevBtn.onclick = () => {
       if (currentIndex > 0) {
         currentIndex--;
         updateCarousel();
       }
     };
 
-    nextBtn.onclick = () => { // Use onclick to ensure single listener
+    nextBtn.onclick = () => {
       if (currentIndex < dotCount - 1) {
         currentIndex++;
         updateCarousel();
@@ -2982,24 +3220,21 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            recalculateCardWidth();
-            const newVisibleCards = getVisibleCards();
-            if (newVisibleCards !== visibleCards) {
-                visibleCards = newVisibleCards;
-                // Adjust current index if it becomes invalid
-                currentIndex = Math.floor((currentIndex * visibleCards * cardWidth) / (newVisibleCards * cardWidth));
-                createDots(); // Recreate dots as the count might change
-                updateCarousel();
-            } else {
-                // Even if visible cards count doesn't change, width might, so update offset
-                updateCarousel();
+            const oldVisibleCards = visibleCards;
+            calculateDimensions(); // Recalculate dimensions
+
+            // If the number of visible cards changed, adjust index and recreate dots
+            if (visibleCards !== oldVisibleCards) {
+                 // Try to maintain the first visible card's position roughly
+                currentIndex = Math.floor(currentIndex * oldVisibleCards / visibleCards);
+                createDots();
             }
+            updateCarousel(); // Update position regardless
         }, 250); // Debounce resize event
     });
 
     // Initial setup
-    recalculateCardWidth();
-    visibleCards = getVisibleCards();
+    calculateDimensions();
     createDots();
     updateCarousel();
   }
@@ -3017,6 +3252,7 @@ document.addEventListener('DOMContentLoaded', function() {
     return categories[category] || category.charAt(0).toUpperCase() + category.slice(1); // Fallback
   }
 
+  // Save Custom Test Button
   saveBtn.addEventListener('click', () => {
     const user = auth.currentUser;
     if (!user) {
@@ -3038,10 +3274,10 @@ document.addEventListener('DOMContentLoaded', function() {
       title,
       text,
       videoUrl: videoUrl || null,
-      userName: user.displayName,
+      userName: user.displayName || 'Anonymous',
       userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`,
       category,
-      timestamp: firebase.database.ServerValue.TIMESTAMP
+      timestamp: firebase.database.ServerValue.TIMESTAMP // Use server timestamp
     };
 
     database.ref('tests').push(testData)
@@ -3058,27 +3294,35 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
 
+  // Clear *My* Tests Button (Admin Only)
   clearBtn.addEventListener('click', () => {
     const user = auth.currentUser;
-    if (!user) return;
+    // Double check admin status although button might be hidden
+    if (!user || !isAdmin) {
+        alert("You don't have permission to clear tests.");
+        return;
+    }
 
+    // Fetch tests added by the current admin user
     database.ref('tests').orderByChild('userName').equalTo(user.displayName).once('value')
       .then(snapshot => {
         const userTests = snapshot.val();
         if (!userTests || Object.keys(userTests).length === 0) {
-          alert('You have no tests to delete.');
+          alert('You have not added any tests to delete.');
           return;
         }
 
+        // Create confirmation modal
         const modal = document.createElement('div');
-        modal.className = 'modal show'; // Add show class
+        modal.className = 'modal show';
         modal.innerHTML = `
           <div class="modal-content">
-            <h3>Select Tests to Delete</h3>
-            <div class="test-selection" style="max-height: 40vh; overflow-y: auto;"></div>
+            <h3>Select Your Tests to Delete</h3>
+            <p>Select the tests you added that you wish to delete.</p>
+            <div class="test-selection" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 1rem;"></div>
             <div class="modal-buttons">
-              <button id="cancelDelete" class="secondary-btn">Cancel</button>
-              <button id="confirmDelete" class="danger-btn">Delete Selected</button>
+              <button id="cancelDeleteMyTests" class="secondary-btn">Cancel</button>
+              <button id="confirmDeleteMyTests" class="danger-btn">Delete Selected</button>
             </div>
           </div>
         `;
@@ -3088,23 +3332,25 @@ document.addEventListener('DOMContentLoaded', function() {
         const testSelection = modal.querySelector('.test-selection');
         const checkboxes = [];
 
+        // Populate modal with checkboxes for tests added by this admin
         Object.entries(userTests).forEach(([id, test]) => {
           const testItem = document.createElement('div');
           testItem.className = 'test-item';
-          const checkboxId = `test-${id}`;
+          const checkboxId = `my-test-${id}`;
           testItem.innerHTML = `
-            <input type="checkbox" id="${checkboxId}" checked>
+            <input type="checkbox" id="${checkboxId}">
             <label for="${checkboxId}">${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></label>
           `;
           testSelection.appendChild(testItem);
           checkboxes.push({id, checkbox: testItem.querySelector('input')});
         });
 
-        modal.querySelector('#cancelDelete').addEventListener('click', () => {
+        // Modal button listeners
+        modal.querySelector('#cancelDeleteMyTests').addEventListener('click', () => {
           closeModal(modal);
         });
 
-        modal.querySelector('#confirmDelete').addEventListener('click', () => {
+        modal.querySelector('#confirmDeleteMyTests').addEventListener('click', () => {
           const selectedTests = checkboxes
             .filter(item => item.checkbox.checked)
             .map(item => item.id);
@@ -3116,22 +3362,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
           const updates = {};
           selectedTests.forEach(id => {
-            updates[`tests/${id}`] = null; // Correct path for tests
+            updates[`tests/${id}`] = null; // Path to delete specific test
           });
 
-          database.ref().update(updates) // Update from root
+          // Perform the delete operation
+          database.ref().update(updates) // Update from root ref
             .then(() => {
               alert(`${selectedTests.length} test(s) deleted successfully.`);
               closeModal(modal);
-              loadGlobalTests(); // Refresh the list
+              loadGlobalTests(); // Refresh the tests list
             })
             .catch(error => {
               console.error('Error deleting tests:', error);
               alert('Failed to delete tests. Please try again.');
+              closeModal(modal); // Close modal even on error
             });
         });
 
-        // Close modal if clicking outside
+        // Close modal on outside click
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 closeModal(modal);
@@ -3144,19 +3392,93 @@ document.addEventListener('DOMContentLoaded', function() {
         alert('Failed to fetch your tests. Please try again.');
       });
   });
-});
+}); // End DOMContentLoaded
 
 // Dark mode toggle
-document.getElementById('darkModeToggle').addEventListener('change', function() {
+const darkModeToggle = document.getElementById('darkModeToggle');
+const toggleIcon = document.querySelector('.toggle-icon');
+
+darkModeToggle.addEventListener('change', function() {
   document.body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', this.checked);
+  toggleIcon.textContent = this.checked ? '☀️' : '🌙'; // Update icon
 });
 
-// Check for saved user preference
+// Check for saved user preference on load
 if (localStorage.getItem('darkMode') === 'true') {
-  document.getElementById('darkModeToggle').checked = true;
+  darkModeToggle.checked = true;
   document.body.classList.add('dark-mode');
+  toggleIcon.textContent = '☀️';
+} else {
+  toggleIcon.textContent = '🌙';
 }
+
+// Function to handle label animation for floating labels
+function handleInputFocusBlur() {
+    const inputs = document.querySelectorAll('.input-group input, .input-group textarea, .input-group select');
+
+    inputs.forEach(input => {
+        const label = input.labels ? input.labels[0] : input.previousElementSibling; // Try to find label
+
+        const updateLabel = () => {
+            if (!label) return; // Exit if no label found
+
+            const isFocused = document.activeElement === input;
+            const hasValue = input.value.trim() !== '' || (input.matches('select') && input.selectedIndex > 0); // Check select too
+
+             // Determine background color based on dark mode for label background
+            const bgColor = document.body.classList.contains('dark-mode') ? '#1e1e1e' : 'white';
+
+            if (isFocused || hasValue) {
+                label.style.top = '-0.6rem';
+                label.style.left = '0.8rem';
+                label.style.fontSize = '0.8rem';
+                label.style.color = 'var(--primary)';
+                label.style.background = bgColor; // Set background to cover border
+                label.style.padding = '0 0.5rem';
+            } else {
+                label.style.top = '';
+                label.style.left = '';
+                label.style.fontSize = '';
+                label.style.color = '';
+                label.style.background = ''; // Reset background
+                label.style.padding = '';
+            }
+        };
+
+        input.addEventListener('focus', updateLabel);
+        input.addEventListener('blur', updateLabel);
+        input.addEventListener('input', updateLabel); // Handle pasting/auto-fill
+        if (input.matches('select')) {
+            input.addEventListener('change', updateLabel); // Handle select changes
+        }
+
+        // Initial check in case of pre-filled values (like in edit modal)
+        updateLabel();
+    });
+}
+
+// Call handler function after DOM is loaded
+document.addEventListener('DOMContentLoaded', handleInputFocusBlur);
+// Also call it when the edit modal is shown (or slightly after)
+// We can modify showEditModal or use MutationObserver if needed,
+// but calling it again here might be sufficient if modal elements are always in DOM.
+document.addEventListener('DOMContentLoaded', () => {
+    // Re-apply handler if needed after dynamic content changes (e.g., modal show)
+    // This is a simple approach; MutationObserver is more robust for complex cases.
+    const editModalObserver = new MutationObserver((mutationsList) => {
+        for(let mutation of mutationsList) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (editTestModal.classList.contains('show')) {
+                    handleInputFocusBlur(); // Re-apply label handlers when modal becomes visible
+                }
+            }
+        }
+    });
+    editModalObserver.observe(editTestModal, { attributes: true });
+});
+
+
 </script>
 </body>
 </html>
