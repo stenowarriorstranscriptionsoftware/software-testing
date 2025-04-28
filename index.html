@@ -5,13 +5,1326 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Steno Warriors Transcription</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-  <link rel="stylesheet" href="styles.css"/>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+<style>
+:root {
+  --primary: #4361ee;
+  --primary-light: #4895ef;
+  --secondary: #3f37c9;
+  --success: #4cc9f0;
+  --danger: #f72585;
+  --warning: #f8961e;
+  --light: #f8f9fa;
+  --dark: #212529;
+  --gray: #6c757d;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e2e8f0 100%);
+  min-height: 100vh;
+  color: var(--dark);
+  line-height: 1.6;
+  padding: 20px;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+body.dark-mode {
+  background: #121212;
+  color: #e0e0e0;
+}
+
+body.dark-mode .container {
+  background: #1e1e1e;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  padding: 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: rotate 20s linear infinite;
+  z-index: 0;
+}
+
+header h1 {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 0.5px;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.theme-toggle {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.toggle-label:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(30deg);
+}
+
+#darkModeToggle {
+  display: none;
+}
+
+.toggle-icon {
+  font-size: 1.2rem;
+}
+
+.input-section {
+  padding: 2rem;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.input-group label {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  color: var(--gray);
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background: white;
+  padding: 0 0.5rem;
+}
+
+body.dark-mode .input-group label {
+  background: #1e1e1e;
+}
+
+.input-group textarea:focus + label,
+.input-group textarea:not(:placeholder-shown) + label,
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label,
+.input-group select:focus + label,
+.input-group select:not(:placeholder-shown) + label {
+  top: -0.6rem;
+  left: 0.8rem;
+  font-size: 0.8rem;
+  color: var(--primary);
+}
+
+textarea, input[type="text"], input[type="email"], input[type="password"], input[type="url"], select {
+  width: 100%;
+  padding: 1.2rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  resize: vertical;
+  transition: all 0.3s;
+  background: transparent;
+  z-index: 1;
+}
+
+body.dark-mode textarea,
+body.dark-mode input[type="text"],
+body.dark-mode input[type="email"],
+body.dark-mode input[type="password"],
+body.dark-mode input[type="url"],
+body.dark-mode select {
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+textarea:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus,
+select:focus {
+  border-color: var(--primary-light);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+}
+
+.button-group {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+button {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+button:focus:not(:active)::after {
+  animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(20, 20);
+    opacity: 0;
+  }
+}
+
+button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
+}
+
+button:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
+}
+
+.secondary-btn {
+  background-color: var(--gray);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  flex: initial;
+}
+
+.download-btn {
+  background-color: var(--success);
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  flex: initial;
+}
+
+.close-results-btn {
+  background-color: var(--danger);
+  margin-left: auto;
+}
+
+#results, #fullTextSection {
+  padding: 0 2rem 2rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .results-header {
+  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.result-meta {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.9rem;
+  color: var(--gray);
+  margin-top: 0.5rem;
+}
+
+.fulltext-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.dark-mode .fulltext-header {
+  border-bottom-color: #444;
+}
+
+.correct { color: #2ecc71; font-weight: bold; }
+.missing { color: #3498db; font-weight: bold; }
+.addition { color: #e74c3c; text-decoration: line-through; font-weight: bold; }
+.spelling { color: #e67e22; font-weight: bold; }
+.capitalization { color: #9b59b6; font-weight: bold; }
+.capitalization-strike { color: #9b59b6; text-decoration: line-through; font-weight: bold; }
+.spelling-strike { color: #e67e22; text-decoration: line-through; font-weight: bold; }
+
+.legend-box {
+  border: 1px solid #e2e8f0;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  background: white;
+}
+
+body.dark-mode .legend-box {
+  background: #1e1e1e;
+  border-color: #444;
+}
+
+.legend-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.legend-row span {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}
+
+.result-box, .stats-box, .feedback-box, .text-display {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 10px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+body.dark-mode .result-box,
+body.dark-mode .stats-box,
+body.dark-mode .feedback-box,
+body.dark-mode .text-display {
+  background: #1e1e1e;
+  border-color: #444;
+}
+
+.result-box {
+  line-height: 1.8;
+}
+
+.comparison-section {
+  margin-bottom: 2rem;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .comparison-section {
+  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.analysis-section {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.analysis-column {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .analysis-column {
+  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stats-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.stat-item {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+body.dark-mode .stat-item {
+  background: rgba(30, 30, 30, 0.9);
+}
+
+.stat-item h4 {
+  color: var(--gray);
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.stat-item p {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: var(--primary);
+  position: relative;
+  z-index: 1;
+}
+
+.stat-item::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary-light), var(--secondary));
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 1s ease-out;
+}
+
+.stat-item:hover::after {
+  transform: scaleX(1);
+}
+
+.feedback-box h3 {
+  color: var(--primary);
+  margin-bottom: 1rem;
+}
+
+.feedback-box ul {
+  padding-left: 1.5rem;
+}
+
+.feedback-box li {
+  margin-bottom: 0.5rem;
+}
+
+.columns {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.column {
+  flex: 1;
+}
+
+.text-display {
+  height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+
+body.dark-mode .text-display {
+  color: #e0e0e0;
+}
+
+footer {
+  text-align: center;
+  padding: 1.5rem;
+  color: var(--gray);
+  font-size: 0.9rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+body.dark-mode footer {
+  border-top-color: #444;
+}
+
+/* Timer Styles */
+.timer-options {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  justify-content: center;
+}
+
+.timer-option {
+  background-color: var(--primary-light);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.timer-option:hover {
+  background-color: var(--secondary);
+  transform: translateY(-2px);
+}
+
+.timer-display {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--danger);
+  margin-bottom: 1.5rem;
+}
+
+.timer-ended {
+  color: var(--danger);
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.test-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.locked-textarea {
+  background-color: var(--light);
+  cursor: not-allowed;
+}
+
+body.dark-mode .locked-textarea {
+  background-color: #2a2a2a;
+}
+
+/* Auth Styles */
+.auth-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 1rem;
+}
+
+.auth-btn:hover {
+  background-color: var(--secondary);
+  transform: translateY(-2px);
+}
+
+.user-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+#userInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 1rem;
+}
+
+/* Login Prompt */
+.login-prompt {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .login-prompt {
+  background: #1e1e1e;
+}
+
+.login-prompt h3 {
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.login-prompt p {
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--gray);
+}
+
+.login-prompt a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.login-prompt a:hover {
+  text-decoration: underline;
+}
+
+/* Global Tests Section */
+.global-tests-section {
+  padding: 2rem;
+  margin: 2rem 0;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+body.dark-mode .global-tests-section {
+  background: #1e1e1e;
+  border-color: #444;
+}
+
+.test-filters {
+  margin-bottom: 1rem;
+}
+
+.test-filters select {
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
+
+body.dark-mode .test-filters select {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+.tests-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.test-card {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 15px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 8px 8px 16px #e2e8f0,
+              -8px -8px 16px #ffffff;
+  margin-bottom: 1.5rem;
+  position: relative; /* Needed for absolute positioning of edit button */
+}
+
+body.dark-mode .test-card {
+  background: #2a2a2a;
+  box-shadow: 8px 8px 16px #1a1a1a,
+              -8px -8px 16px #3a3a3a;
+}
+
+.test-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 12px 12px 24px #d1d9e6,
+              -12px -12px 24px #ffffff;
+}
+
+body.dark-mode .test-card:hover {
+  box-shadow: 12px 12px 24px #1a1a1a,
+              -12px -12px 24px #3a3a3a;
+}
+
+.test-card.selected {
+  box-shadow: inset 4px 4px 8px #d1d9e6,
+              inset -4px -4px 8px #ffffff;
+  border: 2px solid var(--primary-light);
+}
+
+body.dark-mode .test-card.selected {
+  box-shadow: inset 4px 4px 8px #1a1a1a,
+              inset -4px -4px 8px #3a3a3a;
+}
+
+.test-card h4 {
+  color: var(--primary);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+
+.test-card p {
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+.test-author {
+  display: flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.test-author img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+
+/* Edit Button Style */
+.edit-test-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background-color: var(--warning);
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  z-index: 5; /* Ensure it's above other card elements */
+}
+
+.edit-test-btn:hover {
+  background-color: #d97706; /* Darker warning color */
+  transform: scale(1.1);
+}
+
+/* Leaderboard Styles */
+.leaderboard-section {
+  padding: 2rem;
+  margin: 2rem 0;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+}
+
+body.dark-mode .leaderboard-section {
+  background: #1e1e1e;
+  border-color: #444;
+}
+
+.leaderboard-controls {
+  margin-bottom: 1rem;
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.leaderboard-controls select {
+  padding: 0.5rem;
+  border-radius: 5px;
+  border: 1px solid #e2e8f0;
+  background: white;
+}
+
+body.dark-mode .leaderboard-controls select {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #e0e0e0;
+}
+
+/* Updated Leaderboard List Styles for Horizontal Scrolling */
+.leaderboard-list {
+  overflow-x: auto;
+  width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.leaderboard-list table {
+  min-width: 1000px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leaderboard-list th,
+.leaderboard-list td {
+  white-space: nowrap;
+  padding: 0.8rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+body.dark-mode .leaderboard-list th,
+body.dark-mode .leaderboard-list td {
+  border-bottom-color: #444;
+}
+
+.leaderboard-list th {
+  background-color: var(--primary-light);
+  color: white;
+  font-weight: 500;
+  position: relative;
+  cursor: pointer;
+}
+
+.leaderboard-list th:hover {
+  background-color: var(--secondary);
+}
+
+.leaderboard-list th::after {
+  content: "↕";
+  position: absolute;
+  right: 0.5rem;
+  opacity: 0.5;
+  font-size: 0.8rem;
+}
+
+.leaderboard-list th.sorted-asc::after {
+  content: "↑";
+  opacity: 1;
+}
+
+.leaderboard-list th.sorted-desc::after {
+  content: "↓";
+  opacity: 1;
+}
+
+.leaderboard-list tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+body.dark-mode .leaderboard-list tr:nth-child(even) {
+  background-color: #2a2a2a;
+}
+
+.leaderboard-list tr:hover {
+  background-color: #e9ecef;
+}
+
+body.dark-mode .leaderboard-list tr:hover {
+  background-color: #3a3a3a;
+}
+
+.leaderboard-user {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.leaderboard-user img {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.accuracy-cell {
+  font-weight: 600;
+}
+
+.accuracy-high {
+  color: #2ecc71;
+}
+
+.accuracy-medium {
+  color: #f39c12;
+}
+
+.accuracy-low {
+  color: #e74c3c;
+}
+
+.pagination-info {
+  text-align: center;
+  margin-top: 1rem;
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+/* Custom Test Section */
+.custom-test-section {
+  background: #f1f5fb;
+  border: 1px solid #dce3f0;
+  padding: 2rem;
+  margin: 2rem;
+  border-radius: 10px;
+}
+
+body.dark-mode .custom-test-section {
+  background: #2a2a2a;
+  border-color: #444;
+}
+
+.custom-test-section h3 {
+  margin-bottom: 1.2rem;
+  color: var(--primary);
+}
+
+/* Video Container */
+.video-container {
+  margin: 1.5rem 0;
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.video-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.test-card .video-indicator {
+  font-size: 0.8rem;
+  color: var(--primary);
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.test-card .video-indicator svg {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+}
+
+/* Badge Styles */
+.badge {
+  display: inline-block;
+  padding: 0.25em 0.4em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+  margin-left: 0.5rem;
+}
+
+.badge-gold {
+  color: #212529;
+  background-color: #ffd700;
+}
+
+.badge-silver {
+  color: #212529;
+  background-color: #c0c0c0;
+}
+
+.badge-bronze {
+  color: #212529;
+  background-color: #cd7f32;
+}
+
+.category-badge {
+  color: white;
+  padding: 0.2rem 0.5rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  margin-left: 0.5rem;
+}
+
+.category-general {
+  background-color: #e74c3c;
+}
+
+.category-kailash {
+  background-color: #2ecc71;
+}
+
+.category-progressive {
+  background-color: #9b59b6;
+}
+
+.category-legal {
+  background-color: #3498db;
+}
+
+.category-previous {
+  background-color: #f39c12;
+}
+
+/* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 90%;
+  max-width: 600px; /* Increased max-width for edit modal */
+  max-height: 85vh; /* Increased max-height */
+  overflow-y: auto;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+}
+
+
+body.dark-mode .modal-content {
+  background-color: #1e1e1e;
+}
+
+.modal h3 {
+  margin-bottom: 1.5rem;
+  color: var(--primary);
+}
+
+.test-selection {
+  margin: 1.5rem 0;
+}
+
+.test-item {
+  padding: 0.8rem;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+}
+
+body.dark-mode .test-item {
+  border-bottom-color: #444;
+}
+
+.test-item input {
+  margin-right: 0.8rem;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.danger-btn {
+  background-color: var(--danger) !important;
+}
+
+.danger-btn:hover {
+  background-color: #d11a5e !important;
+}
+
+/* Specific styles for Edit Modal */
+#editTestModal .input-group textarea {
+    min-height: 150px; /* Adjust height for text area in modal */
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 2rem;
+    margin-top: 1rem;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+  }
+
+  .theme-toggle {
+    top: 1rem;
+    right: 1rem;
+  }
+
+  .analysis-section {
+    flex-direction: column;
+  }
+
+  .button-group {
+    flex-direction: column;
+  }
+
+  button {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .columns {
+    flex-direction: column;
+  }
+
+  .text-display {
+    height: 300px;
+  }
+
+  .timer-options {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .test-controls {
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+
+  .close-results-btn {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .leaderboard-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .leaderboard-controls select {
+    width: 100%;
+  }
+
+  .input-group label {
+    font-size: 0.9rem;
+  }
+
+  .stat-item {
+    padding: 1rem;
+  }
+
+  .results-header, .fulltext-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .result-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .modal-content {
+      width: 95%;
+  }
+}
+/* Add to existing styles.css */
+.delete-checkbox {
+  margin-right: 10px;
+}
+
+.admin-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.leaderboard-row-selectable {
+  cursor: pointer;
+}
+
+.leaderboard-row-selectable:hover {
+  background-color: #f0f0f0 !important;
+}
+
+body.dark-mode .leaderboard-row-selectable:hover {
+  background-color: #3a3a3a !important;
+}
+
+.selected-row {
+  background-color: #e3f2fd !important;
+}
+
+body.dark-mode .selected-row {
+  background-color: #2c3e50 !important;
+}
+
+.category-test {
+  background-color: #607d8b;
+}
+/* Carousel Styles */
+.tests-carousel {
+  position: relative;
+  margin: 1rem 0;
+  overflow: hidden;
+}
+
+.carousel-container {
+  overflow: hidden;
+  margin: 0 2.5rem; /* Adjust margin for buttons */
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.5s ease;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.carousel-btn:hover {
+  background: var(--secondary);
+}
+
+.prev-btn {
+  left: 0;
+}
+
+.next-btn {
+  right: 0;
+}
+
+.carousel-dots {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  gap: 0.5rem;
+}
+
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ccc;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.carousel-dot.active {
+  background: var(--primary);
+  transform: scale(1.2);
+}
+
+/* Adjust test card size for carousel */
+.carousel-track .test-card { /* Make selector more specific */
+  min-width: 280px;
+  flex: 0 0 calc(33.333% - 1rem);
+  margin-bottom: 0; /* Remove bottom margin for carousel items */
+}
+
+@media (max-width: 768px) {
+  .carousel-track .test-card {
+    flex: 0 0 calc(50% - 1rem);
+  }
+
+  .carousel-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-track .test-card {
+    flex: 0 0 100%;
+  }
+}
+</style>
 </head>
 <body>
   <div class="container">
@@ -35,7 +1348,6 @@
     </header>
 
     <main>
-      <!-- Login Prompt -->
       <section id="loginPrompt" class="login-prompt">
         <div id="loginForm">
           <h3>Login to Steno Warriors</h3>
@@ -75,7 +1387,6 @@
         </div>
       </section>
 
-      <!-- Leaderboard Section -->
       <section id="leaderboardSection" class="hidden leaderboard-section">
         <h3>Leaderboard</h3>
         <div class="leaderboard-controls">
@@ -104,7 +1415,6 @@
         <div id="leaderboardPagination" class="pagination-info"></div>
       </section>
 
-      <!-- Global Tests Section -->
       <section id="globalTestsSection" class="hidden global-tests-section">
         <h3>Community Tests</h3>
         <div class="test-filters">
@@ -119,16 +1429,15 @@
           </select>
         </div>
         <div id="globalTestsList" class="tests-carousel">
-          <button class="carousel-btn prev-btn">&lt;</button>
+          <button class="carousel-btn prev-btn"><</button>
           <div class="carousel-container">
             <div class="carousel-track"></div>
           </div>
-          <button class="carousel-btn next-btn">&gt;</button>
+          <button class="carousel-btn next-btn">></button>
         </div>
         <div class="carousel-dots"></div>
       </section>
 
-      <!-- Custom Test Section -->
       <section id="customTestSection" class="hidden custom-test-section">
         <h3>Add Your Own Test</h3>
         <div class="input-group">
@@ -160,7 +1469,6 @@
         </div>
       </section>
 
-      <!-- Main Input Section -->
       <section class="input-section">
         <div class="input-group" id="originalTextGroup">
           <textarea id="originalText" placeholder=" "></textarea>
@@ -239,46 +1547,1616 @@
       </section>
     </main>
 
-    <!-- Edit Test Modal -->
-    <div id="editTestModal" class="modal hidden">
-      <div class="modal-content">
-        <h3>Edit Test</h3>
-        <div class="input-group">
-          <input type="text" id="editTestTitle" placeholder=" ">
-          <label for="editTestTitle">Test Title</label>
-        </div>
-        <div class="input-group">
-          <select id="editTestCategory">
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-            <option value="test">Test</option>
-          </select>
-          <label for="editTestCategory">Test Category</label>
-        </div>
-        <div class="input-group">
-          <textarea id="editTestText" placeholder=" "></textarea>
-          <label for="editTestText">Original Text</label>
-        </div>
-        <div class="input-group">
-          <input type="url" id="editTestVideoUrl" placeholder=" ">
-          <label for="editTestVideoUrl">Video URL (Optional)</label>
-        </div>
-        <div class="modal-buttons">
-          <button id="cancelEditTest" class="secondary-btn">Cancel</button>
-          <button id="saveEditedTest" class="primary-btn">Save Changes</button>
-          <button id="deleteTest" class="danger-btn">Delete Test</button>
-        </div>
-      </div>
-    </div>
-
     <footer>
       <p>© 2023 Steno Warriors | Professional Transcription Tool</p>
     </footer>
   </div>
 
-  <script src="script.js"></script>
+  <div id="editTestModal" class="modal">
+    <div class="modal-content">
+      <h3>Edit Test</h3>
+      <input type="hidden" id="editTestId">
+      <div class="input-group">
+        <input type="text" id="editTestTitle" placeholder=" ">
+        <label for="editTestTitle">Test Title</label>
+      </div>
+      <div class="input-group">
+        <select id="editTestCategory">
+          <option value="general">General Matter</option>
+          <option value="kailash">Kailash Chandra</option>
+          <option value="progressive">Progressive</option>
+          <option value="legal">Legal</option>
+          <option value="previous">Previous Year</option>
+          <option value="test">Test</option>
+        </select>
+        <label for="editTestCategory">Test Category</label>
+      </div>
+      <div class="input-group">
+        <textarea id="editTestText" placeholder=" "></textarea>
+        <label for="editTestText">Original Text</label>
+      </div>
+      <div class="input-group">
+        <input type="url" id="editTestVideoUrl" placeholder=" ">
+        <label for="editTestVideoUrl">Video URL (Optional)</label>
+      </div>
+      <div class="modal-buttons">
+        <button id="cancelEditTestBtn" class="secondary-btn">Cancel</button>
+        <button id="saveEditedTestBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+// Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
+  authDomain: "setup-login-page.firebaseapp.com",
+  databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
+  projectId: "setup-login-page",
+  storageBucket: "setup-login-page.firebasestorage.app",
+  messagingSenderId: "341251531099",
+  appId: "1:341251531099:web:f4263621455541ffdc3a7e",
+  measurementId: "G-ZXFC7NR9HV"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const database = firebase.database();
+
+// Initialize jsPDF
+const { jsPDF } = window.jspdf;
+
+document.addEventListener('DOMContentLoaded', function() {
+  // DOM elements
+  const originalTextEl = document.getElementById('originalText');
+  const userTextEl = document.getElementById('userText');
+  const compareBtn = document.getElementById('compareBtn');
+  const showFullTextBtn = document.getElementById('showFullTextBtn');
+  const backToResultsBtn = document.getElementById('backToResultsBtn');
+  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+  const closeResultsBtn = document.getElementById('closeResultsBtn');
+  const resultsSection = document.getElementById('results');
+  const fullTextSection = document.getElementById('fullTextSection');
+  const comparisonResultEl = document.getElementById('comparisonResult');
+  const statsEl = document.getElementById('stats');
+  const feedbackEl = document.getElementById('feedback');
+  const originalDisplayEl = document.getElementById('originalDisplay');
+  const userDisplayEl = document.getElementById('userDisplay');
+  const resultDateEl = document.getElementById('resultDate');
+  const originalTextGroup = document.getElementById('originalTextGroup');
+  const timerOptions = document.getElementById('timerOptions');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const loginBtn = document.getElementById('loginBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const userInfo = document.getElementById('userInfo');
+  const userPhoto = document.getElementById('userPhoto');
+  const userName = document.getElementById('userName');
+  const loginPrompt = document.getElementById('loginPrompt');
+  const customTestSection = document.getElementById('customTestSection');
+  const globalTestsSection = document.getElementById('globalTestsSection');
+  const globalTestsList = document.getElementById('globalTestsList');
+  const leaderboardSection = document.getElementById('leaderboardSection');
+  const leaderboardList = document.getElementById('leaderboardList');
+  const leaderboardFilter = document.getElementById('leaderboardFilter');
+  const testNameFilter = document.getElementById('testNameFilter');
+  const categoryFilter = document.getElementById('categoryFilter');
+  const testCategoryFilter = document.getElementById('testCategoryFilter');
+  const prevPageBtn = document.getElementById('prevPageBtn');
+  const nextPageBtn = document.getElementById('nextPageBtn');
+  const leaderboardPagination = document.getElementById('leaderboardPagination');
+  const saveBtn = document.getElementById('saveTestBtn');
+  const clearBtn = document.getElementById('clearTestsBtn');
+  const customTitle = document.getElementById('customTitle');
+  const customOriginal = document.getElementById('customOriginal');
+  const customVideoUrl = document.getElementById('customVideoUrl');
+  const customCategory = document.getElementById('customCategory');
+  const loginForm = document.getElementById('loginForm');
+  const registerForm = document.getElementById('registerForm');
+  const emailLoginBtn = document.getElementById('emailLoginBtn');
+  const googleLoginBtn = document.getElementById('googleLoginBtn');
+  const registerBtn = document.getElementById('registerBtn');
+  const showRegister = document.getElementById('showRegister');
+  const showLogin = document.getElementById('showLogin');
+  const loginEmail = document.getElementById('loginEmail');
+  const loginPassword = document.getElementById('loginPassword');
+  const registerName = document.getElementById('registerName');
+  const registerEmail = document.getElementById('registerEmail');
+  const registerPassword = document.getElementById('registerPassword');
+  const confirmPassword = document.getElementById('confirmPassword');
+  const deleteLeaderboardBtn = document.getElementById('deleteLeaderboardBtn');
+
+  // Edit Modal Elements
+  const editTestModal = document.getElementById('editTestModal');
+  const editTestId = document.getElementById('editTestId');
+  const editTestTitle = document.getElementById('editTestTitle');
+  const editTestCategory = document.getElementById('editTestCategory');
+  const editTestText = document.getElementById('editTestText');
+  const editTestVideoUrl = document.getElementById('editTestVideoUrl');
+  const cancelEditTestBtn = document.getElementById('cancelEditTestBtn');
+  const saveEditedTestBtn = document.getElementById('saveEditedTestBtn');
+
+  // Timer variables
+  let timerInterval;
+  let endTime;
+  let testActive = false;
+  let timerButtons = document.querySelectorAll('.timer-option');
+
+  // Leaderboard variables
+  let currentPage = 1;
+  const entriesPerPage = 10;
+  let allAttempts = [];
+  let filteredAttempts = [];
+  let uniqueTestNames = new Set();
+  let currentSortColumn = 'accuracy';
+  let currentSortDirection = 'desc';
+  let selectedLeaderboardRows = [];
+
+  // Admin Check Variable
+  let isAdmin = false;
+  const adminEmails = [
+    "anishkumar18034@gmail.com",
+    "anishkumar1803@gmail.com",
+    "admin2@example.com" // Add other admin emails here
+  ];
+
+  // Initialize typing timer
+  let startTime = null;
+  userTextEl.addEventListener('input', function() {
+    if (!startTime) {
+      startTime = new Date();
+    }
+  });
+
+  // Toggle between login and register forms
+  showRegister.addEventListener('click', (e) => {
+    e.preventDefault();
+    loginForm.classList.add('hidden');
+    registerForm.classList.remove('hidden');
+  });
+
+  showLogin.addEventListener('click', (e) => {
+    e.preventDefault();
+    registerForm.classList.add('hidden');
+    loginForm.classList.remove('hidden');
+  });
+
+  // Email/password login handler
+  emailLoginBtn.addEventListener('click', () => {
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value.trim();
+
+    if (!email || !password) {
+      alert('Please enter both email and password');
+      return;
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then(() => {
+        console.log('Login successful');
+      })
+      .catch(error => {
+        console.error('Login error:', error);
+        alert('Login failed: ' + error.message);
+      });
+  });
+
+  // Registration handler
+  registerBtn.addEventListener('click', () => {
+    const name = registerName.value.trim();
+    const email = registerEmail.value.trim();
+    const password = registerPassword.value.trim();
+    const confirm = confirmPassword.value.trim();
+
+    if (!name || !email || !password || !confirm) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirm) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      alert('Password should be at least 6 characters');
+      return;
+    }
+
+    auth.createUserWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        return userCredential.user.updateProfile({
+          displayName: name
+        });
+      })
+      .then(() => {
+        alert('Registration successful! You are now logged in.');
+        registerName.value = '';
+        registerEmail.value = '';
+        registerPassword.value = '';
+        confirmPassword.value = '';
+        registerForm.classList.add('hidden');
+        loginForm.classList.remove('hidden');
+      })
+      .catch(error => {
+        console.error('Registration error:', error);
+        alert('Registration failed: ' + error.message);
+      });
+  });
+
+  // Google login handler
+  googleLoginBtn.addEventListener('click', () => {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider)
+      .catch(error => {
+        console.error('Google login error:', error);
+        alert('Google login failed. Please try again.');
+      });
+  });
+
+  // Auth state listener
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      loginBtn.classList.add('hidden');
+      userInfo.classList.remove('hidden');
+
+      if (user.photoURL) {
+        userPhoto.src = user.photoURL;
+      } else {
+        // Use a default placeholder or generate one based on UID
+        userPhoto.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`;
+      }
+
+      userName.textContent = user.displayName || 'User';
+      loginPrompt.classList.add('hidden');
+
+      // Check if user is admin
+      isAdmin = adminEmails.includes(user.email);
+
+      if (isAdmin) {
+        customTestSection.classList.remove('hidden');
+        deleteLeaderboardBtn.classList.remove('hidden');
+      } else {
+          customTestSection.classList.add('hidden');
+          deleteLeaderboardBtn.classList.add('hidden');
+      }
+
+      globalTestsSection.classList.remove('hidden');
+      leaderboardSection.classList.remove('hidden');
+
+      loadGlobalTests(); // Load tests after checking admin status
+      loadLeaderboard();
+      cleanupOldData();
+    } else {
+      isAdmin = false; // Reset admin status on logout
+      loginBtn.classList.remove('hidden');
+      userInfo.classList.add('hidden');
+      loginPrompt.classList.remove('hidden');
+      customTestSection.classList.add('hidden');
+      globalTestsSection.classList.add('hidden');
+      leaderboardSection.classList.add('hidden');
+      loginForm.classList.remove('hidden');
+      registerForm.classList.add('hidden');
+      deleteLeaderboardBtn.classList.add('hidden');
+    }
+  });
+
+  // Logout handler
+  logoutBtn.addEventListener('click', () => {
+    auth.signOut();
+  });
+
+  // Leaderboard filter change handlers
+  leaderboardFilter.addEventListener('change', () => {
+    currentPage = 1;
+    loadLeaderboard();
+  });
+
+  testNameFilter.addEventListener('change', () => {
+    currentPage = 1;
+    loadLeaderboard();
+  });
+
+  categoryFilter.addEventListener('change', () => {
+    currentPage = 1;
+    loadLeaderboard();
+  });
+
+  // Test category filter for community tests
+  testCategoryFilter.addEventListener('change', () => {
+    loadGlobalTests();
+  });
+
+  // Pagination button handlers
+  prevPageBtn.addEventListener('click', () => {
+    if (currentPage > 1) {
+      currentPage--;
+      updatePagination();
+    }
+  });
+
+  nextPageBtn.addEventListener('click', () => {
+    const totalPages = Math.ceil(filteredAttempts.length / entriesPerPage);
+    if (currentPage < totalPages) {
+      currentPage++;
+      updatePagination();
+    }
+  });
+
+  // Delete leaderboard entries handler
+  deleteLeaderboardBtn.addEventListener('click', () => {
+    if (selectedLeaderboardRows.length === 0) return;
+
+    const modal = document.createElement('div');
+    modal.className = 'modal show'; // Add 'show' class immediately
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h3>Confirm Deletion</h3>
+        <p>Are you sure you want to delete ${selectedLeaderboardRows.length} selected leaderboard entries? This action cannot be undone.</p>
+        <div class="modal-buttons">
+          <button id="cancelDeleteLeaderboard" class="secondary-btn">Cancel</button>
+          <button id="confirmDeleteLeaderboard" class="danger-btn">Delete</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector('#cancelDeleteLeaderboard').addEventListener('click', () => {
+      closeModal(modal);
+    });
+
+    modal.querySelector('#confirmDeleteLeaderboard').addEventListener('click', () => {
+      const updates = {};
+      selectedLeaderboardRows.forEach(id => {
+        updates[`attempts/${id}`] = null;
+      });
+
+      database.ref().update(updates)
+        .then(() => {
+          alert(`${selectedLeaderboardRows.length} entries deleted successfully.`);
+          selectedLeaderboardRows = [];
+          closeModal(modal);
+          loadLeaderboard();
+        })
+        .catch(error => {
+          console.error('Error deleting leaderboard entries:', error);
+          alert('Failed to delete entries. Please try again.');
+        });
+    });
+  });
+
+  // Load leaderboard data with pagination
+  function loadLeaderboard() {
+    const filter = leaderboardFilter.value;
+    const category = categoryFilter.value;
+    let query = database.ref('attempts').orderByChild('timestamp');
+
+    if (filter === 'week') {
+      const oneWeekAgo = new Date();
+      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+      query = query.startAt(oneWeekAgo.getTime());
+    } else if (filter === 'month') {
+      const oneMonthAgo = new Date();
+      oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+      query = query.startAt(oneMonthAgo.getTime());
+    }
+
+    query.once('value')
+      .then(snapshot => {
+        const attempts = snapshot.val();
+        if (!attempts) {
+          leaderboardList.innerHTML = '<p>No attempts recorded yet. Be the first to complete a test!</p>';
+          leaderboardPagination.innerHTML = '';
+          return;
+        }
+
+        allAttempts = Object.entries(attempts).map(([id, attempt]) => ({
+          id,
+          ...attempt
+        }));
+
+        sortAttempts(currentSortColumn, currentSortDirection);
+        updateTestNameFilter(allAttempts);
+
+        filteredAttempts = allAttempts.filter(attempt => {
+          const nameMatch = testNameFilter.value === 'all' || attempt.testTitle === testNameFilter.value;
+          const categoryMatch = category === 'all' || attempt.category === category;
+          return nameMatch && categoryMatch;
+        });
+
+        updatePagination();
+      })
+      .catch(error => {
+        console.error('Error loading leaderboard:', error);
+        leaderboardList.innerHTML = '<p>Error loading leaderboard. Please try again later.</p>';
+        leaderboardPagination.innerHTML = '';
+      });
+  }
+
+  function sortAttempts(column, direction) {
+    allAttempts.sort((a, b) => {
+      let aValue, bValue;
+
+      switch (column) {
+        case 'accuracy':
+        case 'wpm':
+        case 'totalOriginal':
+        case 'totalUser':
+        case 'halfMistakes':
+        case 'fullMistakes':
+        case 'timeTaken':
+          aValue = a.stats[column];
+          bValue = b.stats[column];
+          break;
+        case 'userName':
+          aValue = (a.userName || '').toLowerCase(); // Handle potential null/undefined
+          bValue = (b.userName || '').toLowerCase();
+          break;
+        case 'testTitle':
+          aValue = (a.testTitle || 'Custom Test').toLowerCase();
+          bValue = (b.testTitle || 'Custom Test').toLowerCase();
+          break;
+        case 'date':
+          aValue = a.timestamp;
+          bValue = b.timestamp;
+          break;
+        default:
+          return 0;
+      }
+
+      // Ensure values are comparable
+      aValue = aValue ?? (typeof aValue === 'number' ? 0 : '');
+      bValue = bValue ?? (typeof bValue === 'number' ? 0 : '');
+
+
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return direction === 'asc' ? aValue - bValue : bValue - aValue;
+      } else if (typeof aValue === 'string' && typeof bValue === 'string') {
+        return direction === 'asc'
+          ? aValue.localeCompare(bValue)
+          : bValue.localeCompare(aValue); // Corrected localeCompare for desc
+      } else {
+          // Handle mixed types or other cases if necessary
+          return 0;
+      }
+    });
+  }
+
+
+  function updateTestNameFilter(attempts) {
+    uniqueTestNames = new Set(attempts.map(attempt => attempt.testTitle || 'Custom Test'));
+    const currentTestFilter = testNameFilter.value;
+
+    testNameFilter.innerHTML = '<option value="all">All Tests</option>';
+    [...uniqueTestNames].sort().forEach(testName => { // Sort test names alphabetically
+      const option = document.createElement('option');
+      option.value = testName;
+      option.textContent = testName;
+      testNameFilter.appendChild(option);
+    });
+
+    if (currentTestFilter !== 'all' && uniqueTestNames.has(currentTestFilter)) {
+      testNameFilter.value = currentTestFilter;
+    } else {
+      testNameFilter.value = 'all';
+    }
+  }
+
+  function updatePagination() {
+    const totalPages = Math.ceil(filteredAttempts.length / entriesPerPage);
+    const startIdx = (currentPage - 1) * entriesPerPage;
+    const endIdx = startIdx + entriesPerPage;
+    const pageAttempts = filteredAttempts.slice(startIdx, endIdx);
+
+    prevPageBtn.disabled = currentPage === 1;
+    nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+
+    leaderboardPagination.innerHTML = `Showing ${startIdx + 1}-${Math.min(endIdx, filteredAttempts.length)} of ${filteredAttempts.length} entries`;
+
+    renderLeaderboardTable(pageAttempts, startIdx + 1);
+  }
+
+  function renderLeaderboardTable(attempts, startRank) {
+    if (attempts.length === 0) {
+      leaderboardList.innerHTML = '<p>No attempts match your filters.</p>';
+      return;
+    }
+
+    let tableHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th data-column="rank">Rank</th>
+            <th data-column="userName">User</th>
+            <th data-column="testTitle">Test</th>
+            <th data-column="accuracy">Accuracy</th>
+            <th data-column="wpm">Speed (WPM)</th>
+            <th data-column="totalOriginal">Original Words</th>
+            <th data-column="totalUser">Typed Words</th>
+            <th data-column="timeTaken">Time Taken</th>
+            <th data-column="halfMistakes">Half Mistakes</th>
+            <th data-column="fullMistakes">Full Mistakes</th>
+            <th data-column="date">Date</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+
+    attempts.forEach((attempt, index) => {
+      const date = new Date(attempt.timestamp);
+      const accuracyClass =
+        attempt.stats.accuracy >= 90 ? 'accuracy-high' :
+        attempt.stats.accuracy >= 70 ? 'accuracy-medium' : 'accuracy-low';
+
+      const minutes = Math.floor(attempt.stats.timeTaken / 60);
+      const seconds = attempt.stats.timeTaken % 60;
+      const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+      // Add badges to top 3
+      let badge = '';
+      if (startRank + index === 1) {
+        badge = '<span class="badge badge-gold">🥇</span>';
+      } else if (startRank + index === 2) {
+        badge = '<span class="badge badge-silver">🥈</span>';
+      } else if (startRank + index === 3) {
+        badge = '<span class="badge badge-bronze">🥉</span>';
+      }
+
+      // Default user photo if none provided
+      const userPhotoSrc = attempt.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(attempt.userName || 'User')}&background=random&color=fff`;
+
+      tableHTML += `
+        <tr data-id="${attempt.id}" class="${selectedLeaderboardRows.includes(attempt.id) ? 'selected-row' : ''}">
+          <td>${startRank + index} ${badge}</td>
+          <td class="leaderboard-user">
+            <img src="${userPhotoSrc}" alt="${attempt.userName || 'User'}">
+            <span>${attempt.userName || 'Anonymous'}</span>
+          </td>
+          <td>${attempt.testTitle || 'Custom Test'} ${attempt.category ? `<span class="category-badge category-${attempt.category}">${getCategoryName(attempt.category)}</span>` : ''}</td>
+          <td class="accuracy-cell ${accuracyClass}">${attempt.stats.accuracy.toFixed(1)}%</td>
+          <td>${attempt.stats.wpm}</td>
+          <td>${attempt.stats.totalOriginal}</td>
+          <td>${attempt.stats.totalUser}</td>
+          <td>${timeFormatted}</td>
+          <td>${attempt.stats.halfMistakes}</td>
+          <td>${attempt.stats.fullMistakes}</td>
+          <td>${date.toLocaleDateString()}</td>
+        </tr>
+      `;
+    });
+
+    tableHTML += `</tbody></table>`;
+    leaderboardList.innerHTML = tableHTML;
+
+    makeTableSortable();
+    updateDeleteButtonState();
+  }
+
+  function makeTableSortable() {
+    const headers = document.querySelectorAll('.leaderboard-list th[data-column]');
+    headers.forEach(header => {
+      header.style.cursor = 'pointer';
+      // Remove existing listeners to prevent duplicates
+      const newHeader = header.cloneNode(true);
+      header.parentNode.replaceChild(newHeader, header);
+
+      newHeader.addEventListener('click', () => {
+        const column = newHeader.getAttribute('data-column');
+
+        if (currentSortColumn === column) {
+          currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSortColumn = column;
+          currentSortDirection = 'desc'; // Default to desc for new column
+        }
+
+        sortAttempts(column, currentSortDirection);
+        // Re-filter based on current filters after sorting
+        filteredAttempts = allAttempts.filter(attempt => {
+            const nameMatch = testNameFilter.value === 'all' || attempt.testTitle === testNameFilter.value;
+            const categoryMatch = categoryFilter.value === 'all' || attempt.category === categoryFilter.value;
+            return nameMatch && categoryMatch;
+        });
+        currentPage = 1; // Reset to first page after sorting
+        updatePagination();
+
+        // Update header styles after re-rendering
+        const currentHeaders = document.querySelectorAll('.leaderboard-list th[data-column]');
+        currentHeaders.forEach(h => {
+          h.classList.remove('sorted-asc', 'sorted-desc');
+          if (h.getAttribute('data-column') === column) {
+            h.classList.add(`sorted-${currentSortDirection}`);
+          }
+        });
+      });
+
+      // Apply initial sort style
+      if (newHeader.getAttribute('data-column') === currentSortColumn) {
+        newHeader.classList.add(`sorted-${currentSortDirection}`);
+      }
+    });
+
+
+    // Add row selection
+    const rows = document.querySelectorAll('.leaderboard-list tbody tr');
+    rows.forEach(row => {
+      row.classList.add('leaderboard-row-selectable');
+      row.addEventListener('click', (e) => {
+        // Don't toggle selection if clicking on a link or button
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON') {
+          return;
+        }
+
+        const attemptId = row.dataset.id;
+        if (selectedLeaderboardRows.includes(attemptId)) {
+          selectedLeaderboardRows = selectedLeaderboardRows.filter(id => id !== attemptId);
+          row.classList.remove('selected-row');
+        } else {
+          selectedLeaderboardRows.push(attemptId);
+          row.classList.add('selected-row');
+        }
+        updateDeleteButtonState();
+      });
+    });
+  }
+
+  function updateDeleteButtonState() {
+    deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0;
+  }
+
+  // Auto-delete old data function
+  function cleanupOldData() {
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const timestampThreshold = sixMonthsAgo.getTime();
+
+    database.ref('attempts').once('value').then(snapshot => {
+      const updates = {};
+      snapshot.forEach(child => {
+        if (child.val().timestamp < timestampThreshold) {
+          updates[child.key] = null;
+        }
+      });
+      if (Object.keys(updates).length > 0) {
+          console.log(`Cleaning up ${Object.keys(updates).length} old leaderboard entries...`);
+          database.ref('attempts').update(updates)
+            .then(() => console.log("Old entries cleaned up."))
+            .catch(err => console.error("Error cleaning up old entries:", err));
+      }
+    });
+  }
+
+  // Run cleanup weekly
+  setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
+
+  // Original text paste handler
+  originalTextEl.addEventListener('paste', function() {
+    document.querySelectorAll('.test-card').forEach(card => {
+      card.classList.remove('selected');
+    });
+
+    setTimeout(() => {
+      if (originalTextEl.value.trim() !== '' && !testActive) {
+        originalTextGroup.classList.add('hidden');
+        timerOptions.classList.remove('hidden');
+        timerButtons.forEach(btn => {
+          btn.disabled = false;
+          btn.style.opacity = '1';
+        });
+      }
+    }, 0);
+  });
+
+  // Timer option click handler
+  timerButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const minutes = parseInt(this.dataset.minutes);
+      startTimer(minutes);
+      timerOptions.classList.add('hidden');
+      timerDisplay.classList.remove('hidden');
+      testActive = true;
+    });
+  });
+
+  // Compare button click handler
+  compareBtn.addEventListener('click', function() {
+    stopTimer();
+    compareTexts();
+    disableTimerOptions();
+  });
+
+  // Show full text button click handler
+  showFullTextBtn.addEventListener('click', showFullTexts);
+
+  // Back to results button click handler
+  backToResultsBtn.addEventListener('click', showResults);
+
+  // Download PDF button click handler
+  downloadPdfBtn.addEventListener('click', downloadAsPdf);
+
+  // Close results button click handler
+  closeResultsBtn.addEventListener('click', function() {
+    const existingVideo = document.getElementById('testVideoPlayer');
+    if (existingVideo) existingVideo.remove();
+    location.reload(); // Reload the page to reset everything
+  });
+
+  function startTimer(minutes) {
+    endTime = new Date();
+    endTime.setMinutes(endTime.getMinutes() + minutes);
+
+    updateTimerDisplay();
+
+    timerInterval = setInterval(() => {
+      updateTimerDisplay();
+
+      const now = new Date();
+      if (now >= endTime) {
+        stopTimer();
+        timerDisplay.classList.add('timer-ended');
+        timerDisplay.textContent = "TIME'S UP!";
+        compareTexts();
+        lockTest();
+        disableTimerOptions();
+      }
+    }, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    timerDisplay.classList.add('hidden');
+  }
+
+  function disableTimerOptions() {
+    timerButtons.forEach(btn => {
+      btn.disabled = true;
+      btn.style.opacity = '0.5';
+      btn.style.cursor = 'not-allowed';
+    });
+  }
+
+  function updateTimerDisplay() {
+    const now = new Date();
+    const remaining = endTime - now;
+
+    if (remaining <= 0) return;
+
+    const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+    timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function lockTest() {
+    userTextEl.readOnly = true;
+    userTextEl.classList.add('locked-textarea');
+    compareBtn.disabled = true;
+    closeResultsBtn.classList.remove('hidden');
+  }
+
+  function compareTexts() {
+    const originalText = originalTextEl.value;
+    const userText = userTextEl.value;
+
+    if (!originalText || !userText) {
+      alert('Please enter both original text and your transcription.');
+      return;
+    }
+
+    let testTitle = "Custom Test";
+    let testCategory = "general"; // Default category for custom tests
+    const selectedTestCard = document.querySelector('.test-card.selected');
+    if (selectedTestCard) {
+        testTitle = selectedTestCard.querySelector('h4').textContent.split('<span')[0].trim(); // Get title before badge
+        testCategory = selectedTestCard.dataset.category || "general";
+    }
+
+    const originalWords = processText(originalText);
+    const userWords = processText(userText);
+
+    const comparison = compareParagraphs(originalWords, userWords);
+
+    displayComparison(comparison);
+    displayStats(comparison.stats);
+    displayFeedback(comparison.stats, originalWords, userWords);
+    displayFullTexts(originalText, userText);
+
+    const now = new Date();
+    resultDateEl.textContent = now.toLocaleString();
+
+    showResults();
+
+    if (testActive) {
+      lockTest();
+    }
+
+    const user = auth.currentUser;
+    if (user) {
+      const attemptData = {
+        userName: user.displayName,
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`,
+        testTitle: testTitle,
+        category: testCategory,
+        stats: comparison.stats,
+        timestamp: Date.now()
+      };
+
+      database.ref('attempts').push(attemptData)
+        .then(() => loadLeaderboard())
+        .catch(error => console.error('Error saving attempt:', error));
+    }
+  }
+
+  function showFullTexts() {
+    resultsSection.classList.add('hidden');
+    fullTextSection.classList.remove('hidden');
+  }
+
+  function showResults() {
+    fullTextSection.classList.add('hidden');
+    resultsSection.classList.remove('hidden');
+  }
+
+  function downloadAsPdf() {
+    const resultsElement = document.getElementById('results');
+
+    html2canvas(resultsElement, {
+      scale: 1.5,
+      useCORS: true,
+      allowTaint: true
+    }).then(canvas => {
+      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      pdf.save('transcription-comparison.pdf');
+    });
+  }
+
+  function processText(text) {
+    return text
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/[\u2018\u2019]/g, "'") // Normalize apostrophes
+      .trim()
+      .split(/\s+/); // Split by whitespace
+  }
+
+  function isSimilar(wordA, wordB) {
+    // Basic similarity check (case-insensitive, ignores punctuation)
+    const cleanA = wordA.toLowerCase().replace(/[.,!?;:]/g, '');
+    const cleanB = wordB.toLowerCase().replace(/[.,!?;:]/g, '');
+    return cleanA === cleanB; // Simple equality check for now
+  }
+
+  function arraysAreEqual(arr1, arr2) {
+    if (arr1.length !== arr2.length) return false;
+    for (let i = 0; i < arr1.length; i++) {
+      if (arr1[i] !== arr2[i]) return false;
+    }
+    return true;
+  }
+
+  function compareParagraphs(paragraphA, paragraphB) {
+    let comparedText = '';
+    let numHalfDiff = 0; // Misspellings, capitalization
+    let numFullDiff = 0; // Omissions, additions, completely wrong words
+    let wordAIndex = 0;
+    let wordBIndex = 0;
+
+    while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
+        const wordA = paragraphA[wordAIndex] || '';
+        const wordB = paragraphB[wordBIndex] || '';
+        const cleanWordA = wordA.replace(/[.,!?;:]/g, ''); // Remove punctuation for comparison
+        const cleanWordB = wordB.replace(/[.,!?;:]/g, '');
+
+        if (wordAIndex >= paragraphA.length) { // User typed extra words at the end
+            comparedText += `<span class="addition">${wordB}</span> `;
+            wordBIndex++;
+            numFullDiff++;
+        } else if (wordBIndex >= paragraphB.length) { // User missed words at the end
+            comparedText += `<span class="missing">${wordA}</span> `;
+            wordAIndex++;
+            numFullDiff++;
+        } else if (cleanWordA === cleanWordB) { // Exact match (ignoring punctuation)
+            comparedText += `<span class="correct">${wordA}</span> `; // Display original word with punctuation
+            wordAIndex++;
+            wordBIndex++;
+        } else if (cleanWordA.toLowerCase() === cleanWordB.toLowerCase()) { // Capitalization difference
+            // Display original word, strike through user's word
+            comparedText += `<span class="capitalization">${wordA}</span> <span class="capitalization-strike">${wordB}</span> `;
+            wordAIndex++;
+            wordBIndex++;
+            numHalfDiff++;
+        } else {
+            // Look ahead slightly to see if we can resync
+            let foundMatch = false;
+            // Look ahead in user text for original word
+            for (let lookAheadB = 1; lookAheadB <= 3 && (wordBIndex + lookAheadB) < paragraphB.length; lookAheadB++) {
+                if (cleanWordA === paragraphB[wordBIndex + lookAheadB].replace(/[.,!?;:]/g, '')) {
+                    // User added words
+                    for (let i = 0; i < lookAheadB; i++) {
+                        comparedText += `<span class="addition">${paragraphB[wordBIndex + i]}</span> `;
+                        numFullDiff++;
+                    }
+                    comparedText += `<span class="correct">${wordA}</span> `;
+                    wordAIndex++;
+                    wordBIndex += lookAheadB + 1;
+                    foundMatch = true;
+                    break;
+                }
+            }
+
+            if (!foundMatch) {
+                // Look ahead in original text for user word
+                for (let lookAheadA = 1; lookAheadA <= 3 && (wordAIndex + lookAheadA) < paragraphA.length; lookAheadA++) {
+                    if (cleanWordB === paragraphA[wordAIndex + lookAheadA].replace(/[.,!?;:]/g, '')) {
+                        // User missed words
+                        for (let i = 0; i < lookAheadA; i++) {
+                            comparedText += `<span class="missing">${paragraphA[wordAIndex + i]}</span> `;
+                            numFullDiff++;
+                        }
+                        comparedText += `<span class="correct">${wordB}</span> `; // Display user word as correct in this context
+                        wordAIndex += lookAheadA + 1;
+                        wordBIndex++;
+                        foundMatch = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!foundMatch) {
+                // No easy resync found, assume spelling error or wrong word
+                // Simple Levenshtein distance could be added here for better spelling detection
+                // For now, mark original as missing, user as added (full mistake)
+                comparedText += `<span class="missing">${wordA}</span> <span class="addition">${wordB}</span> `;
+                wordAIndex++;
+                wordBIndex++;
+                numFullDiff++; // Treat as full mistake for now
+            }
+        }
+    }
+
+
+    const keystrokesCount = userTextEl.value.length;
+    // Calculate error percentage based on original text length
+    const errorPercentage = paragraphA.length > 0 ?
+      Math.min(100, ((numHalfDiff / 2) + numFullDiff) / paragraphA.length * 100) : 0;
+    const accuracyPercentage = Math.max(0, 100 - errorPercentage);
+
+    const endTime = new Date();
+    const timeTakenSeconds = startTime ? Math.round((endTime - startTime) / 1000) : 0;
+
+    const typingTimeMinutes = timeTakenSeconds / 60;
+    // Calculate WPM based on user's typed words, adjusted for accuracy
+    // A common formula: (Total Characters Typed / 5) / Time in Minutes
+    // Or: (Correct Words Typed) / Time in Minutes
+    // Let's use a simpler WPM based on total user words for now
+    const wordsTyped = paragraphB.length;
+    const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
+
+    return {
+      html: comparedText.trim(), // Trim trailing space
+      stats: {
+        totalOriginal: paragraphA.length,
+        totalUser: paragraphB.length,
+        halfMistakes: numHalfDiff,
+        fullMistakes: numFullDiff,
+        keystrokes: keystrokesCount,
+        wpm: wpm,
+        accuracy: accuracyPercentage,
+        errorRate: errorPercentage,
+        timeTaken: timeTakenSeconds
+      }
+    };
+  }
+
+
+  function displayComparison(comparison) {
+    comparisonResultEl.innerHTML = comparison.html;
+  }
+
+  function displayStats(stats) {
+    statsEl.innerHTML = `
+      <div class="stat-item">
+        <h4>Original Words</h4>
+        <p>${stats.totalOriginal}</p>
+      </div>
+      <div class="stat-item">
+        <h4>Your Words</h4>
+        <p>${stats.totalUser}</p>
+      </div>
+      <div class="stat-item">
+        <h4>Half Mistakes</h4>
+        <p>${stats.halfMistakes}</p>
+      </div>
+      <div class="stat-item">
+        <h4>Full Mistakes</h4>
+        <p>${stats.fullMistakes}</p>
+      </div>
+      <div class="stat-item">
+        <h4>Keystrokes</h4>
+        <p>${stats.keystrokes}</p>
+      </div>
+      <div class="stat-item">
+        <h4>Typing Speed (WPM)</h4>
+        <p>${stats.wpm}</p>
+      </div>
+      <div class="stat-item">
+        <h4>Accuracy</h4>
+        <p>${stats.accuracy.toFixed(1)}%</p>
+      </div>
+      <div class="stat-item">
+        <h4>Time Taken</h4>
+        <p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p>
+      </div>
+    `;
+  }
+
+  function displayFeedback(stats, originalWords, userWords) {
+    // Basic feedback based on accuracy and WPM
+    let feedbackHTML = `<h4>Feedback</h4><ul>`;
+
+    if (stats.accuracy >= 98) {
+        feedbackHTML += `<li>Excellent accuracy! Keep up the great work.</li>`;
+    } else if (stats.accuracy >= 90) {
+        feedbackHTML += `<li>Good accuracy. Focus on reducing those minor errors.</li>`;
+    } else {
+        feedbackHTML += `<li>Accuracy needs improvement. Try focusing more carefully on the text.</li>`;
+    }
+
+    if (stats.wpm >= 60) {
+        feedbackHTML += `<li>Great speed!</li>`;
+    } else if (stats.wpm >= 40) {
+        feedbackHTML += `<li>Good typing speed. Practice regularly to increase it further.</li>`;
+    } else {
+        feedbackHTML += `<li>Focus on improving your typing speed through consistent practice.</li>`;
+    }
+
+    if (stats.halfMistakes > 0) {
+        feedbackHTML += `<li>Pay attention to capitalization and minor spelling errors.</li>`;
+    }
+    if (stats.fullMistakes > 0) {
+        feedbackHTML += `<li>Watch out for missed or added words. Read carefully.</li>`;
+    }
+
+    feedbackHTML += `</ul>`;
+    feedbackEl.innerHTML = feedbackHTML;
+  }
+
+
+  function displayFullTexts(original, user) {
+    originalDisplayEl.textContent = original;
+    userDisplayEl.textContent = user;
+  }
+
+  function embedVideo(url) {
+    const existingVideo = document.getElementById('testVideoPlayer');
+    if (existingVideo) {
+      existingVideo.remove();
+    }
+
+    if (!url) return;
+
+    const videoContainer = document.createElement('div');
+    videoContainer.className = 'video-container';
+    videoContainer.id = 'testVideoPlayer';
+
+    // Basic check for YouTube URLs
+    let videoId = null;
+    try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+            if (urlObj.pathname === '/watch') {
+                videoId = urlObj.searchParams.get('v');
+            } else if (urlObj.hostname === 'youtu.be') {
+                videoId = urlObj.pathname.substring(1);
+            }
+        }
+    } catch (e) {
+        console.warn("Invalid video URL format:", url);
+    }
+
+
+    if (videoId) {
+      videoContainer.innerHTML = `
+        <iframe src="https://www.youtube.com/embed/${videoId}"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+      `;
+    } else {
+      // Assume direct video link if not YouTube
+      videoContainer.innerHTML = `
+        <video controls style="width:100%; height: 100%; position: absolute; top: 0; left: 0;">
+          <source src="${url}" type="video/mp4">
+          Your browser does not support the video tag or the video format.
+        </video>
+      `;
+    }
+
+    originalTextGroup.insertAdjacentElement('afterend', videoContainer);
+  }
+
+  function loadGlobalTests() {
+    const category = testCategoryFilter.value;
+
+    database.ref('tests').orderByChild('timestamp').once('value')
+      .then(snapshot => {
+        const carouselTrack = document.querySelector('.carousel-track');
+        const dotsContainer = document.querySelector('.carousel-dots');
+        carouselTrack.innerHTML = ''; // Clear existing cards
+        dotsContainer.innerHTML = ''; // Clear existing dots
+
+        const tests = snapshot.val();
+
+        if (!tests) {
+          carouselTrack.innerHTML = '<p>No community tests yet. Be the first to share one!</p>';
+          initializeCarousel(); // Initialize even if empty to handle layout
+          return;
+        }
+
+        const testsArray = Object.entries(tests).map(([id, test]) => ({
+          id,
+          ...test
+        })).sort((a, b) => b.timestamp - a.timestamp); // Sort newest first
+
+        // Filter by category if not "all"
+        const filteredTests = category === 'all'
+          ? testsArray
+          : testsArray.filter(test => test.category === category);
+
+        if (filteredTests.length === 0) {
+          carouselTrack.innerHTML = '<p>No tests match your filter.</p>';
+          initializeCarousel(); // Initialize even if empty
+          return;
+        }
+
+        // Create test cards
+        filteredTests.forEach((test) => {
+          const testCard = document.createElement('div');
+          testCard.className = 'test-card';
+          testCard.dataset.category = test.category;
+          testCard.dataset.id = test.id; // Store test ID
+
+          // Default user photo if none provided
+          const userPhotoSrc = test.userPhoto || `https://ui-avatars.com/api/?name=${encodeURIComponent(test.userName || 'User')}&background=random&color=fff`;
+
+          testCard.innerHTML = `
+            <h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4>
+            <p>${test.text.substring(0, 100)}${test.text.length > 100 ? '...' : ''}</p>
+            ${test.videoUrl ? '<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>' : ''}
+            <div class="test-author">
+              <img src="${userPhotoSrc}" alt="${test.userName || 'User'}">
+              <span>Added by ${test.userName || 'Anonymous'}</span>
+            </div>
+            ${isAdmin ? `<button class="edit-test-btn" data-testid="${test.id}">Edit</button>` : ''}
+          `;
+
+          // Add click listener to the card itself (excluding the edit button)
+          testCard.addEventListener('click', (e) => {
+            // Prevent card selection if the edit button was clicked
+            if (e.target.classList.contains('edit-test-btn')) {
+                return;
+            }
+
+            document.querySelectorAll('.test-card').forEach(card => {
+              card.classList.remove('selected');
+            });
+            testCard.classList.add('selected');
+
+            originalTextEl.value = test.text;
+            originalTextGroup.classList.add('hidden'); // Hide original text input
+            timerOptions.classList.remove('hidden'); // Show timer options
+            timerButtons.forEach(btn => { // Enable timer buttons
+              btn.disabled = false;
+              btn.style.opacity = '1';
+            });
+
+            // Embed video if URL exists
+            if (test.videoUrl) {
+              embedVideo(test.videoUrl);
+            } else {
+              // Remove video player if it exists from a previous selection
+              const existingVideo = document.getElementById('testVideoPlayer');
+              if (existingVideo) existingVideo.remove();
+            }
+          });
+
+          // Add click listener specifically for the edit button (if it exists)
+          const editButton = testCard.querySelector('.edit-test-btn');
+          if (editButton) {
+              editButton.addEventListener('click', (e) => {
+                  e.stopPropagation(); // Prevent the card click listener from firing
+                  showEditModal(test); // Pass the full test object
+              });
+          }
+
+
+          carouselTrack.appendChild(testCard);
+        });
+
+        // Initialize carousel after cards are created
+        initializeCarousel();
+      })
+      .catch(error => {
+        console.error('Error loading tests:', error);
+        document.querySelector('.carousel-track').innerHTML = '<p>Error loading community tests. Please try again later.</p>';
+        initializeCarousel(); // Initialize even on error
+      });
+  }
+
+  // Function to show the edit modal
+  function showEditModal(test) {
+      editTestId.value = test.id;
+      editTestTitle.value = test.title;
+      editTestCategory.value = test.category;
+      editTestText.value = test.text;
+      editTestVideoUrl.value = test.videoUrl || ''; // Handle null/undefined videoUrl
+
+      // Trigger reflow for labels if needed (especially for pre-filled fields)
+      [editTestTitle, editTestCategory, editTestText, editTestVideoUrl].forEach(el => {
+          const label = el.nextElementSibling;
+          if (el.value && label) {
+              label.style.top = '-0.6rem';
+              label.style.fontSize = '0.8rem';
+              label.style.color = 'var(--primary)';
+          }
+      });
+
+
+      editTestModal.classList.add('show');
+  }
+
+  // Function to close any modal
+  function closeModal(modalElement) {
+      modalElement.classList.remove('show');
+      // Optional: Add a small delay before removing from DOM if needed for transitions
+      setTimeout(() => {
+          if (modalElement.parentNode === document.body) {
+             // Only remove if it's a direct child of body (to avoid errors)
+             // and if it wasn't the predefined edit modal
+             if (modalElement.id !== 'editTestModal') {
+                document.body.removeChild(modalElement);
+             }
+          }
+      }, 300); // Match transition duration
+  }
+
+
+  // Event listener for closing the edit modal
+  cancelEditTestBtn.addEventListener('click', () => {
+      closeModal(editTestModal);
+  });
+
+  // Event listener for saving changes in the edit modal
+  saveEditedTestBtn.addEventListener('click', () => {
+      const testId = editTestId.value;
+      const updatedData = {
+          title: editTestTitle.value.trim(),
+          category: editTestCategory.value,
+          text: editTestText.value.trim(),
+          videoUrl: editTestVideoUrl.value.trim() || null // Store null if empty
+      };
+
+      if (!updatedData.title || !updatedData.text) {
+          alert('Test Title and Original Text cannot be empty.');
+          return;
+      }
+
+      // Update data in Firebase
+      database.ref('tests').child(testId).update(updatedData)
+          .then(() => {
+              alert('Test updated successfully!');
+              closeModal(editTestModal);
+              loadGlobalTests(); // Reload tests to show changes
+          })
+          .catch(error => {
+              console.error('Error updating test:', error);
+              alert('Failed to update test. Please try again.');
+          });
+  });
+
+  // Close modal if clicking outside the content
+  editTestModal.addEventListener('click', (e) => {
+      if (e.target === editTestModal) {
+          closeModal(editTestModal);
+      }
+  });
+
+
+  function initializeCarousel() {
+    const track = document.querySelector('.carousel-track');
+    const dotsContainer = document.querySelector('.carousel-dots');
+    const cards = track.querySelectorAll('.test-card'); // Select cards within the track
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    const carouselContainer = document.querySelector('.carousel-container');
+
+    if (!track || !dotsContainer || !prevBtn || !nextBtn || !carouselContainer || cards.length === 0) {
+        // Hide controls if no cards or elements missing
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'none';
+        dotsContainer.style.display = 'none';
+        return;
+    }
+
+    // Ensure controls are visible if there are cards
+    prevBtn.style.display = 'flex';
+    nextBtn.style.display = 'flex';
+    dotsContainer.style.display = 'flex';
+
+
+    let cardWidth = cards[0].offsetWidth + parseInt(getComputedStyle(track).gap || '16px');
+    let currentIndex = 0;
+    let visibleCards = getVisibleCards();
+    let dotCount = Math.ceil(cards.length / visibleCards);
+
+    // Recalculate card width on resize potentially
+    function recalculateCardWidth() {
+        if (cards.length > 0) {
+            cardWidth = cards[0].offsetWidth + parseInt(getComputedStyle(track).gap || '16px');
+        }
+    }
+
+    function getVisibleCards() {
+      const containerWidth = carouselContainer.offsetWidth;
+      // Estimate based on min-width or flex-basis, fallback needed
+      const cardMinWidth = 280 + 16; // From CSS min-width + gap
+      let count = Math.floor(containerWidth / cardMinWidth);
+      return Math.max(1, count); // Ensure at least 1 is visible
+    }
+
+    function createDots() {
+        dotsContainer.innerHTML = ''; // Clear existing dots
+        dotCount = Math.ceil(cards.length / visibleCards);
+        if (dotCount <= 1) {
+            dotsContainer.style.display = 'none'; // Hide dots if only one page
+            return;
+        }
+        dotsContainer.style.display = 'flex'; // Show dots if more than one page
+
+        for (let i = 0; i < dotCount; i++) {
+          const dot = document.createElement('div');
+          dot.className = 'carousel-dot';
+          dot.addEventListener('click', () => {
+            currentIndex = i;
+            updateCarousel();
+          });
+          dotsContainer.appendChild(dot);
+        }
+    }
+
+    function updateCarousel() {
+      // Ensure currentIndex is within bounds
+      currentIndex = Math.max(0, Math.min(currentIndex, dotCount - 1));
+
+      const offset = -currentIndex * (visibleCards * cardWidth);
+      track.style.transform = `translateX(${offset}px)`;
+
+      // Update active dot
+      document.querySelectorAll('.carousel-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentIndex);
+      });
+
+      // Disable/enable buttons
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex >= dotCount - 1;
+      prevBtn.style.opacity = prevBtn.disabled ? '0.5' : '1';
+      nextBtn.style.opacity = nextBtn.disabled ? '0.5' : '1';
+      prevBtn.style.cursor = prevBtn.disabled ? 'not-allowed' : 'pointer';
+      nextBtn.style.cursor = nextBtn.disabled ? 'not-allowed' : 'pointer';
+    }
+
+    // Navigation handlers
+    prevBtn.onclick = () => { // Use onclick to ensure single listener
+      if (currentIndex > 0) {
+        currentIndex--;
+        updateCarousel();
+      }
+    };
+
+    nextBtn.onclick = () => { // Use onclick to ensure single listener
+      if (currentIndex < dotCount - 1) {
+        currentIndex++;
+        updateCarousel();
+      }
+    };
+
+    // Handle window resize
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            recalculateCardWidth();
+            const newVisibleCards = getVisibleCards();
+            if (newVisibleCards !== visibleCards) {
+                visibleCards = newVisibleCards;
+                // Adjust current index if it becomes invalid
+                currentIndex = Math.floor((currentIndex * visibleCards * cardWidth) / (newVisibleCards * cardWidth));
+                createDots(); // Recreate dots as the count might change
+                updateCarousel();
+            } else {
+                // Even if visible cards count doesn't change, width might, so update offset
+                updateCarousel();
+            }
+        }, 250); // Debounce resize event
+    });
+
+    // Initial setup
+    recalculateCardWidth();
+    visibleCards = getVisibleCards();
+    createDots();
+    updateCarousel();
+  }
+
+
+  function getCategoryName(category) {
+    const categories = {
+      'general': 'General Matter',
+      'kailash': 'Kailash Chandra',
+      'progressive': 'Progressive',
+      'legal': 'Legal',
+      'previous': 'Previous Year',
+      'test': 'Test'
+    };
+    return categories[category] || category.charAt(0).toUpperCase() + category.slice(1); // Fallback
+  }
+
+  saveBtn.addEventListener('click', () => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert('Please login to save tests.');
+      return;
+    }
+
+    const title = customTitle.value.trim();
+    const text = customOriginal.value.trim();
+    const videoUrl = customVideoUrl.value.trim();
+    const category = customCategory.value;
+
+    if (!title || !text) {
+      alert('Please enter both a title and the original text.');
+      return;
+    }
+
+    const testData = {
+      title,
+      text,
+      videoUrl: videoUrl || null,
+      userName: user.displayName,
+      userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`,
+      category,
+      timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    database.ref('tests').push(testData)
+      .then(() => {
+        alert('Test saved and shared with the community!');
+        customTitle.value = '';
+        customOriginal.value = '';
+        customVideoUrl.value = '';
+        loadGlobalTests(); // Refresh the list
+      })
+      .catch(error => {
+        console.error('Error saving test:', error);
+        alert('Failed to save test. Please try again.');
+      });
+  });
+
+  clearBtn.addEventListener('click', () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    database.ref('tests').orderByChild('userName').equalTo(user.displayName).once('value')
+      .then(snapshot => {
+        const userTests = snapshot.val();
+        if (!userTests || Object.keys(userTests).length === 0) {
+          alert('You have no tests to delete.');
+          return;
+        }
+
+        const modal = document.createElement('div');
+        modal.className = 'modal show'; // Add show class
+        modal.innerHTML = `
+          <div class="modal-content">
+            <h3>Select Tests to Delete</h3>
+            <div class="test-selection" style="max-height: 40vh; overflow-y: auto;"></div>
+            <div class="modal-buttons">
+              <button id="cancelDelete" class="secondary-btn">Cancel</button>
+              <button id="confirmDelete" class="danger-btn">Delete Selected</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const testSelection = modal.querySelector('.test-selection');
+        const checkboxes = [];
+
+        Object.entries(userTests).forEach(([id, test]) => {
+          const testItem = document.createElement('div');
+          testItem.className = 'test-item';
+          const checkboxId = `test-${id}`;
+          testItem.innerHTML = `
+            <input type="checkbox" id="${checkboxId}" checked>
+            <label for="${checkboxId}">${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></label>
+          `;
+          testSelection.appendChild(testItem);
+          checkboxes.push({id, checkbox: testItem.querySelector('input')});
+        });
+
+        modal.querySelector('#cancelDelete').addEventListener('click', () => {
+          closeModal(modal);
+        });
+
+        modal.querySelector('#confirmDelete').addEventListener('click', () => {
+          const selectedTests = checkboxes
+            .filter(item => item.checkbox.checked)
+            .map(item => item.id);
+
+          if (selectedTests.length === 0) {
+            alert('Please select at least one test to delete.');
+            return;
+          }
+
+          const updates = {};
+          selectedTests.forEach(id => {
+            updates[`tests/${id}`] = null; // Correct path for tests
+          });
+
+          database.ref().update(updates) // Update from root
+            .then(() => {
+              alert(`${selectedTests.length} test(s) deleted successfully.`);
+              closeModal(modal);
+              loadGlobalTests(); // Refresh the list
+            })
+            .catch(error => {
+              console.error('Error deleting tests:', error);
+              alert('Failed to delete tests. Please try again.');
+            });
+        });
+
+        // Close modal if clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal(modal);
+            }
+        });
+
+      })
+      .catch(error => {
+        console.error('Error fetching user tests:', error);
+        alert('Failed to fetch your tests. Please try again.');
+      });
+  });
+});
+
+// Dark mode toggle
+document.getElementById('darkModeToggle').addEventListener('change', function() {
+  document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', this.checked);
+});
+
+// Check for saved user preference
+if (localStorage.getItem('darkMode') === 'true') {
+  document.getElementById('darkModeToggle').checked = true;
+  document.body.classList.add('dark-mode');
+}
+</script>
 </body>
 </html>
