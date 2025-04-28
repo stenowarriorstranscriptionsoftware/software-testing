@@ -331,13 +331,16 @@ body.dark-mode .fulltext-header {
   border-bottom-color: #444;
 }
 
-.correct { color: #2ecc71; font-weight: bold; }
-.missing { color: #3498db; font-weight: bold; }
-.addition { color: #e74c3c; text-decoration: line-through; font-weight: bold; }
-.spelling { color: #e67e22; font-weight: bold; }
-.capitalization { color: #9b59b6; font-weight: bold; }
-.capitalization-strike { color: #9b59b6; text-decoration: line-through; font-weight: bold; }
-.spelling-strike { color: #e67e22; text-decoration: line-through; font-weight: bold; }
+/* Comparison Text Styles */
+.correct { color: #2ecc71; font-weight: bold; } /* Green */
+.missing { color: #e74c3c; font-weight: bold; text-decoration: line-through; background-color: rgba(231, 76, 60, 0.1); padding: 0 2px; border-radius: 3px;} /* Red, strikethrough */
+.addition { color: #3498db; font-weight: bold; background-color: rgba(52, 152, 219, 0.1); padding: 0 2px; border-radius: 3px;} /* Blue */
+.spelling { color: #e67e22; font-weight: bold; text-decoration: underline wavy rgba(230, 126, 34, 0.7); } /* Orange, wavy underline */
+.capitalization { color: #9b59b6; font-weight: bold; border-bottom: 2px dotted rgba(155, 89, 182, 0.7); } /* Purple, dotted underline */
+/* Remove strike through styles as they are redundant with the new approach */
+/* .capitalization-strike { ... } */
+/* .spelling-strike { ... } */
+
 
 .legend-box {
   border: 1px solid #e2e8f0;
@@ -361,8 +364,21 @@ body.dark-mode .legend-box {
 
 .legend-row span {
   margin-right: 8px;
-  font-size: 1.2rem;
+  font-size: 1.2rem; /* Keep box size consistent */
+  display: inline-block; /* Needed for background color */
+  padding: 0 2px; /* Match padding */
+  border-radius: 3px; /* Match border radius */
+  line-height: 1.2; /* Adjust line height for visual consistency */
+  min-width: 1.5em; /* Ensure some width */
+  text-align: center;
 }
+/* Apply styles directly to legend spans */
+.legend-row .correct { background-color: transparent; text-decoration: none; }
+.legend-row .missing { background-color: rgba(231, 76, 60, 0.1); text-decoration: line-through; }
+.legend-row .addition { background-color: rgba(52, 152, 219, 0.1); text-decoration: none; }
+.legend-row .spelling { background-color: transparent; text-decoration: underline wavy rgba(230, 126, 34, 0.7); }
+.legend-row .capitalization { background-color: transparent; text-decoration: none; border-bottom: 2px dotted rgba(155, 89, 182, 0.7); }
+
 
 .result-box, .stats-box, .feedback-box, .text-display {
   background: white;
@@ -382,6 +398,8 @@ body.dark-mode .text-display {
 
 .result-box {
   line-height: 1.8;
+  white-space: pre-wrap; /* Ensure whitespace is handled correctly */
+  word-wrap: break-word; /* Allow long words to break */
 }
 
 .comparison-section {
@@ -689,7 +707,7 @@ body.dark-mode .test-filters select {
   padding: 1.5rem;
   border-radius: 15px;
   border: none;
-  cursor: pointer;
+  /* cursor: pointer; /* Remove cursor from whole card */
   transition: all 0.3s ease;
   box-shadow: 8px 8px 16px #e2e8f0,
               -8px -8px 16px #ffffff;
@@ -1510,11 +1528,10 @@ body.dark-mode .selected-row {
         <div class="comparison-section">
           <div class="legend-box">
             <div class="legend-row"><span class="correct">■</span> Correct</div>
-            <div class="legend-row"><span class="missing">■</span> Missing</div>
-            <div class="legend-row"><span class="addition">■</span> Added</div>
-            <div class="legend-row"><span class="spelling">■</span> Spelling</div>
-            <div class="legend-row"><span class="capitalization">■</span> Capitalization</div>
-          </div>
+            <div class="legend-row"><span class="missing">■</span> Missing (from Original)</div>
+            <div class="legend-row"><span class="addition">■</span> Added (in Your Text)</div>
+            <div class="legend-row"><span class="capitalization">■</span> Capitalization Difference</div>
+            </div>
           <div id="comparisonResult" class="result-box"></div>
         </div>
 
@@ -2358,10 +2375,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function compareTexts() {
-    const originalText = originalTextEl.value;
-    const userText = userTextEl.value;
+    const originalTextRaw = originalTextEl.value; // Keep raw for display
+    const userTextRaw = userTextEl.value; // Keep raw for display
 
-    if (!originalText || !userText) {
+    if (!originalTextRaw || !userTextRaw) {
       alert('Please enter both original text and your transcription.');
       return;
     }
@@ -2370,41 +2387,42 @@ document.addEventListener('DOMContentLoaded', function() {
     let testCategory = 'general'; // Default category
     const selectedTestCard = document.querySelector('.test-card.selected');
     if (selectedTestCard) {
-        // Extract title carefully, removing badge if present
         const titleElement = selectedTestCard.querySelector('h4');
         testTitle = titleElement ? titleElement.firstChild.textContent.trim() : 'Selected Test';
         testCategory = selectedTestCard.dataset.category || 'general';
     }
 
-    const originalWords = processText(originalText);
-    const userWords = processText(userText);
+    // Process text for comparison (removes punctuation, converts to array)
+    const originalWords = processText(originalTextRaw);
+    const userWords = processText(userTextRaw);
 
-    const comparison = compareParagraphs(originalWords, userWords);
+    // Perform the improved comparison
+    const comparison = compareParagraphsLCS(originalWords, userWords); // Use LCS version
 
-    displayComparison(comparison);
-    displayStats(comparison.stats);
-    displayFeedback(comparison.stats, originalWords, userWords);
-    displayFullTexts(originalText, userText);
+    displayComparison(comparison); // Display the HTML diff
+    displayStats(comparison.stats); // Display calculated stats
+    displayFeedback(comparison.stats, originalWords, userWords); // Display feedback
+    displayFullTexts(originalTextRaw, userTextRaw); // Show raw texts
 
     const now = new Date();
     resultDateEl.textContent = now.toLocaleString();
 
-    showResults();
+    showResults(); // Make results visible
 
     if (testActive) {
-      lockTest();
+      lockTest(); // Lock input if timer was active
     }
 
     // Save attempt to leaderboard if user is logged in
     if (currentUser) {
       const attemptData = {
-        userId: currentUser.uid, // Store user ID
+        userId: currentUser.uid,
         userName: currentUser.displayName || 'Anonymous',
         userPhoto: currentUser.photoURL || 'https://www.gravatar.com/avatar/' + currentUser.uid + '?d=identicon&s=30',
         testTitle: testTitle,
-        category: testCategory, // Use determined category
-        stats: comparison.stats,
-        timestamp: firebase.database.ServerValue.TIMESTAMP // Use server timestamp
+        category: testCategory,
+        stats: comparison.stats, // Use stats from the comparison result
+        timestamp: firebase.database.ServerValue.TIMESTAMP
       };
 
       database.ref('attempts').push(attemptData)
@@ -2428,182 +2446,191 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function downloadAsPdf() {
     const resultsElement = document.getElementById('results');
-    // Temporarily make hidden elements visible for capture if needed
-    // e.g., comparisonResultEl.style.display = 'block';
 
     html2canvas(resultsElement, {
-      scale: 1.5, // Increase scale for better resolution
+      scale: 1.5,
       useCORS: true,
       allowTaint: true,
-      logging: false // Reduce console noise
+      logging: false
     }).then(canvas => {
-      const imgData = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG for smaller size
+      const imgData = canvas.toDataURL('image/jpeg', 0.8);
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const canvasWidth = canvas.width;
       const canvasHeight = canvas.height;
       const ratio = canvasWidth / canvasHeight;
-      const imgWidth = pdfWidth - 20; // Add some margin
+      const imgWidth = pdfWidth - 20;
       const imgHeight = imgWidth / ratio;
 
       let heightLeft = imgHeight;
-      let position = 10; // Initial top margin
+      let position = 10;
 
       pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-      heightLeft -= (pdfHeight - 20); // Subtract available height
+      heightLeft -= (pdfHeight - 20);
 
       while (heightLeft > 0) {
-        position = heightLeft - imgHeight + 10; // Adjust position for next page
+        position = heightLeft - imgHeight + 10;
         pdf.addPage();
         pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
         heightLeft -= (pdfHeight - 20);
       }
 
       pdf.save('steno-warriors-results.pdf');
-      // Restore visibility if changed
-      // e.g., comparisonResultEl.style.display = '';
     }).catch(err => {
         console.error("Error generating PDF:", err);
         alert("Could not generate PDF. Please try again.");
-        // Restore visibility if changed
     });
   }
 
   function processText(text) {
+    // Keep this simple for now: remove common punctuation and split
+    // More sophisticated handling (keeping punctuation attached) could be added later.
     return text
       .replace(/<[^>]*>/g, '') // Remove HTML tags
       .replace(/[\u2018\u2019]/g, "'") // Normalize apostrophes
       .replace(/[\u201C\u201D]/g, '"') // Normalize quotes
-      .replace(/[.,!?;:]/g, '') // Remove punctuation for basic comparison (adjust if needed)
+      .replace(/[.,!?;:]/g, '') // Remove common punctuation
       .trim()
       .split(/\s+/); // Split by whitespace
   }
 
-  function isSimilar(wordA, wordB) {
-      // Basic similarity check (case-insensitive)
-      return wordA.toLowerCase() === wordB.toLowerCase();
-      // Could implement Levenshtein distance for more advanced similarity
-  }
+  // --- START: Improved Comparison Logic using LCS ---
 
-  function arraysAreEqual(arr1, arr2) {
-    if (arr1.length !== arr2.length) return false;
-    for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) return false;
-    }
-    return true;
-  }
+  /**
+   * Calculates the Longest Common Subsequence between two arrays.
+   * Returns a 2D array representing the LCS lengths.
+   * @param {string[]} arr1 First array of words.
+   * @param {string[]} arr2 Second array of words.
+   * @returns {number[][]} The LCS length table.
+   */
+  function getLcsTable(arr1, arr2) {
+      const m = arr1.length;
+      const n = arr2.length;
+      // Initialize DP table with zeros
+      const dp = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0));
 
-  function compareParagraphs(paragraphA, paragraphB) {
-      // This is a simplified comparison logic. A more robust diff algorithm (like Myers diff)
-      // would provide better results for insertions/deletions.
-      let comparedText = '';
-      let numHalfDiff = 0; // For capitalization/minor spelling differences
-      let numFullDiff = 0; // For missing/added/completely different words
-      let correctCount = 0;
-      let wordAIndex = 0;
-      let wordBIndex = 0;
-
-      const maxLength = Math.max(paragraphA.length, paragraphB.length);
-
-      while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
-          const wordA = paragraphA[wordAIndex] || '';
-          const wordB = paragraphB[wordBIndex] || '';
-          const cleanWordA = wordA.toLowerCase(); // Compare lowercase
-          const cleanWordB = wordB.toLowerCase();
-
-          if (wordA === wordB) { // Exact match
-              comparedText += `<span class="correct">${wordA}</span> `;
-              correctCount++;
-              wordAIndex++;
-              wordBIndex++;
-          } else if (cleanWordA === cleanWordB) { // Capitalization difference
-              comparedText += `<span class="capitalization">${wordA}</span> `; // Show original
-              // comparedText += `<span class="capitalization-strike">${wordB}</span> `; // Optionally show user's version
-              wordAIndex++;
-              wordBIndex++;
-              numHalfDiff++;
-          } else {
-              // Simple diff: Check next few words for resynchronization
-              let lookahead = 3;
-              let foundMatchA = -1;
-              let foundMatchB = -1;
-
-              // Look ahead in B for word A
-              for (let i = 1; i <= lookahead && (wordBIndex + i) < paragraphB.length; i++) {
-                  if (paragraphA[wordAIndex] === paragraphB[wordBIndex + i]) {
-                      foundMatchB = i;
-                      break;
-                  }
-              }
-
-              // Look ahead in A for word B
-              for (let i = 1; i <= lookahead && (wordAIndex + i) < paragraphA.length; i++) {
-                  if (paragraphB[wordBIndex] === paragraphA[wordAIndex + i]) {
-                      foundMatchA = i;
-                      break;
-                  }
-              }
-
-              if (foundMatchB !== -1 && (foundMatchA === -1 || foundMatchB <= foundMatchA)) {
-                  // Found wordA later in B -> words in B were added
-                  for (let i = 0; i < foundMatchB; i++) {
-                      comparedText += `<span class="addition">${paragraphB[wordBIndex + i]}</span> `;
-                      numFullDiff++;
-                  }
-                  wordBIndex += foundMatchB;
-              } else if (foundMatchA !== -1) {
-                  // Found wordB later in A -> words in A were missed
-                  for (let i = 0; i < foundMatchA; i++) {
-                      comparedText += `<span class="missing">${paragraphA[wordAIndex + i]}</span> `;
-                      numFullDiff++;
-                  }
-                  wordAIndex += foundMatchA;
+      for (let i = 1; i <= m; i++) {
+          for (let j = 1; j <= n; j++) {
+              // Compare words case-insensitively for LCS matching
+              if (arr1[i - 1].toLowerCase() === arr2[j - 1].toLowerCase()) {
+                  dp[i][j] = dp[i - 1][j - 1] + 1;
               } else {
-                  // No match found nearby -> assume mismatch
-                  if (wordA && wordB) {
-                      // Consider it a spelling error if words are somewhat similar (optional)
-                      // For now, treat as full diff
-                      comparedText += `<span class="missing">${wordA}</span> `;
-                      comparedText += `<span class="addition">${wordB}</span> `;
-                      numFullDiff++;
-                      wordAIndex++;
-                      wordBIndex++;
-                  } else if (wordA) { // Word A exists, Word B doesn't (end of user text)
-                      comparedText += `<span class="missing">${wordA}</span> `;
-                      numFullDiff++;
-                      wordAIndex++;
-                  } else { // Word B exists, Word A doesn't (end of original text)
-                      comparedText += `<span class="addition">${wordB}</span> `;
-                      numFullDiff++;
-                      wordBIndex++;
-                  }
+                  dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
               }
           }
       }
+      return dp;
+  }
 
-      const totalOriginalWords = paragraphA.length;
-      const totalMistakes = (numHalfDiff / 2) + numFullDiff; // Count half mistakes as 0.5
-      const errorPercentage = totalOriginalWords > 0 ?
-          Math.min(100, (totalMistakes / totalOriginalWords) * 100) : 0;
-      const accuracyPercentage = Math.max(0, 100 - errorPercentage);
+  /**
+   * Improved comparison function using Longest Common Subsequence (LCS).
+   * @param {string[]} originalWords Array of words from the original text.
+   * @param {string[]} userWords Array of words from the user's transcription.
+   * @returns {object} Object containing comparison HTML and statistics.
+   */
+  function compareParagraphsLCS(originalWords, userWords) {
+      const m = originalWords.length;
+      const n = userWords.length;
+      const lcsTable = getLcsTable(originalWords, userWords);
 
-      const keystrokesCount = userTextEl.value.length;
+      let i = m;
+      let j = n;
+      const diffResult = []; // Store comparison results { type, originalWord, userWord }
+
+      // Backtrack through the LCS table to build the diff
+      while (i > 0 || j > 0) {
+          const originalWord = i > 0 ? originalWords[i - 1] : '';
+          const userWord = j > 0 ? userWords[j - 1] : '';
+          const originalWordLower = originalWord.toLowerCase();
+          const userWordLower = userWord.toLowerCase();
+
+          if (i > 0 && j > 0 && originalWordLower === userWordLower) {
+              // Words match (case-insensitive)
+              if (originalWord === userWord) {
+                  // Exact match
+                  diffResult.push({ type: 'correct', word: originalWord });
+              } else {
+                  // Capitalization difference
+                  diffResult.push({ type: 'capitalization', originalWord: originalWord, userWord: userWord });
+              }
+              i--;
+              j--;
+          } else if (j > 0 && (i === 0 || lcsTable[i][j - 1] >= lcsTable[i - 1][j])) {
+              // Word added in user text
+              diffResult.push({ type: 'addition', word: userWord });
+              j--;
+          } else if (i > 0 && (j === 0 || lcsTable[i][j - 1] < lcsTable[i - 1][j])) {
+              // Word missing from user text (present in original)
+              diffResult.push({ type: 'missing', word: originalWord });
+              i--;
+          } else {
+               // Should not happen in standard LCS backtracking, but break just in case
+               break;
+          }
+      }
+
+      // Reverse the result array as we backtracked from the end
+      diffResult.reverse();
+
+      // --- Generate HTML and Calculate Stats ---
+      let comparedText = '';
+      let numHalfDiff = 0; // Capitalization
+      let numFullDiff = 0; // Missing/Added
+      let correctCount = 0;
+
+      diffResult.forEach(diff => {
+          switch (diff.type) {
+              case 'correct':
+                  comparedText += `<span class="correct">${diff.word}</span> `;
+                  correctCount++;
+                  break;
+              case 'capitalization':
+                  // Display the original word with capitalization styling
+                  comparedText += `<span class="capitalization">${diff.originalWord}</span> `;
+                  // Note: We count capitalization as a half mistake, but display only one word.
+                  numHalfDiff++;
+                  correctCount++; // Still counts as fundamentally correct word
+                  break;
+              case 'missing':
+                  comparedText += `<span class="missing">${diff.word}</span> `;
+                  numFullDiff++;
+                  break;
+              case 'addition':
+                  comparedText += `<span class="addition">${diff.word}</span> `;
+                  numFullDiff++;
+                  break;
+          }
+      });
+
+      // --- Calculate Stats ---
+      const totalOriginalWords = originalWords.length;
+      // Accuracy calculation: (Correct Words - Half Mistakes / 2) / Total Original Words
+      // We count capitalization diffs as correct but penalize slightly.
+      const effectiveCorrect = correctCount - (numHalfDiff / 2);
+      const accuracyPercentage = totalOriginalWords > 0 ?
+          Math.max(0, Math.min(100, (effectiveCorrect / totalOriginalWords) * 100)) :
+          (userWords.length === 0 ? 100 : 0); // Handle empty original text case
+
+      const errorPercentage = 100 - accuracyPercentage;
+
+      const keystrokesCount = userTextEl.value.length; // Use raw text length for keystrokes
       const endTime = new Date();
       const timeTakenSeconds = startTime ? Math.round((endTime - startTime) / 1000) : 0;
       const typingTimeMinutes = timeTakenSeconds / 60;
-      const wordsTyped = paragraphB.length; // Use user words for WPM calculation
-      // Calculate WPM based on net words (correct words typed per minute) or gross words
-      // Using gross WPM here:
+      const wordsTyped = userWords.length; // Base WPM on typed words
+
+      // WPM Calculation: (Typed Words / Time in Minutes)
+      // Could also use Net WPM: (Correct Words / Time) or ((Keystrokes / 5) / Time)
       const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
 
       return {
-          html: comparedText.trim(), // Trim trailing space
+          html: comparedText.trim(),
           stats: {
               totalOriginal: totalOriginalWords,
               totalUser: wordsTyped,
-              halfMistakes: numHalfDiff,
-              fullMistakes: numFullDiff,
+              halfMistakes: numHalfDiff, // Capitalization errors
+              fullMistakes: numFullDiff, // Missing/Added errors
               keystrokes: keystrokesCount,
               wpm: wpm,
               accuracy: accuracyPercentage,
@@ -2612,6 +2639,8 @@ document.addEventListener('DOMContentLoaded', function() {
           }
       };
   }
+
+  // --- END: Improved Comparison Logic using LCS ---
 
 
   function displayComparison(comparison) {
@@ -2629,12 +2658,10 @@ document.addEventListener('DOMContentLoaded', function() {
         <p>${stats.totalUser}</p>
       </div>
       <div class="stat-item">
-        <h4>Half Mistakes</h4>
-        <p>${stats.halfMistakes}</p>
+        <h4>Capitalization Errors</h4> <p>${stats.halfMistakes}</p>
       </div>
       <div class="stat-item">
-        <h4>Full Mistakes</h4>
-        <p>${stats.fullMistakes}</p>
+        <h4>Missing/Added Words</h4> <p>${stats.fullMistakes}</p>
       </div>
       <div class="stat-item">
         <h4>Keystrokes</h4>
@@ -2660,21 +2687,42 @@ document.addEventListener('DOMContentLoaded', function() {
     let feedbackHTML = `<h4>Overall Assessment</h4>`;
     feedbackHTML += getOverallAssessment(stats.accuracy, stats.wpm);
 
-    // More detailed analysis could be added here by comparing originalWords and userWords
-    // For example, identifying common types of errors (omissions, additions, specific word errors)
+    feedbackHTML += `<h4>Mistake Summary</h4><ul>`;
+     if (stats.halfMistakes > 0) {
+         feedbackHTML += `<li>Found ${stats.halfMistakes} capitalization difference(s).</li>`;
+     }
+     const missingCount = document.querySelectorAll('#comparisonResult .missing').length;
+     const addedCount = document.querySelectorAll('#comparisonResult .addition').length;
+     if (missingCount > 0) {
+        feedbackHTML += `<li>Found ${missingCount} missing word(s) (present in original, absent in yours).</li>`;
+     }
+      if (addedCount > 0) {
+        feedbackHTML += `<li>Found ${addedCount} added word(s) (absent in original, present in yours).</li>`;
+     }
+     if (stats.halfMistakes === 0 && missingCount === 0 && addedCount === 0 && stats.accuracy < 100) {
+         // This might indicate punctuation or complex spacing issues if processText was different
+         feedbackHTML += `<li>Some differences detected, possibly related to punctuation or spacing not shown in this basic diff.</li>`;
+     } else if (stats.halfMistakes === 0 && missingCount === 0 && addedCount === 0 && stats.accuracy === 100) {
+         feedbackHTML += `<li>No significant word or capitalization errors found!</li>`;
+     }
+    feedbackHTML += `</ul>`;
+
 
     feedbackHTML += `<h4>Improvement Suggestions</h4><ul>`;
     if (stats.accuracy < 90) {
       feedbackHTML += `<li>Focus on accuracy. Slow down slightly if needed.</li>`;
     }
     if (stats.halfMistakes > 5) {
-         feedbackHTML += `<li>Pay attention to capitalization and minor spelling details.</li>`;
+         feedbackHTML += `<li>Pay close attention to capitalization rules.</li>`;
     }
-     if (stats.fullMistakes > stats.totalOriginal * 0.05) { // More than 5% full mistakes
-         feedbackHTML += `<li>Review the original text carefully to avoid missing or adding words.</li>`;
+     if (missingCount > stats.totalOriginal * 0.03) { // More than 3% missing
+         feedbackHTML += `<li>Try to read slightly ahead in the original text to avoid skipping words.</li>`;
+     }
+     if (addedCount > stats.totalOriginal * 0.03) { // More than 3% added
+         feedbackHTML += `<li>Focus on typing only what is present in the source text.</li>`;
      }
     if (stats.wpm < 40) {
-        feedbackHTML += `<li>Practice regularly to increase your typing speed.</li>`;
+        feedbackHTML += `<li>Practice regularly to increase your typing speed and rhythm.</li>`;
     }
     feedbackHTML += `<li>Consistent practice is key to improvement!</li>`;
     feedbackHTML += `</ul>`;
@@ -3174,7 +3222,11 @@ document.addEventListener('DOMContentLoaded', function() {
           }
 
           // Proceed with update
-          dbOperation = database.ref('tests/' + editingTestId).update(testData);
+          // Ensure timestamp isn't overwritten on update unless intended
+          const updateData = {...testData};
+          delete updateData.timestamp; // Don't update timestamp on edit
+
+          dbOperation = database.ref('tests/' + editingTestId).update(updateData);
           successMessage = 'Test updated successfully!';
           performDbOperation(dbOperation, successMessage);
       }).catch(error => {
@@ -3183,7 +3235,7 @@ document.addEventListener('DOMContentLoaded', function() {
       });
 
     } else {
-      // Save new test
+      // Save new test (includes timestamp)
       dbOperation = database.ref('tests').push(testData);
       successMessage = 'Test saved and shared successfully!';
       performDbOperation(dbOperation, successMessage);
