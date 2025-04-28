@@ -12,6 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
 <style>
+/* CSS Styles (unchanged from original) */
 :root {
   --primary: #4361ee;
   --primary-light: #4895ef;
@@ -2376,267 +2377,386 @@ document.addEventListener('DOMContentLoaded', function() {
     closeResultsBtn.classList.remove('hidden');
   }
 
- function compareTexts() {
-    const originalText = originalTextEl.value;
+
+  // --- NEW FUNCTIONS START ---
+
+  /**
+   * Main function to initiate text comparison.
+   * Gathers text, processes it, triggers comparison, and displays results.
+   */
+  function compareTexts() {
+    // Get original and user-transcribed text from the respective text areas.
+    const originalText = selectedTestInternal.text ? selectedTestInternal.text : originalTextEl.value;
     const userText = userTextEl.value;
-    
+
+    // Basic validation: Ensure both text areas have content.
     if (!originalText || !userText) {
-      alert('Please enter both original text and your transcription.');
+      // Use a more user-friendly notification instead of alert().
+      // This could be a custom modal or a message area on the page.
+      console.error('Please enter both original text and your transcription.');
+      // Example: displayMessage('Please enter both original text and your transcription.', 'warning');
+      alert('Please enter both original text and your transcription.'); // Kept alert for now, replace with better UI element
       return;
     }
-    
-    let testTitle = "Custom Test";
+
+    // Determine the title of the test being compared.
+    let testTitle = "Custom Test"; // Default title for pasted text.
+    // Check if a test card was selected from the community tests.
     const selectedTestCard = document.querySelector('.test-card.selected');
     if (selectedTestCard) {
+        // If a card is selected, use its title.
         testTitle = selectedTestCard.querySelector('h4').textContent;
     }
-    
+
+    // Process both texts: split into words, remove unwanted characters/tags.
     const originalWords = processText(originalText);
     const userWords = processText(userText);
-    
+
+    // Perform the core comparison logic.
     const comparison = compareParagraphs(originalWords, userWords);
-    
+
+    // Display the comparison results visually (highlighting differences).
     displayComparison(comparison);
+    // Display the calculated statistics (WPM, accuracy, etc.).
     displayStats(comparison.stats);
+    // Provide feedback and suggestions based on the stats and mistakes.
     displayFeedback(comparison.stats, originalWords, userWords);
+    // Make the full original and user texts available for viewing.
     displayFullTexts(originalText, userText);
-    
+
+    // Record and display the date/time of the comparison.
     const now = new Date();
     resultDateEl.textContent = now.toLocaleString();
-    
+
+    // Show the results section and hide the input/full text sections.
     showResults();
-    
+
+    // If a timed test was active, lock the input fields.
     if (testActive) {
       lockTest();
     }
 
+    // Save the attempt data to Firebase if a user is logged in.
     const user = auth.currentUser;
     if (user) {
       const attemptData = {
-        userName: user.displayName,
-        userPhoto: user.photoURL,
+        userName: user.displayName || 'Anonymous', // Use 'Anonymous' if displayName is not available
+        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`, // Provide a fallback avatar
         testTitle: testTitle,
-        category: selectedTestCard ? selectedTestCard.dataset.category : customCategory.value,
-        stats: comparison.stats,
-        timestamp: Date.now()
+        category: selectedTestCard ? selectedTestCard.dataset.category : customCategory.value, // Get category from selected card or custom input
+        stats: comparison.stats, // Include all calculated stats
+        timestamp: Date.now() // Use a simple timestamp
       };
 
+      // Push the data to the 'attempts' node in Firebase Realtime Database.
       database.ref('attempts').push(attemptData)
-        .then(() => loadLeaderboard())
-        .catch(error => console.error('Error saving attempt:', error));
+        .then(() => {
+            console.log("Attempt saved successfully.");
+            loadLeaderboard(); // Refresh the leaderboard after saving
+        })
+        .catch(error => console.error('Error saving attempt:', error)); // Log any errors during saving
     }
   }
-  
+
+  /**
+   * Shows the full text comparison view and hides the main results summary.
+   */
   function showFullTexts() {
-    resultsSection.classList.add('hidden');
-    fullTextSection.classList.remove('hidden');
+    resultsSection.classList.add('hidden'); // Hide the statistics and highlighted comparison
+    fullTextSection.classList.remove('hidden'); // Show the side-by-side full text view
   }
-  
+
+  /**
+   * Shows the main results summary (stats, highlighted text) and hides the full text view.
+   */
   function showResults() {
-    fullTextSection.classList.add('hidden');
-    resultsSection.classList.remove('hidden');
+    fullTextSection.classList.add('hidden'); // Hide the side-by-side full text view
+    resultsSection.classList.remove('hidden'); // Show the statistics and highlighted comparison
+    showFullTextBtn.classList.remove('hidden'); // Ensure the "View Full Texts" button is visible
   }
-  
+
+  /**
+   * Generates a PDF document of the results section.
+   */
   function downloadAsPdf() {
+    // Get the HTML element containing the results to be converted to PDF.
     const resultsElement = document.getElementById('results');
+    const downloadBtn = resultsElement.querySelector('#downloadPdfBtn'); // Find the download button within results
+    const originalDownloadDisplay = downloadBtn.style.display; // Store its original display style
 
+    // Temporarily hide the download button itself so it's not included in the PDF image.
+    downloadBtn.style.display = 'none';
+
+    // Use html2canvas to capture the results element as an image.
     html2canvas(resultsElement, {
-      scale: 1.5,
-      useCORS: true,
-      allowTaint: true
+      scale: 1.5, // Increase scale for better resolution in the PDF.
+      useCORS: true, // Necessary if images are loaded from other domains.
+      allowTaint: true, // Allows rendering cross-origin images (use with caution).
+      logging: false // Disable html2canvas logging in the console.
     }).then(canvas => {
-      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      // Restore the download button's visibility after capture.
+      downloadBtn.style.display = originalDownloadDisplay;
+
+      // Convert the canvas to a JPEG image data URL.
+      const imgData = canvas.toDataURL('image/jpeg', 0.8); // Use JPEG format with 80% quality.
+      // Create a new jsPDF instance (portrait, millimeters, A4 size).
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgWidth = 210;
-      const pageHeight = 295;
+      // Get PDF page dimensions.
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      // Calculate image dimensions, maintaining aspect ratio and adding margins.
+      const imgWidth = pdfWidth - 20; // 10mm margin on each side
       const imgHeight = canvas.height * imgWidth / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
+      let heightLeft = imgHeight; // Track remaining image height to print.
+      let position = 10; // Initial Y position for the image (10mm margin).
 
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      // Add the first part of the image to the PDF.
+      pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+      // Decrease remaining height by the height of the first page content area.
+      heightLeft -= (pdfHeight - 20); // Subtract page height minus top/bottom margins
 
+      // If the image is taller than one page, add new pages.
       while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        // Calculate the Y position for the image segment on the new page.
+        // This effectively shifts the image upwards on subsequent pages.
+        position = heightLeft - imgHeight + 10; // Adjust position based on remaining height
+        pdf.addPage(); // Add a new page to the PDF.
+        // Add the next segment of the image.
+        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
+        // Decrease remaining height.
+        heightLeft -= (pdfHeight - 20);
       }
 
-      pdf.save('transcription-comparison.pdf');
+      // Generate a filename for the PDF.
+      const dateStr = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+      const testTitle = selectedTestInternal.title || 'CustomTest'; // Get test title or use default
+      const filename = `StenoWarriors_${testTitle.replace(/[^a-z0-9]/gi, '_')}_${dateStr}.pdf`; // Sanitize title
+
+      // Save the generated PDF.
+      pdf.save(filename);
+    }).catch(err => {
+        // Restore the download button even if an error occurs.
+        downloadBtn.style.display = originalDownloadDisplay;
+        console.error("Error generating PDF:", err);
+        alert("Failed to generate PDF. Check console for details.");
     });
   }
-  
+
+  /**
+   * Prepares text for comparison by cleaning and splitting it into words.
+   * @param {string} text - The input text string.
+   * @returns {string[]} An array of processed words.
+   */
   function processText(text) {
+    // Normalize line breaks, remove HTML tags, normalize quotes,
+    // replace multiple spaces with single space, trim whitespace, and split into words.
     return text
-      .replace(/<[^>]*>/g, '')
-      .replace(/[\u2018\u2019]/g, "'")
-      .trim()
-      .split(/\s+/);
+      .replace(/\r\n|\r/g, '\n') // Normalize line endings to \n
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/[\u2018\u2019]/g, "'") // Replace curly single quotes with standard apostrophe
+      .replace(/[\u201C\u201D]/g, '"') // Replace curly double quotes with standard double quotes
+      .replace(/[ \t]+/g, ' ') // Replace multiple spaces/tabs with a single space
+      .trim() // Remove leading/trailing whitespace
+      .split(' '); // Split the string into an array of words based on spaces
   }
-  
+
+  /**
+   * Checks if two words are similar, ignoring case and basic punctuation.
+   * @param {string} wordA - The first word.
+   * @param {string} wordB - The second word.
+   * @returns {boolean} True if the words are considered similar, false otherwise.
+   */
   function isSimilar(wordA, wordB) {
-    const minLength = Math.min(wordA.length, wordB.length);
-    const maxLength = Math.max(wordA.length, wordB.length);
-    let similarCount = 0;
-    const threshold = 50;
-    
-    for (let i = 0; i < minLength; i++) {
-      if (wordA[i] === wordB[i]) {
-        similarCount++;
-      }
-    }
-    
-    const similarityPercentage = (similarCount / maxLength) * 100;
-    return similarityPercentage >= threshold;
+    // Convert both words to lowercase and remove common punctuation marks.
+    const cleanA = wordA.toLowerCase().replace(/[.,!?;:"']/g, '');
+    const cleanB = wordB.toLowerCase().replace(/[.,!?;:"']/g, '');
+    // Return true if the cleaned words are identical.
+    return cleanA === cleanB;
   }
-  
+
+  /**
+   * Checks if two arrays of words are identical using the isSimilar function for word comparison.
+   * @param {string[]} arr1 - The first array of words.
+   * @param {string[]} arr2 - The second array of words.
+   * @returns {boolean} True if the arrays are considered equal, false otherwise.
+   */
   function arraysAreEqual(arr1, arr2) {
+    // If the arrays have different lengths, they cannot be equal.
     if (arr1.length !== arr2.length) return false;
+    // Iterate through the arrays and compare words at the same index.
     for (let i = 0; i < arr1.length; i++) {
-      if (arr1[i] !== arr2[i]) return false;
+      // Use isSimilar for comparison to handle case/punctuation differences.
+      if (!isSimilar(arr1[i], arr2[i])) return false; // If any pair is not similar, arrays are not equal.
     }
+    // If all corresponding words are similar, the arrays are equal.
     return true;
   }
-  
-  function compareParagraphs(paragraphA, paragraphB) {
-    let comparedText = '';
-    let numHalfDiff = 0;
-    let numFullDiff = 0;
-    let wordAIndex = 0;
-    let wordBIndex = 0;
 
+  /**
+   * Compares two arrays of words (paragraphs) and generates comparison HTML and statistics.
+   * This is a more advanced comparison algorithm attempting to synchronize after mismatches.
+   * @param {string[]} paragraphA - The array of words from the original text.
+   * @param {string[]} paragraphB - The array of words from the user's transcription.
+   * @returns {object} An object containing the comparison HTML and statistics.
+   */
+   function compareParagraphs(paragraphA, paragraphB) {
+    let comparedText = ''; // HTML string to build the visual comparison
+    let numHalfDiff = 0;   // Count of minor differences (e.g., capitalization)
+    let numFullDiff = 0;   // Count of major differences (missing, added, wrong word)
+    let wordAIndex = 0;    // Current index for paragraphA
+    let wordBIndex = 0;    // Current index for paragraphB
+
+    // Loop until both paragraphs have been fully processed
     while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
-      const wordA = paragraphA[wordAIndex] || '';
-      const wordB = paragraphB[wordBIndex] || '';
-      const cleanWordA = wordA.replace(/[,\?\-\s]/g, '');
-      const cleanWordB = wordB.replace(/[,\?\-\s]/g, '');
+        const wordA = paragraphA[wordAIndex] || ''; // Get current word or empty string if out of bounds
+        const wordB = paragraphB[wordBIndex] || ''; // Get current word or empty string if out of bounds
 
-      if (cleanWordA === cleanWordB) {
-        comparedText += `<span class="correct">${wordA}</span> `;
-        wordAIndex++;
-        wordBIndex++;
-      } else if (cleanWordA.toLowerCase() === cleanWordB.toLowerCase()) {
-        comparedText += `<span class="capitalization">${wordA}</span> `;
-        comparedText += `<span class="capitalization-strike">${wordB}</span> `;
-        wordAIndex++;
-        wordBIndex++;
-        numHalfDiff++;
-      } else {
-        if (!wordA) {
-          comparedText += `<span class="addition">${wordB}</span> `;
-          wordBIndex++;
-          numFullDiff++;
-        } else if (!wordB) {
-          comparedText += `<span class="missing">${wordA}</span> `;
-          wordAIndex++;
-          numFullDiff++;
-        } else {
-          if (wordA === paragraphB[wordBIndex]) {
-            comparedText += `<span class="spelling">${wordA}</span> `;
-            wordAIndex++;
-            wordBIndex++;
-          } else if (wordB === paragraphA[wordAIndex]) {
-            comparedText += `<span class="spelling-strike">${wordB}</span> `;
-            wordAIndex++;
-            wordBIndex++;
-          } else if (isSimilar(wordA, wordB)) {
-            comparedText += `<span class="spelling">${wordA}</span> `;
-            comparedText += `<span class="spelling-strike">${wordB}</span> `;
-            wordAIndex++;
-            wordBIndex++;
-            numHalfDiff++;
-          } else {
-            const pairA = [wordA];
-            const pairB = [wordB];
-            
-            for (let i = 1; i < 5 && (wordBIndex + i) < paragraphB.length; i++) {
-              pairB.push(paragraphB[wordBIndex + i]);
-            }
-            
-            for (let i = 1; i < 5 && (wordAIndex + i) < paragraphA.length; i++) {
-              pairA.push(paragraphA[wordAIndex + i]);
-            }
+        // Clean words for comparison (lowercase, remove basic punctuation)
+        const cleanWordA = wordA.replace(/[,\?\-\s.]/g, '').toLowerCase();
+        const cleanWordB = wordB.replace(/[,\?\-\s.]/g, '').toLowerCase();
 
-            let foundPairInA = false;
-            for (let i = 1; i <= 50 && (wordAIndex + i) < paragraphA.length; i++) {
-              const subarrayA = paragraphA.slice(wordAIndex + i, wordAIndex + i + pairB.length);
-              if (arraysAreEqual(subarrayA, pairB)) {
-                for (let j = 0; j < i; j++) {
-                  comparedText += `<span class="missing">${paragraphA[wordAIndex + j]}</span> `;
-                  numFullDiff++;
+        // --- Case 1: Exact Match (after cleaning) ---
+        if (cleanWordA === cleanWordB && wordA && wordB) { // Ensure words exist before comparing
+            // Check if the original casing/punctuation differs
+            if (wordA !== wordB) {
+                // Mark as capitalization/minor difference
+                comparedText += `<span class="capitalization">${wordA}</span> `;
+                comparedText += `<span class="capitalization-strike">${wordB}</span> `;
+                numHalfDiff++;
+            } else {
+                // Mark as correct
+                comparedText += `<span class="correct">${wordA}</span> `;
+            }
+            // Move to the next word in both paragraphs
+            wordAIndex++;
+            wordBIndex++;
+        }
+        // --- Case 2: End of one paragraph reached ---
+        else if (wordAIndex >= paragraphA.length) {
+            // Original text ended, remaining user words are additions
+            comparedText += `<span class="addition">${wordB}</span> `;
+            numFullDiff++;
+            wordBIndex++;
+        } else if (wordBIndex >= paragraphB.length) {
+            // User text ended, remaining original words are missing
+            comparedText += `<span class="missing">${wordA}</span> `;
+            numFullDiff++;
+            wordAIndex++;
+        }
+        // --- Case 3: Mismatch - Attempt Synchronization ---
+        else {
+            let foundSync = false;
+            // Look ahead in user text (max 5 words) to see if original word appears
+            for (let lookAheadB = 1; lookAheadB <= 5 && (wordBIndex + lookAheadB) < paragraphB.length; lookAheadB++) {
+                if (isSimilar(wordA, paragraphB[wordBIndex + lookAheadB])) {
+                    // Found original word later in user text. Mark intermediate user words as additions.
+                    for (let i = 0; i < lookAheadB; i++) {
+                        comparedText += `<span class="addition">${paragraphB[wordBIndex + i]}</span> `;
+                        numFullDiff++;
+                    }
+                    // Mark the synchronized word (handle capitalization)
+                    if (wordA !== paragraphB[wordBIndex + lookAheadB]) {
+                         comparedText += `<span class="capitalization">${wordA}</span> `;
+                         comparedText += `<span class="capitalization-strike">${paragraphB[wordBIndex + lookAheadB]}</span> `;
+                         numHalfDiff++;
+                    } else {
+                        comparedText += `<span class="correct">${wordA}</span> `;
+                    }
+                    // Advance indices past the synchronized point
+                    wordAIndex++;
+                    wordBIndex += lookAheadB + 1;
+                    foundSync = true;
+                    break;
                 }
-                comparedText += `<span class="correct">${pairB.join(' ')}</span> `;
-                wordAIndex += i + pairB.length;
-                wordBIndex += pairB.length;
-                foundPairInA = true;
-                break;
-              }
             }
 
-            if (!foundPairInA) {
-              let foundPairInB = false;
-              for (let i = 1; i <= 50 && (wordBIndex + i) < paragraphB.length; i++) {
-                const subarrayB = paragraphB.slice(wordBIndex + i, wordBIndex + i + pairA.length);
-                if (arraysAreEqual(subarrayB, pairA)) {
-                  for (let j = 0; j < i; j++) {
-                    comparedText += `<span class="addition">${paragraphB[wordBIndex + j]}</span> `;
-                    numFullDiff++;
-                  }
-                  comparedText += `<span class="correct">${pairA.join(' ')}</span> `;
-                  wordAIndex += pairA.length;
-                  wordBIndex += i + pairA.length;
-                  foundPairInB = true;
-                  break;
+            // If not found by looking ahead in user text, look ahead in original text
+            if (!foundSync) {
+                for (let lookAheadA = 1; lookAheadA <= 5 && (wordAIndex + lookAheadA) < paragraphA.length; lookAheadA++) {
+                    if (isSimilar(paragraphA[wordAIndex + lookAheadA], wordB)) {
+                        // Found user word later in original text. Mark intermediate original words as missing.
+                        for (let i = 0; i < lookAheadA; i++) {
+                            comparedText += `<span class="missing">${paragraphA[wordAIndex + i]}</span> `;
+                            numFullDiff++;
+                        }
+                        // Mark the synchronized word (handle capitalization)
+                         if (paragraphA[wordAIndex + lookAheadA] !== wordB) {
+                             comparedText += `<span class="capitalization">${paragraphA[wordAIndex + lookAheadA]}</span> `;
+                             comparedText += `<span class="capitalization-strike">${wordB}</span> `;
+                             numHalfDiff++;
+                         } else {
+                             comparedText += `<span class="correct">${paragraphA[wordAIndex + lookAheadA]}</span> `;
+                         }
+                        // Advance indices past the synchronized point
+                        wordAIndex += lookAheadA + 1;
+                        wordBIndex++;
+                        foundSync = true;
+                        break;
+                    }
                 }
-              }
+            }
 
-              if (!foundPairInB) {
+            // --- Case 4: Still Mismatched - Mark as full difference ---
+            if (!foundSync) {
                 comparedText += `<span class="missing">${wordA}</span> `;
                 comparedText += `<span class="addition">${wordB}</span> `;
+                numFullDiff++;
                 wordAIndex++;
                 wordBIndex++;
-                numFullDiff++;
-              }
             }
-          }
         }
-      }
     }
 
-    const keystrokesCount = userTextEl.value.length;
-    const errorPercentage = paragraphA.length > 0 ? 
+    // --- Calculate Statistics ---
+    const keystrokesCount = userTextEl.value.length; // Total characters typed by the user.
+    // Calculate error percentage (half mistakes count half as much as full mistakes).
+    const errorPercentage = paragraphA.length > 0 ?
       Math.min(100, ((numHalfDiff / 2) + numFullDiff) / paragraphA.length * 100) : 0;
+    // Accuracy is the inverse of the error percentage.
     const accuracyPercentage = Math.max(0, 100 - errorPercentage);
-    
-    const endTime = new Date();
-    const timeTakenSeconds = startTime ? Math.round((endTime - startTime) / 1000) : 0;
-    
-    const typingTimeMinutes = timeTakenSeconds / 60;
-    const wordsTyped = paragraphB.length;
-    const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
 
+    // Calculate time taken and WPM.
+    const endTimeCalc = new Date(); // Use current time as end time for calculation
+    // Calculate time difference only if startTime is valid
+    const timeTakenSeconds = startTime ? Math.round((endTimeCalc - startTime) / 1000) : 0;
+    // Ensure timeTakenSeconds is not negative if system clock changes etc.
+    const validTimeTakenSeconds = Math.max(0, timeTakenSeconds);
+    const typingTimeMinutes = validTimeTakenSeconds / 60;
+    const wordsTyped = paragraphB.length; // Base WPM on the number of words the user actually typed.
+    const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0; // Avoid division by zero.
+
+    // Return the results object.
     return {
-      html: comparedText,
+      html: comparedText.trim(), // The generated HTML string for display.
       stats: {
-        totalOriginal: paragraphA.length,
-        totalUser: paragraphB.length,
-        halfMistakes: numHalfDiff,
-        fullMistakes: numFullDiff,
-        keystrokes: keystrokesCount,
-        wpm: wpm,
-        accuracy: accuracyPercentage,
-        errorRate: errorPercentage,
-        timeTaken: timeTakenSeconds
+        totalOriginal: paragraphA.length, // Total words in the original text.
+        totalUser: paragraphB.length,     // Total words in the user's transcription.
+        halfMistakes: numHalfDiff,         // Count of minor errors (e.g., capitalization).
+        fullMistakes: numFullDiff,         // Count of major errors (missing, added, wrong).
+        keystrokes: keystrokesCount,       // Total characters typed by the user.
+        wpm: wpm,                          // Words per minute.
+        accuracy: accuracyPercentage,      // Overall accuracy percentage.
+        errorRate: errorPercentage,        // Overall error rate percentage.
+        timeTaken: validTimeTakenSeconds   // Total time taken in seconds.
       }
     };
   }
-  
+
+  /**
+   * Displays the visually compared text (with highlights) in the designated element.
+   * @param {object} comparison - The comparison object returned by compareParagraphs.
+   */
   function displayComparison(comparison) {
+    // Set the innerHTML of the comparison result element to the generated HTML string.
     comparisonResultEl.innerHTML = comparison.html;
   }
-  
+
+  /**
+   * Displays the calculated statistics in the designated element.
+   * @param {object} stats - The statistics object from the comparison result.
+   */
   function displayStats(stats) {
+    // Populate the stats element with formatted statistics data.
     statsEl.innerHTML = `
       <div class="stat-item">
         <h4>Original Words</h4>
@@ -2664,109 +2784,159 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <div class="stat-item">
         <h4>Accuracy</h4>
-        <p>${stats.accuracy.toFixed(1)}%</p>
-      </div>
+        <p>${stats.accuracy.toFixed(1)}%</p> </div>
       <div class="stat-item">
         <h4>Time Taken</h4>
         <p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p>
       </div>
     `;
   }
-  
+
+  /**
+   * Generates and displays feedback and improvement suggestions based on performance.
+   * @param {object} stats - The statistics object.
+   * @param {string[]} originalWords - Array of original words.
+   * @param {string[]} userWords - Array of user-typed words.
+   */
   function displayFeedback(stats, originalWords, userWords) {
+    // Analyze the mistakes made during the transcription.
     const analysis = analyzeMistakes(originalWords, userWords);
-    
+
+    // Construct the feedback HTML string.
     let feedback = `
       <h4>Overall Assessment</h4>
-      ${getOverallAssessment(stats.accuracy, stats.wpm)}
-      
-      <h4>Mistake Analysis</h4>
+      ${getOverallAssessment(stats.accuracy, stats.wpm)} <h4>Mistake Analysis</h4>
       <ul>
         ${analysis.commonMistakes.map(m => `<li>${m}</li>`).join('')}
       </ul>
-      
+
       <h4>Improvement Suggestions</h4>
       <ul>
         ${getImprovementSuggestions(analysis, stats)}
       </ul>
     `;
-    
+
+    // Display the generated feedback in the feedback element.
     feedbackEl.innerHTML = feedback;
   }
-  
+
+  /**
+   * Displays the full original and user-transcribed texts in their respective display areas.
+   * @param {string} original - The original text.
+   * @param {string} user - The user's transcribed text.
+   */
   function displayFullTexts(original, user) {
+    // Set the text content for the original and user text display elements.
     originalDisplayEl.textContent = original;
     userDisplayEl.textContent = user;
   }
-  
+
+  /**
+   * Analyzes the differences between original and user text to identify common mistake types.
+   * @param {string[]} originalText - Array of original words.
+   * @param {string[]} userText - Array of user-typed words.
+   * @returns {object} An object containing analysis results (mistake rates, common errors).
+   */
   function analyzeMistakes(originalText, userText) {
+    // Initialize the analysis object.
     const analysis = {
-      commonMistakes: [],
-      omissionRate: 0,
-      additionRate: 0,
-      spellingErrorRate: 0,
-      capitalizationErrorRate: 0,
-      mostErrorProneWords: []
+      commonMistakes: [], // Array to hold descriptions of common mistakes.
+      omissionRate: 0,    // Rate of skipping words.
+      additionRate: 0,    // Rate of adding extra words.
+      spellingErrorRate: 0, // Rate of spelling/minor errors.
+      capitalizationErrorRate: 0, // Rate of capitalization errors specifically.
+      mostErrorProneWords: [] // List of words frequently involved in errors.
     };
-    
-    const wordPairs = [];
+
+    // --- This is a simplified analysis based on direct word-pair comparison ---
+    // A more accurate analysis would require using the detailed diff from compareParagraphs.
+    // However, this provides a basic overview.
+
+    const wordPairs = []; // Array to store pairs of differing words.
     const minLength = Math.min(originalText.length, userText.length);
-    
+
+    // Compare words at the same index up to the length of the shorter text.
     for (let i = 0; i < minLength; i++) {
-      const origWord = originalText[i].toLowerCase();
-      const userWord = userText[i].toLowerCase();
-      
-      if (origWord !== userWord) {
+      const origWordClean = originalText[i].toLowerCase().replace(/[.,!?;:"']/g, '');
+      const userWordClean = userText[i].toLowerCase().replace(/[.,!?;:"']/g, '');
+
+      // If cleaned words differ, store the original and user pair.
+      if (origWordClean !== userWordClean) {
         wordPairs.push({ original: originalText[i], user: userText[i] });
       }
     }
-    
+
+    // Add differences due to length mismatch (approximations).
+    if (originalText.length > userText.length) {
+        for (let i = minLength; i < originalText.length; i++) {
+            wordPairs.push({ original: originalText[i], user: '' }); // Omission
+        }
+    } else if (userText.length > originalText.length) {
+        for (let i = minLength; i < userText.length; i++) {
+            wordPairs.push({ original: '', user: userText[i] }); // Addition
+        }
+    }
+
+
     let omissionCount = 0;
     let additionCount = 0;
-    let spellingCount = 0;
-    let capitalizationCount = 0;
-    const errorWords = [];
-    
+    let spellingCount = 0; // Includes capitalization for this simplified analysis
+    let capitalizationCount = 0; // More specific count
+    const errorWords = []; // Track original words involved in errors
+
+    // Categorize the identified differences.
     wordPairs.forEach(pair => {
-      const orig = pair.original.toLowerCase();
-      const user = pair.user.toLowerCase();
-      
+      const orig = pair.original;
+      const user = pair.user;
+      const origClean = orig.toLowerCase().replace(/[.,!?;:"']/g, '');
+      const userClean = user.toLowerCase().replace(/[.,!?;:"']/g, '');
+
       if (user === '') {
         omissionCount++;
+        errorWords.push(orig);
       } else if (orig === '') {
         additionCount++;
-      } else if (orig === user) {
-        capitalizationCount++;
-        errorWords.push(pair.original);
-      } else if (isSimilar(orig, user)) {
-        spellingCount++;
-        errorWords.push(pair.original);
+        // Don't add original word if it was an addition
+      } else if (origClean === userClean) {
+          // Words match after cleaning, but not exactly -> Capitalization/Punctuation
+          capitalizationCount++; // Count specifically
+          spellingCount++; // Also count in general spelling/minor errors
+          errorWords.push(orig);
       } else {
-        errorWords.push(pair.original);
+          // Words differ even after cleaning -> Spelling/Wrong word
+          spellingCount++;
+          errorWords.push(orig);
       }
     });
-    
-    analysis.omissionRate = omissionCount / originalText.length;
-    analysis.additionRate = additionCount / originalText.length;
-    analysis.spellingErrorRate = spellingCount / originalText.length;
-    analysis.capitalizationErrorRate = capitalizationCount / originalText.length;
-    
+
+    // Calculate rates based on the length of the original text.
+    const totalOriginal = originalText.length || 1; // Avoid division by zero
+    analysis.omissionRate = omissionCount / totalOriginal;
+    analysis.additionRate = additionCount / totalOriginal; // Note: Rate based on original length might be misleading for additions.
+    analysis.spellingErrorRate = spellingCount / totalOriginal;
+    analysis.capitalizationErrorRate = capitalizationCount / totalOriginal;
+
+    // Find the most frequently misspelled/omitted original words.
     const wordFrequency = {};
     errorWords.forEach(word => {
-      const lowerWord = word.toLowerCase();
-      wordFrequency[lowerWord] = (wordFrequency[lowerWord] || 0) + 1;
+      const lowerWord = word.toLowerCase().replace(/[.,!?;:"']/g, ''); // Clean the word for frequency count
+      if (lowerWord) { // Avoid counting empty strings if punctuation was the only content
+          wordFrequency[lowerWord] = (wordFrequency[lowerWord] || 0) + 1;
+      }
     });
-    
+
+    // Sort words by error frequency and take the top 5.
     analysis.mostErrorProneWords = Object.entries(wordFrequency)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5)
-      .map(entry => entry[0]);
-    
+      .sort((a, b) => b[1] - a[1]) // Sort descending by frequency
+      .slice(0, 5) // Take the top 5
+      .map(entry => entry[0]); // Get only the word
+
+    // Populate the commonMistakes array with descriptions.
     if (capitalizationCount > 0) {
-      analysis.commonMistakes.push(`Capitalization errors (${capitalizationCount} instances)`);
+      analysis.commonMistakes.push(`Capitalization/punctuation errors (${capitalizationCount} instances)`);
     }
-    if (spellingCount > 0) {
-      analysis.commonMistakes.push(`Spelling mistakes (${spellingCount} instances)`);
+    if (spellingCount > capitalizationCount) { // Avoid double counting pure capitalization errors here
+       analysis.commonMistakes.push(`Spelling/wrong word errors (${spellingCount - capitalizationCount} instances)`);
     }
     if (omissionCount > 0) {
       analysis.commonMistakes.push(`Omitted words (${omissionCount} instances)`);
@@ -2774,13 +2944,27 @@ document.addEventListener('DOMContentLoaded', function() {
     if (additionCount > 0) {
       analysis.commonMistakes.push(`Added extra words (${additionCount} instances)`);
     }
-    
+     if (analysis.mostErrorProneWords.length > 0) {
+        analysis.commonMistakes.push(`Words often missed/mistyped: ${analysis.mostErrorProneWords.join(', ')}`);
+    }
+    if (analysis.commonMistakes.length === 0) {
+        analysis.commonMistakes.push("No specific common mistake patterns identified in this simple analysis.");
+    }
+
+
     return analysis;
   }
-  
+
+  /**
+   * Provides an overall assessment message based on accuracy and WPM.
+   * @param {number} accuracy - The accuracy percentage.
+   * @param {number} wpm - The words per minute.
+   * @returns {string} An HTML string containing the assessment message.
+   */
   function getOverallAssessment(accuracy, wpm) {
     let assessment = '';
-    
+
+    // Assess accuracy.
     if (accuracy >= 95) {
       assessment += '<p>🌟 <strong>Excellent accuracy!</strong> Your transcription is nearly perfect.</p>';
     } else if (accuracy >= 85) {
@@ -2790,9 +2974,11 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       assessment += '<p>⚠️ <strong>Needs improvement.</strong> Work on accuracy before increasing speed.</p>';
     }
-    
+
+    // Assess speed (WPM).
     if (wpm >= 50) {
       assessment += '<p>⚡ <strong>Fast typer!</strong> Your speed is impressive. ';
+      // Add advice based on accuracy at high speed.
       if (accuracy < 90) {
         assessment += 'Try slowing down slightly to improve accuracy.</p>';
       } else {
@@ -2804,35 +2990,55 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
       assessment += '<p>🐢 <strong>Slow pace.</strong> Focus on building muscle memory and gradually increasing your speed.</p>';
     }
-    
+
     return assessment;
   }
-  
+
+  /**
+   * Generates specific improvement suggestions based on the mistake analysis.
+   * @param {object} analysis - The mistake analysis object.
+   * @param {object} stats - The statistics object.
+   * @returns {string} An HTML string containing list items with suggestions.
+   */
   function getImprovementSuggestions(analysis, stats) {
-    let suggestions = [];
-    
-    if (analysis.omissionRate > 0.2) {
-      suggestions.push('You\'re skipping many words. Practice reading ahead to anticipate upcoming words.');
+    let suggestions = []; // Array to hold suggestion strings.
+
+    // Add suggestions based on specific error rates (thresholds can be adjusted).
+    if (analysis.omissionRate > 0.1) { // If more than 10% of words are omitted
+      suggestions.push('You seem to be skipping words. Try to read slightly ahead or listen more carefully to anticipate upcoming words.');
     }
-    
-    if (analysis.additionRate > 0.15) {
-      suggestions.push('You\'re adding extra words. Focus on typing only what you see/hear.');
+
+    if (analysis.additionRate > 0.05) { // If more than 5% extra words are added
+      suggestions.push('You\'re adding extra words. Focus on typing only what you see/hear in the original text.');
     }
-    
-    if (analysis.spellingErrorRate > 0.25) {
-      suggestions.push('Spelling mistakes are frequent. Consider practicing difficult words separately.');
+
+    if (analysis.spellingErrorRate > 0.1) { // If more than 10% spelling/wrong word errors
+      suggestions.push('Spelling or word choice mistakes are noticeable. Practice commonly misspelled words or review the text more closely.');
+       if (analysis.mostErrorProneWords.length > 0) {
+           suggestions.push(`Focus practice on these words: ${analysis.mostErrorProneWords.join(', ')}.`);
+       }
     }
-    
-    if (analysis.capitalizationErrorRate > 0.1) {
-      suggestions.push('Watch your capitalization. Remember proper nouns and sentence starts need capitals.');
+
+    if (analysis.capitalizationErrorRate > 0.05) { // If more than 5% capitalization errors
+      suggestions.push('Pay attention to capitalization. Remember proper nouns and the start of sentences require capitals.');
     }
-    
-    suggestions.push('Practice difficult sections repeatedly until you master them.');
-    suggestions.push('Break long passages into smaller chunks for focused practice.');
-    suggestions.push('Focus on accuracy before speed - speed will come naturally with practice.');
-    
+
+    // Add general suggestions.
+    suggestions.push('Practice makes perfect! Repeat difficult sections until you master them.');
+    suggestions.push('Consider breaking long passages into smaller chunks for focused practice.');
+    if (stats.accuracy < 95 && stats.wpm > 45) { // If accuracy is not great but speed is high
+        suggestions.push('Focus on improving accuracy before trying to type faster. Speed will increase naturally with accuracy.');
+    } else {
+        suggestions.push('Continue practicing regularly to improve both speed and accuracy.');
+    }
+
+
+    // Format suggestions as HTML list items.
     return suggestions.map(s => `<li>${s}</li>`).join('');
   }
+
+  // --- NEW FUNCTIONS END ---
+
 
   function embedVideo(url) {
     const existingVideo = document.getElementById('testVideoPlayer');
@@ -2844,17 +3050,23 @@ document.addEventListener('DOMContentLoaded', function() {
     let videoId = null;
     try {
         const urlObj = new URL(url);
-        if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
-            if (urlObj.pathname === '/watch') videoId = urlObj.searchParams.get('v');
-            else if (urlObj.hostname === 'youtu.be') videoId = urlObj.pathname.substring(1);
+        // Updated Regex to handle various YouTube URL formats
+        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+        const match = url.match(youtubeRegex);
+        if (match && match[1]) {
+            videoId = match[1];
         }
     } catch (e) { console.warn("Could not parse video URL:", url, e); }
+
     if (videoId) {
       videoContainer.innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     } else {
-      videoContainer.innerHTML = `<video controls style="width:100%; height: 100%; position: absolute; top: 0; left: 0; border-radius: 8px;"><source src="${url}" type="video/mp4"><source src="${url}" type="video/webm"><source src="${url}" type="video/ogg">Video not supported. <a href="${url}" target="_blank">Link</a></video>`;
+      // Fallback for direct video links or other platforms
+      videoContainer.innerHTML = `<video controls style="width:100%; height: 100%; position: absolute; top: 0; left: 0; border-radius: 8px;"><source src="${url}" type="video/mp4"><source src="${url}" type="video/webm"><source src="${url}" type="video/ogg">Video not supported or invalid URL. <a href="${url}" target="_blank">Link</a></video>`;
     }
-    originalTextGroup.parentNode.insertBefore(videoContainer, originalTextGroup.nextSibling);
+    // Insert video before the user text input area
+    const userTextGroup = document.getElementById('userText').parentNode;
+    userTextGroup.parentNode.insertBefore(videoContainer, userTextGroup);
   }
 
   // Fetch all tests once and store them
@@ -2928,22 +3140,36 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="test-author"><img src="${userPhotoSrc}" alt="${test.userName || 'User'}"><span>Added by ${test.userName || 'Anonymous'}</span></div>`;
 
           testCard.addEventListener('click', (e) => {
-            if (e.target.closest('.test-card-admin-controls')) return;
+            if (e.target.closest('.test-card-admin-controls')) return; // Ignore clicks on admin buttons
             document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected'));
             testCard.classList.add('selected');
-            selectedTestInternal = { text: test.text, title: test.title, category: test.category };
-            originalTextEl.value = ''; originalTextGroup.classList.add('hidden');
-            timerOptions.classList.remove('hidden');
-            document.querySelectorAll('.timer-option').forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; });
-            userTextEl.value = ''; userTextEl.readOnly = false;
+            selectedTestInternal = { text: test.text, title: test.title, category: test.category }; // Store selected test data
+            originalTextEl.value = ''; // Clear manual input area
+            originalTextGroup.classList.add('hidden'); // Hide manual input area
+            timerOptions.classList.remove('hidden'); // Show timer options
+            // Reset timer buttons
+            document.querySelectorAll('.timer-option').forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; });
+            userTextEl.value = ''; // Clear user input
+            userTextEl.readOnly = false; // Ensure user input is editable
             userTextEl.classList.remove('locked-textarea');
-            compareBtn.disabled = false; resultsSection.classList.add('hidden');
-            fullTextSection.classList.add('hidden'); closeResultsBtn.classList.add('hidden');
+            compareBtn.disabled = false; // Enable compare button
+            resultsSection.classList.add('hidden'); // Hide previous results
+            fullTextSection.classList.add('hidden'); // Hide full text view
+            closeResultsBtn.classList.add('hidden'); // Hide close button
             showFullTextBtn.classList.add('hidden'); // Hide full text btn on new selection
-            timerDisplay.classList.add('hidden'); timerDisplay.classList.remove('timer-ended');
-            testActive = false; startTime = null;
-            if (test.videoUrl) embedVideo(test.videoUrl);
-            else { const v = document.getElementById('testVideoPlayer'); if (v) v.remove(); }
+            timerDisplay.classList.add('hidden'); // Hide timer display
+            timerDisplay.classList.remove('timer-ended'); // Reset timer end state
+            testActive = false; // Reset test state
+            startTime = null; // Reset start time
+            stopTimer(); // Clear any existing timer interval
+            // Embed video if available, otherwise remove existing video player
+            if (test.videoUrl) {
+                embedVideo(test.videoUrl);
+            } else {
+                const existingVideo = document.getElementById('testVideoPlayer');
+                if (existingVideo) existingVideo.remove();
+            }
+            userTextEl.focus(); // Focus on the transcription area
           });
 
           const editButton = testCard.querySelector('.edit-test-btn');
@@ -3027,7 +3253,11 @@ document.addEventListener('DOMContentLoaded', function() {
               // Update the local cache and re-render
               const index = allFetchedTests.findIndex(test => test.id === testId);
               if (index !== -1) {
-                  allFetchedTests[index] = { ...allFetchedTests[index], ...updatedData };
+                  // Preserve original timestamp and author info when updating
+                  allFetchedTests[index] = {
+                      ...allFetchedTests[index], // Keep existing data like timestamp, author
+                      ...updatedData // Overwrite with new data
+                    };
               }
               renderGlobalTests();
            })
@@ -3066,12 +3296,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardStyle = getComputedStyle(cards[0]);
             const trackStyle = getComputedStyle(track);
             const cardMargin = parseFloat(cardStyle.marginLeft) + parseFloat(cardStyle.marginRight);
-            const trackGap = parseFloat(trackStyle.gap) || 16;
-            cardWidth = cards[0].offsetWidth + Math.max(cardMargin, trackGap);
+            // Use gap if defined, otherwise fallback to margin calculation
+            const trackGap = parseFloat(trackStyle.gap) || (parseFloat(cardStyle.marginRight) || 0); // Use marginRight as fallback gap
+            cardWidth = cards[0].offsetWidth + trackGap; // Simplified width + gap/margin
             const containerWidth = carouselContainer.offsetWidth;
             // Ensure cardWidth is positive before division
             visibleCards = cardWidth > 0 ? Math.max(1, Math.floor(containerWidth / cardWidth)) : 1;
-            dotCount = Math.ceil(cards.length / visibleCards);
+            // Adjust dot count calculation slightly
+            dotCount = cardWidth > 0 ? Math.ceil(cards.length / Math.max(1, Math.floor(containerWidth / cardWidth))) : 1;
+            dotCount = Math.max(1, dotCount); // Ensure at least 1 dot if there are cards
+
         } else { cardWidth = 0; visibleCards = 1; dotCount = 0; }
     }
 
@@ -3091,7 +3325,12 @@ document.addEventListener('DOMContentLoaded', function() {
       currentIndex = Math.max(0, Math.min(currentIndex, dotCount - 1));
        // Ensure cardWidth and visibleCards are positive before calculating offset
       const offset = (cardWidth > 0 && visibleCards > 0) ? -currentIndex * (visibleCards * cardWidth) : 0;
-      track.style.transform = `translateX(${offset}px)`;
+      // Calculate maximum possible offset
+      const maxOffset = cardWidth > 0 ? -(cards.length - visibleCards) * cardWidth : 0;
+      // Clamp the offset to prevent overscrolling
+      const clampedOffset = Math.max(maxOffset, Math.min(0, offset));
+
+      track.style.transform = `translateX(${clampedOffset}px)`;
       document.querySelectorAll('.carousel-dot').forEach((dot, index) => dot.classList.toggle('active', index === currentIndex));
       prevBtn.disabled = currentIndex === 0;
       nextBtn.disabled = currentIndex >= dotCount - 1;
@@ -3108,13 +3347,16 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', () => {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            const oldVisibleCards = visibleCards; calculateDimensions();
-            if (visibleCards !== oldVisibleCards) {
-                // Adjust index carefully to avoid invalid states
-                currentIndex = Math.max(0, Math.min(Math.floor(currentIndex * oldVisibleCards / visibleCards), dotCount - 1));
+            const oldVisibleCards = visibleCards;
+            const oldDotCount = dotCount;
+            calculateDimensions();
+            // Only recreate dots and adjust index if the number of dots changes
+            if (dotCount !== oldDotCount) {
+                // Adjust index carefully based on the change in visible items per "page"
+                currentIndex = Math.max(0, Math.min(Math.floor(currentIndex * oldDotCount / dotCount), dotCount - 1));
                 createDots();
             }
-            updateCarousel();
+            updateCarousel(); // Always update position on resize
         }, 250);
     });
 
@@ -3135,14 +3377,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!title || !text) { alert('Title and Text required.'); return; }
     const testData = { title, text, videoUrl: videoUrl || null, userName: user.displayName || 'Anonymous',
       userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`,
-      category, timestamp: firebase.database.ServerValue.TIMESTAMP };
+      category, timestamp: firebase.database.ServerValue.TIMESTAMP }; // Use server timestamp
     database.ref('tests').push(testData)
       .then((newRef) => {
           alert('Test saved.');
           customTitle.value = ''; customOriginal.value = ''; customVideoUrl.value = '';
           // Add the new test to the local cache and re-render
-          const newTestData = { id: newRef.key, ...testData };
-          allFetchedTests.unshift(newTestData); // Add to beginning (assuming newest first)
+          // Fetch the actual timestamp after saving if needed, or use client time approx.
+          const newTestData = { id: newRef.key, ...testData, timestamp: Date.now() }; // Approx timestamp
+          allFetchedTests.unshift(newTestData); // Add to beginning
+          allFetchedTests.sort((a, b) => b.timestamp - a.timestamp); // Re-sort
           renderGlobalTests();
       })
       .catch(error => { console.error('Error saving test:', error); alert('Failed to save test.'); });
@@ -3192,7 +3436,9 @@ darkModeToggle.addEventListener('change', function() {
   document.body.classList.toggle('dark-mode');
   localStorage.setItem('darkMode', this.checked);
   toggleIcon.textContent = this.checked ? '☀️' : '🌙';
+  handleInputFocusBlur(); // Update labels on theme change
 });
+// Set initial dark mode state
 if (localStorage.getItem('darkMode') === 'true') {
   darkModeToggle.checked = true; document.body.classList.add('dark-mode'); toggleIcon.textContent = '☀️';
 } else { toggleIcon.textContent = '🌙'; }
@@ -3201,28 +3447,59 @@ if (localStorage.getItem('darkMode') === 'true') {
 function handleInputFocusBlur() {
     const inputs = document.querySelectorAll('.input-group input, .input-group textarea, .input-group select');
     inputs.forEach(input => {
-        const label = input.labels?.[0] || input.previousElementSibling;
+        // Find the label associated with the input.
+        // It might be directly preceding the input or linked via the 'for' attribute.
+        const label = input.labels?.[0] || (input.previousElementSibling?.tagName === 'LABEL' ? input.previousElementSibling : null);
+        if (!label) return; // Skip if no label found
+
         const updateLabel = () => {
-            if (!label) return;
             const isFocused = document.activeElement === input;
-            const hasValue = input.value.trim() !== '' || (input.matches('select') && input.value !== ''); // Adjusted select check
+            // Check value for inputs/textareas, selected value for selects
+            const hasValue = (input.matches('select') ? input.value !== '' : input.value.trim() !== '');
+            // Determine background color based on theme for the floating label background
             const bgColor = document.body.classList.contains('dark-mode') ? '#1e1e1e' : 'white';
+
+            // Apply floating label styles if focused or has value
             if (isFocused || hasValue) {
-                Object.assign(label.style, { top: '-0.6rem', left: '0.8rem', fontSize: '0.8rem', color: 'var(--primary)', background: bgColor, padding: '0 0.5rem' });
+                Object.assign(label.style, {
+                    top: '-0.6rem', // Move label up
+                    left: '0.8rem', // Indent label slightly
+                    fontSize: '0.8rem', // Reduce font size
+                    color: 'var(--primary)', // Change color to primary
+                    background: bgColor, // Set background to match container
+                    padding: '0 0.5rem', // Add padding
+                    zIndex: '2' // Ensure label is above input border
+                });
             } else {
-                Object.assign(label.style, { top: '', left: '', fontSize: '', color: '', background: '', padding: '' });
+                // Reset styles to default placeholder position
+                Object.assign(label.style, {
+                    top: '', left: '', fontSize: '', color: '', background: '', padding: '', zIndex: ''
+                });
             }
         };
-        input.addEventListener('focus', updateLabel); input.addEventListener('blur', updateLabel);
-        input.addEventListener('input', updateLabel);
-        if (input.matches('select')) input.addEventListener('change', updateLabel);
-        updateLabel(); // Initial check
+        // Add event listeners to update label state
+        input.addEventListener('focus', updateLabel);
+        input.addEventListener('blur', updateLabel);
+        input.addEventListener('input', updateLabel); // Update on typing
+        if (input.matches('select')) {
+            input.addEventListener('change', updateLabel); // Update on selection change
+        }
+        updateLabel(); // Initial check when the page loads or function is called
     });
 }
+// Run the handler on initial load and when the theme might change
 document.addEventListener('DOMContentLoaded', handleInputFocusBlur);
+// Also re-run if the edit modal becomes visible
 document.addEventListener('DOMContentLoaded', () => {
-    const editModalObserver = new MutationObserver(() => { if (editTestModal && editTestModal.classList.contains('show')) handleInputFocusBlur(); });
-    if (editTestModal) editModalObserver.observe(editTestModal, { attributes: true, attributeFilter: ['class'] });
+    const editModal = document.getElementById('editTestModal'); // Define editModal here
+    if (editModal) {
+        const editModalObserver = new MutationObserver(() => {
+            if (editModal.classList.contains('show')) {
+                handleInputFocusBlur(); // Re-apply floating labels when modal shows
+            }
+        });
+        editModalObserver.observe(editModal, { attributes: true, attributeFilter: ['class'] });
+    }
 });
 
 </script>
