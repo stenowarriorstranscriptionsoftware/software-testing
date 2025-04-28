@@ -1638,14 +1638,15 @@ body.dark-mode .selected-row {
 <script>
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA",
-  authDomain: "setup-login-page.firebaseapp.com",
-  databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
-  projectId: "setup-login-page",
-  storageBucket: "setup-login-page.firebasestorage.app",
-  messagingSenderId: "341251531099",
-  appId: "1:341251531099:web:f4263621455541ffdc3a7e",
-  measurementId: "G-ZXFC7NR9HV"
+  // IMPORTANT: Replace with your actual Firebase config
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+  appId: "YOUR_APP_ID",
+  measurementId: "YOUR_MEASUREMENT_ID" // Optional
 };
 
 
@@ -2376,824 +2377,462 @@ document.addEventListener('DOMContentLoaded', function() {
     closeResultsBtn.classList.remove('hidden');
   }
 
-  function compareTexts() {
-    const originalText = selectedTestInternal.text ? selectedTestInternal.text : originalTextEl.value;
+ function compareTexts() {
+    const originalText = originalTextEl.value;
     const userText = userTextEl.value;
-    const testTitle = selectedTestInternal.title || "Custom Test";
-    const testCategory = selectedTestInternal.category || "general";
-
+    
     if (!originalText || !userText) {
-      console.error("Comparison called without original or user text.");
+      alert('Please enter both original text and your transcription.');
       return;
     }
-
-    // --- Accurate Time Calculation ---
-    let timeTakenSeconds = 0;
-    const comparisonEndTime = new Date(); // Time when comparison is triggered
-
-    if (startTime) { // startTime should be set either by timer or first input
-        timeTakenSeconds = Math.round((comparisonEndTime - startTime) / 1000);
+    
+    let testTitle = "Custom Test";
+    const selectedTestCard = document.querySelector('.test-card.selected');
+    if (selectedTestCard) {
+        testTitle = selectedTestCard.querySelector('h4').textContent;
     }
-
-    // If it was a timed test, cap the time at the timer duration
-    if (testActive && timerDuration > 0) {
-        timeTakenSeconds = Math.min(timeTakenSeconds, timerDuration);
-    }
-    timeTakenSeconds = Math.max(0, timeTakenSeconds); // Ensure non-negative
-    // --- End Time Calculation ---
-
+    
     const originalWords = processText(originalText);
     const userWords = processText(userText);
-
-    const comparison = compareParagraphs(originalWords, userWords, timeTakenSeconds); // Pass calculated time
-
+    
+    const comparison = compareParagraphs(originalWords, userWords);
+    
     displayComparison(comparison);
     displayStats(comparison.stats);
     displayFeedback(comparison.stats, originalWords, userWords);
-    displayFullTexts(originalText, userText); // Pass texts to display function
-
+    displayFullTexts(originalText, userText);
+    
     const now = new Date();
     resultDateEl.textContent = now.toLocaleString();
+    
+    showResults();
+    
+    if (testActive) {
+      lockTest();
+    }
 
-    showResults(); // Show results section
-    showFullTextBtn.classList.remove('hidden'); // Show the "View Full Texts" button
-    lockTest();
-
-    // Save attempt to Firebase
     const user = auth.currentUser;
     if (user) {
       const attemptData = {
-        userName: user.displayName || 'Anonymous',
-        userPhoto: user.photoURL || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'User')}&background=random&color=fff`,
+        userName: user.displayName,
+        userPhoto: user.photoURL,
         testTitle: testTitle,
-        category: testCategory,
-        stats: comparison.stats, // Save calculated stats
+        category: selectedTestCard ? selectedTestCard.dataset.category : customCategory.value,
+        stats: comparison.stats,
         timestamp: Date.now()
       };
+
       database.ref('attempts').push(attemptData)
-        .then(() => { console.log("Attempt saved."); loadLeaderboard(); })
+        .then(() => loadLeaderboard())
         .catch(error => console.error('Error saving attempt:', error));
     }
   }
-
+  
   function showFullTexts() {
     resultsSection.classList.add('hidden');
     fullTextSection.classList.remove('hidden');
-    // Populate the full text display here, using the correct original source
-    originalDisplayEl.textContent = selectedTestInternal.text ? selectedTestInternal.text : originalTextEl.value;
-    userDisplayEl.textContent = userTextEl.value;
   }
-
+  
   function showResults() {
     fullTextSection.classList.add('hidden');
     resultsSection.classList.remove('hidden');
-    // No need to show full text button here, done in compareTexts
   }
-
+  
   function downloadAsPdf() {
     const resultsElement = document.getElementById('results');
-    const downloadBtn = resultsElement.querySelector('#downloadPdfBtn');
-    const originalDownloadDisplay = downloadBtn.style.display;
-    downloadBtn.style.display = 'none'; // Hide button for capture
 
-    html2canvas(resultsElement, { scale: 1.5, useCORS: true, allowTaint: true, logging: false })
-      .then(canvas => {
-        downloadBtn.style.display = originalDownloadDisplay; // Restore button
-        const imgData = canvas.toDataURL('image/jpeg', 0.8);
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = pdfWidth - 20;
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        let heightLeft = imgHeight; let position = 10;
-        pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-        heightLeft -= (pdfHeight - 20);
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight + 10;
-          pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight);
-          heightLeft -= (pdfHeight - 20);
-        }
-        const dateStr = new Date().toISOString().split('T')[0];
-        const testTitle = selectedTestInternal.title || 'CustomTest';
-        const filename = `StenoWarriors_${testTitle.replace(/[^a-z0-9]/gi, '_')}_${dateStr}.pdf`;
-        pdf.save(filename);
-      }).catch(err => {
-        downloadBtn.style.display = originalDownloadDisplay; // Restore on error too
-        console.error("Error generating PDF:", err);
-        alert("Failed to generate PDF.");
-      });
-  }
+    html2canvas(resultsElement, {
+      scale: 1.5,
+      useCORS: true,
+      allowTaint: true
+    }).then(canvas => {
+      const imgData = canvas.toDataURL('image/jpeg', 0.7);
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 295;
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
 
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
 
-  function processText(text) {
-    return text
-      .replace(/\r\n|\r/g, '\n')
-      .replace(/<[^>]*>/g, '')
-      .replace(/[\u2018\u2019]/g, "'")
-      .replace(/[\u201C\u201D]/g, '"')
-      .replace(/[ \t]+/g, ' ')
-      .trim()
-      .split(' ');
-  }
-
-    const minLength = Math.min(wordA.length, wordB.length);
-
-    const maxLength = Math.max(wordA.length, wordB.length);
-
-    let similarCount = 0;
-
-    const threshold = 50;
-
-    
-
-    for (let i = 0; i < minLength; i++) {
-
-      if (wordA[i] === wordB[i]) {
-
-        similarCount++;
-
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
       }
 
-    }
-
+      pdf.save('transcription-comparison.pdf');
+    });
+  }
+  
+  function processText(text) {
+    return text
+      .replace(/<[^>]*>/g, '')
+      .replace(/[\u2018\u2019]/g, "'")
+      .trim()
+      .split(/\s+/);
+  }
+  
+  function isSimilar(wordA, wordB) {
+    const minLength = Math.min(wordA.length, wordB.length);
+    const maxLength = Math.max(wordA.length, wordB.length);
+    let similarCount = 0;
+    const threshold = 50;
     
-
+    for (let i = 0; i < minLength; i++) {
+      if (wordA[i] === wordB[i]) {
+        similarCount++;
+      }
+    }
+    
     const similarityPercentage = (similarCount / maxLength) * 100;
-
     return similarityPercentage >= threshold;
-
-
+  }
+  
   function arraysAreEqual(arr1, arr2) {
     if (arr1.length !== arr2.length) return false;
     for (let i = 0; i < arr1.length; i++) {
-     if (arr1[i] !== arr2[i]) return false;
+      if (arr1[i] !== arr2[i]) return false;
     }
     return true;
   }
-
-
- function compareParagraphs(paragraphA, paragraphB) {
-
+  
+  function compareParagraphs(paragraphA, paragraphB) {
     let comparedText = '';
-
     let numHalfDiff = 0;
-
     let numFullDiff = 0;
-
     let wordAIndex = 0;
-
     let wordBIndex = 0;
 
-
-
     while (wordAIndex < paragraphA.length || wordBIndex < paragraphB.length) {
-
       const wordA = paragraphA[wordAIndex] || '';
-
       const wordB = paragraphB[wordBIndex] || '';
-
       const cleanWordA = wordA.replace(/[,\?\-\s]/g, '');
-
       const cleanWordB = wordB.replace(/[,\?\-\s]/g, '');
 
-
-
       if (cleanWordA === cleanWordB) {
-
         comparedText += `<span class="correct">${wordA}</span> `;
-
         wordAIndex++;
-
         wordBIndex++;
-
       } else if (cleanWordA.toLowerCase() === cleanWordB.toLowerCase()) {
-
         comparedText += `<span class="capitalization">${wordA}</span> `;
-
         comparedText += `<span class="capitalization-strike">${wordB}</span> `;
-
         wordAIndex++;
-
         wordBIndex++;
-
         numHalfDiff++;
-
       } else {
-
         if (!wordA) {
-
           comparedText += `<span class="addition">${wordB}</span> `;
-
           wordBIndex++;
-
           numFullDiff++;
-
         } else if (!wordB) {
-
           comparedText += `<span class="missing">${wordA}</span> `;
-
           wordAIndex++;
-
           numFullDiff++;
-
         } else {
-
           if (wordA === paragraphB[wordBIndex]) {
-
             comparedText += `<span class="spelling">${wordA}</span> `;
-
             wordAIndex++;
-
             wordBIndex++;
-
           } else if (wordB === paragraphA[wordAIndex]) {
-
             comparedText += `<span class="spelling-strike">${wordB}</span> `;
-
             wordAIndex++;
-
             wordBIndex++;
-
           } else if (isSimilar(wordA, wordB)) {
-
             comparedText += `<span class="spelling">${wordA}</span> `;
-
             comparedText += `<span class="spelling-strike">${wordB}</span> `;
-
             wordAIndex++;
-
             wordBIndex++;
-
             numHalfDiff++;
-
           } else {
-
             const pairA = [wordA];
-
             const pairB = [wordB];
-
             
-
             for (let i = 1; i < 5 && (wordBIndex + i) < paragraphB.length; i++) {
-
               pairB.push(paragraphB[wordBIndex + i]);
-
             }
-
             
-
             for (let i = 1; i < 5 && (wordAIndex + i) < paragraphA.length; i++) {
-
               pairA.push(paragraphA[wordAIndex + i]);
-
             }
-
-
 
             let foundPairInA = false;
-
             for (let i = 1; i <= 50 && (wordAIndex + i) < paragraphA.length; i++) {
-
               const subarrayA = paragraphA.slice(wordAIndex + i, wordAIndex + i + pairB.length);
-
               if (arraysAreEqual(subarrayA, pairB)) {
-
                 for (let j = 0; j < i; j++) {
-
                   comparedText += `<span class="missing">${paragraphA[wordAIndex + j]}</span> `;
-
                   numFullDiff++;
-
                 }
-
                 comparedText += `<span class="correct">${pairB.join(' ')}</span> `;
-
                 wordAIndex += i + pairB.length;
-
                 wordBIndex += pairB.length;
-
                 foundPairInA = true;
-
                 break;
-
               }
-
             }
-
-
 
             if (!foundPairInA) {
-
               let foundPairInB = false;
-
               for (let i = 1; i <= 50 && (wordBIndex + i) < paragraphB.length; i++) {
-
                 const subarrayB = paragraphB.slice(wordBIndex + i, wordBIndex + i + pairA.length);
-
                 if (arraysAreEqual(subarrayB, pairA)) {
-
                   for (let j = 0; j < i; j++) {
-
                     comparedText += `<span class="addition">${paragraphB[wordBIndex + j]}</span> `;
-
                     numFullDiff++;
-
                   }
-
                   comparedText += `<span class="correct">${pairA.join(' ')}</span> `;
-
                   wordAIndex += pairA.length;
-
                   wordBIndex += i + pairA.length;
-
                   foundPairInB = true;
-
                   break;
-
                 }
-
               }
-
-
 
               if (!foundPairInB) {
-
                 comparedText += `<span class="missing">${wordA}</span> `;
-
                 comparedText += `<span class="addition">${wordB}</span> `;
-
                 wordAIndex++;
-
                 wordBIndex++;
-
                 numFullDiff++;
-
               }
-
             }
-
           }
-
         }
-
       }
-
     }
 
-
-
     const keystrokesCount = userTextEl.value.length;
-
     const errorPercentage = paragraphA.length > 0 ? 
-
       Math.min(100, ((numHalfDiff / 2) + numFullDiff) / paragraphA.length * 100) : 0;
-
     const accuracyPercentage = Math.max(0, 100 - errorPercentage);
-
     
-
     const endTime = new Date();
-
     const timeTakenSeconds = startTime ? Math.round((endTime - startTime) / 1000) : 0;
-
     
-
     const typingTimeMinutes = timeTakenSeconds / 60;
-
     const wordsTyped = paragraphB.length;
-
     const wpm = typingTimeMinutes > 0 ? Math.round(wordsTyped / typingTimeMinutes) : 0;
 
-
-
     return {
-
       html: comparedText,
-
       stats: {
-
         totalOriginal: paragraphA.length,
-
         totalUser: paragraphB.length,
-
         halfMistakes: numHalfDiff,
-
         fullMistakes: numFullDiff,
-
         keystrokes: keystrokesCount,
-
         wpm: wpm,
-
         accuracy: accuracyPercentage,
-
         errorRate: errorPercentage,
-
         timeTaken: timeTakenSeconds
-
       }
-
     };
-
   }
-
   
-
   function displayComparison(comparison) {
-
     comparisonResultEl.innerHTML = comparison.html;
-
   }
+  
   function displayStats(stats) {
     statsEl.innerHTML = `
       <div class="stat-item">
-
         <h4>Original Words</h4>
-
         <p>${stats.totalOriginal}</p>
-
       </div>
-
       <div class="stat-item">
-
         <h4>Your Words</h4>
-
         <p>${stats.totalUser}</p>
-
       </div>
-
       <div class="stat-item">
-
         <h4>Half Mistakes</h4>
-
         <p>${stats.halfMistakes}</p>
-
       </div>
-
       <div class="stat-item">
-
         <h4>Full Mistakes</h4>
-
         <p>${stats.fullMistakes}</p>
-
       </div>
-
       <div class="stat-item">
-
         <h4>Keystrokes</h4>
-
         <p>${stats.keystrokes}</p>
-
       </div>
-
       <div class="stat-item">
-
         <h4>Typing Speed (WPM)</h4>
-
         <p>${stats.wpm}</p>
-
       </div>
-
       <div class="stat-item">
-
         <h4>Accuracy</h4>
-
         <p>${stats.accuracy.toFixed(1)}%</p>
-
       </div>
-
       <div class="stat-item">
-
         <h4>Time Taken</h4>
-
         <p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p>
-
       </div>
-
     `;
-
   }
-
   
-
   function displayFeedback(stats, originalWords, userWords) {
-
     const analysis = analyzeMistakes(originalWords, userWords);
-
     
-
     let feedback = `
-
       <h4>Overall Assessment</h4>
-
       ${getOverallAssessment(stats.accuracy, stats.wpm)}
-
       
-
       <h4>Mistake Analysis</h4>
-
       <ul>
-
         ${analysis.commonMistakes.map(m => `<li>${m}</li>`).join('')}
-
       </ul>
-
       
-
       <h4>Improvement Suggestions</h4>
-
       <ul>
-
         ${getImprovementSuggestions(analysis, stats)}
-
       </ul>
-
     `;
-
     
-
     feedbackEl.innerHTML = feedback;
-
   }
-
   
-
   function displayFullTexts(original, user) {
-
     originalDisplayEl.textContent = original;
-
     userDisplayEl.textContent = user;
-
   }
-
   
-
   function analyzeMistakes(originalText, userText) {
-
     const analysis = {
-
       commonMistakes: [],
-
       omissionRate: 0,
-
       additionRate: 0,
-
       spellingErrorRate: 0,
-
       capitalizationErrorRate: 0,
-
       mostErrorProneWords: []
-
     };
-
     
-
     const wordPairs = [];
-
     const minLength = Math.min(originalText.length, userText.length);
-
     
-
     for (let i = 0; i < minLength; i++) {
-
       const origWord = originalText[i].toLowerCase();
-
       const userWord = userText[i].toLowerCase();
-
       
-
       if (origWord !== userWord) {
-
         wordPairs.push({ original: originalText[i], user: userText[i] });
-
       }
-
     }
-
     
-
     let omissionCount = 0;
-
     let additionCount = 0;
-
     let spellingCount = 0;
-
     let capitalizationCount = 0;
-
     const errorWords = [];
-
     
-
     wordPairs.forEach(pair => {
-
       const orig = pair.original.toLowerCase();
-
       const user = pair.user.toLowerCase();
-
       
-
       if (user === '') {
-
         omissionCount++;
-
       } else if (orig === '') {
-
         additionCount++;
-
       } else if (orig === user) {
-
         capitalizationCount++;
-
         errorWords.push(pair.original);
-
       } else if (isSimilar(orig, user)) {
-
         spellingCount++;
-
         errorWords.push(pair.original);
-
       } else {
-
         errorWords.push(pair.original);
-
       }
-
     });
-
     
-
     analysis.omissionRate = omissionCount / originalText.length;
-
     analysis.additionRate = additionCount / originalText.length;
-
     analysis.spellingErrorRate = spellingCount / originalText.length;
-
     analysis.capitalizationErrorRate = capitalizationCount / originalText.length;
-
     
-
     const wordFrequency = {};
-
     errorWords.forEach(word => {
-
       const lowerWord = word.toLowerCase();
-
       wordFrequency[lowerWord] = (wordFrequency[lowerWord] || 0) + 1;
-
     });
-
     
-
     analysis.mostErrorProneWords = Object.entries(wordFrequency)
-
       .sort((a, b) => b[1] - a[1])
-
       .slice(0, 5)
-
       .map(entry => entry[0]);
-
     
-
     if (capitalizationCount > 0) {
-
       analysis.commonMistakes.push(`Capitalization errors (${capitalizationCount} instances)`);
-
     }
-
     if (spellingCount > 0) {
-
       analysis.commonMistakes.push(`Spelling mistakes (${spellingCount} instances)`);
-
     }
-
     if (omissionCount > 0) {
-
       analysis.commonMistakes.push(`Omitted words (${omissionCount} instances)`);
-
     }
-
     if (additionCount > 0) {
-
       analysis.commonMistakes.push(`Added extra words (${additionCount} instances)`);
-
     }
-
     
-
     return analysis;
-
   }
-
   
-
   function getOverallAssessment(accuracy, wpm) {
-
     let assessment = '';
-
     
-
     if (accuracy >= 95) {
-
       assessment += '<p>🌟 <strong>Excellent accuracy!</strong> Your transcription is nearly perfect.</p>';
-
     } else if (accuracy >= 85) {
-
       assessment += '<p>👍 <strong>Good accuracy.</strong> With a little more practice, you can reach excellence.</p>';
-
     } else if (accuracy >= 70) {
-
       assessment += '<p>📝 <strong>Fair accuracy.</strong> Focus on reducing errors to improve your score.</p>';
-
     } else {
-
       assessment += '<p>⚠️ <strong>Needs improvement.</strong> Work on accuracy before increasing speed.</p>';
-
     }
-
     
-
     if (wpm >= 50) {
-
       assessment += '<p>⚡ <strong>Fast typer!</strong> Your speed is impressive. ';
-
       if (accuracy < 90) {
-
         assessment += 'Try slowing down slightly to improve accuracy.</p>';
-
       } else {
-
         assessment += 'Maintain this speed while keeping accuracy high.</p>';
-
       }
-
     } else if (wpm >= 40) {
-
       assessment += '<p>🏃 <strong>Moderate speed.</strong> You\'re typing at a good pace. ';
-
       assessment += 'With practice, you can increase speed without sacrificing accuracy.</p>';
-
     } else {
-
       assessment += '<p>🐢 <strong>Slow pace.</strong> Focus on building muscle memory and gradually increasing your speed.</p>';
-
     }
-
     
-
     return assessment;
-
   }
-
   
-
   function getImprovementSuggestions(analysis, stats) {
-
     let suggestions = [];
-
     
-
     if (analysis.omissionRate > 0.2) {
-
       suggestions.push('You\'re skipping many words. Practice reading ahead to anticipate upcoming words.');
-
     }
-
     
-
     if (analysis.additionRate > 0.15) {
-
       suggestions.push('You\'re adding extra words. Focus on typing only what you see/hear.');
-
     }
-
     
-
     if (analysis.spellingErrorRate > 0.25) {
-
       suggestions.push('Spelling mistakes are frequent. Consider practicing difficult words separately.');
-
     }
-
     
-
     if (analysis.capitalizationErrorRate > 0.1) {
-
       suggestions.push('Watch your capitalization. Remember proper nouns and sentence starts need capitals.');
-
     }
-
     
-
     suggestions.push('Practice difficult sections repeatedly until you master them.');
-
     suggestions.push('Break long passages into smaller chunks for focused practice.');
-
     suggestions.push('Focus on accuracy before speed - speed will come naturally with practice.');
-
     
-
     return suggestions.map(s => `<li>${s}</li>`).join('');
-
   }
 
   function embedVideo(url) {
