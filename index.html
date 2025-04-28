@@ -713,47 +713,46 @@ body.dark-mode .test-filters input[type="search"] {
   margin-top: 1rem;
 }
 
+/* MODIFIED: Test Card Styling */
 .test-card {
   background: #f8f9fa;
   padding: 1.5rem;
   border-radius: 15px;
-  border: none;
-  /* cursor: pointer; /* Remove cursor from whole card */
-  transition: all 0.3s ease;
-  box-shadow: 8px 8px 16px #e2e8f0,
-              -8px -8px 16px #ffffff;
-  margin-bottom: 1.5rem;
-  display: flex; /* Use flexbox for better layout */
-  flex-direction: column; /* Stack content vertically */
+  border: 1px solid #e2e8f0; /* Simple border */
+  transition: border-color 0.3s ease; /* Transition for hover */
+  /* Removed complex box-shadow */
+  margin-bottom: 1.5rem; /* Keep margin for grid layout if not using carousel exclusively */
+  display: flex;
+  flex-direction: column;
 }
 
 body.dark-mode .test-card {
   background: #2a2a2a;
-  box-shadow: 8px 8px 16px #1a1a1a,
-              -8px -8px 16px #3a3a3a;
+  border-color: #444; /* Dark mode border */
+  /* Removed dark mode box-shadow */
 }
 
 .test-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 12px 12px 24px #d1d9e6,
-              -12px -12px 24px #ffffff;
+  /* Removed transform */
+  border-color: var(--primary-light); /* Subtle hover effect */
 }
 
 body.dark-mode .test-card:hover {
-  box-shadow: 12px 12px 24px #1a1a1a,
-              -12px -12px 24px #3a3a3a;
+  border-color: var(--primary-light);
 }
 
 .test-card.selected {
-  box-shadow: inset 4px 4px 8px #d1d9e6,
-              inset -4px -4px 8px #ffffff;
-  border: 2px solid var(--primary-light);
+  /* Removed inset box-shadow */
+  border: 2px solid var(--primary-light); /* Keep border for selected state */
+  padding: calc(1.5rem - 1px); /* Adjust padding to compensate for thicker border */
 }
 
 body.dark-mode .test-card.selected {
-  box-shadow: inset 4px 4px 8px #1a1a1a,
-              inset -4px -4px 8px #3a3a3a;
+  /* Removed dark mode inset box-shadow */
+  border-color: var(--primary-light);
 }
+/* End of Modified Test Card Styling */
+
 
 .test-card h4 {
   color: var(--primary);
@@ -994,19 +993,11 @@ body.dark-mode .custom-test-section {
   border-radius: 8px;
 }
 
+/* MODIFIED: Video indicator styling within card */
 .test-card .video-indicator {
   font-size: 0.8rem;
   color: var(--primary);
   margin-top: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.test-card .video-indicator svg {
-  width: 14px;
-  height: 14px;
-  fill: currentColor;
 }
 
 /* Badge Styles */
@@ -1277,7 +1268,7 @@ body.dark-mode .selected-row {
   display: flex;
   transition: transform 0.5s ease;
   gap: 1rem; /* Gap between cards */
-  padding: 0.5rem 0; /* Padding for shadow visibility */
+  padding: 0.5rem 0; /* Padding for border visibility */
 }
 
 .carousel-btn {
@@ -1335,7 +1326,6 @@ body.dark-mode .selected-row {
 /* Adjust test card size for carousel */
 .test-card {
   min-width: 280px; /* Minimum width for a card */
-  /* Calculate flex-basis dynamically in JS or use media queries */
   flex-shrink: 0; /* Prevent cards from shrinking */
   margin-bottom: 0; /* Remove bottom margin for carousel */
 }
@@ -1629,8 +1619,8 @@ document.addEventListener('DOMContentLoaded', function() {
   const showFullTextBtn = document.getElementById('showFullTextBtn');
   const backToResultsBtn = document.getElementById('backToResultsBtn');
   const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-  const closeResultsBtn = document.getElementById('closeResultsBtn'); // Existing button in controls
-  const closeResultsBtnEnd = document.getElementById('closeResultsBtnEnd'); // NEW button at the end
+  const closeResultsBtn = document.getElementById('closeResultsBtn');
+  const closeResultsBtnEnd = document.getElementById('closeResultsBtnEnd');
   const resultsSection = document.getElementById('results');
   const fullTextSection = document.getElementById('fullTextSection');
   const comparisonResultEl = document.getElementById('comparisonResult');
@@ -1713,182 +1703,59 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Event Listeners ---
 
-  // Typing timer start
   userTextEl.addEventListener('input', function() { if (!startTime) { startTime = new Date(); } });
-
-  // Auth UI toggles
   showRegister.addEventListener('click', (e) => { e.preventDefault(); loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); });
   showLogin.addEventListener('click', (e) => { e.preventDefault(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); });
-
-  // Auth actions
-  emailLoginBtn.addEventListener('click', () => {
-      const email = loginEmail.value.trim(); const password = loginPassword.value.trim();
-      if (!email || !password) { alert('Please enter both email and password'); return; }
-      auth.signInWithEmailAndPassword(email, password)
-          .then(() => { console.log('Login successful'); })
-          .catch(error => { console.error('Login error:', error); alert('Login failed: ' + error.message); });
-  });
-
-  registerBtn.addEventListener('click', () => {
-      const name = registerName.value.trim(); const email = registerEmail.value.trim();
-      const password = registerPassword.value.trim(); const confirm = confirmPassword.value.trim();
-      if (!name || !email || !password || !confirm) { alert('Please fill in all fields'); return; }
-      if (password !== confirm) { alert('Passwords do not match'); return; }
-      if (password.length < 6) { alert('Password should be at least 6 characters'); return; }
-      auth.createUserWithEmailAndPassword(email, password)
-          .then((userCredential) => userCredential.user.updateProfile({ displayName: name }))
-          .then(() => { alert('Registration successful! You are now logged in.'); resetAuthForms(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); })
-          .catch(error => { console.error('Registration error:', error); alert('Registration failed: ' + error.message); });
-  });
-
-  googleLoginBtn.addEventListener('click', () => {
-      const provider = new firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(provider).catch(error => { console.error('Google login error:', error); alert('Google login failed. Please try again.'); });
-  });
-
+  emailLoginBtn.addEventListener('click', () => { const email = loginEmail.value.trim(); const password = loginPassword.value.trim(); if (!email || !password) { alert('Please enter both email and password'); return; } auth.signInWithEmailAndPassword(email, password).then(() => console.log('Login successful')).catch(error => { console.error('Login error:', error); alert('Login failed: ' + error.message); }); });
+  registerBtn.addEventListener('click', () => { const name = registerName.value.trim(); const email = registerEmail.value.trim(); const password = registerPassword.value.trim(); const confirm = confirmPassword.value.trim(); if (!name || !email || !password || !confirm) { alert('Please fill in all fields'); return; } if (password !== confirm) { alert('Passwords do not match'); return; } if (password.length < 6) { alert('Password should be at least 6 characters'); return; } auth.createUserWithEmailAndPassword(email, password).then((cred) => cred.user.updateProfile({ displayName: name })).then(() => { alert('Registration successful! You are now logged in.'); resetAuthForms(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); }).catch(error => { console.error('Registration error:', error); alert('Registration failed: ' + error.message); }); });
+  googleLoginBtn.addEventListener('click', () => { const provider = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(provider).catch(error => { console.error('Google login error:', error); alert('Google login failed. Please try again.'); }); });
   logoutBtn.addEventListener('click', () => { auth.signOut(); });
-
-  // Auth state change handler
-  auth.onAuthStateChanged(user => {
-      currentUser = user;
-      if (user) {
-          // Update UI for logged-in user
-          loginBtn.classList.add('hidden'); userInfo.classList.remove('hidden');
-          userPhoto.src = user.photoURL || `https://www.gravatar.com/avatar/${user.uid}?d=identicon&s=40`;
-          userName.textContent = user.displayName || 'User';
-          loginPrompt.classList.add('hidden');
-          const isAdmin = adminEmails.includes(user.email);
-          customTestSection.classList.remove('hidden');
-          deleteLeaderboardBtn.classList.toggle('hidden', !isAdmin);
-          globalTestsSection.classList.remove('hidden'); leaderboardSection.classList.remove('hidden');
-          fetchAndDisplayGlobalTests(); loadLeaderboard(); cleanupOldData();
-      } else {
-          // Reset UI for logged-out user
-          loginBtn.classList.remove('hidden'); userInfo.classList.add('hidden'); loginPrompt.classList.remove('hidden');
-          customTestSection.classList.add('hidden'); globalTestsSection.classList.add('hidden'); leaderboardSection.classList.add('hidden');
-          loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); deleteLeaderboardBtn.classList.add('hidden');
-          resetComparisonUI(); // Use the reset function
-          if(carouselTrack) carouselTrack.innerHTML = ''; if(carouselDotsContainer) carouselDotsContainer.innerHTML = '';
-          if(leaderboardList) leaderboardList.innerHTML = ''; allFetchedTests = []; allAttempts = []; filteredAttempts = []; selectedLeaderboardRows = [];
-      }
-      resetCustomTestForm();
-  });
-
-  // Test and Leaderboard Filters
+  auth.onAuthStateChanged(user => { currentUser = user; if (user) { loginBtn.classList.add('hidden'); userInfo.classList.remove('hidden'); userPhoto.src = user.photoURL || `https://www.gravatar.com/avatar/${user.uid}?d=identicon&s=40`; userName.textContent = user.displayName || 'User'; loginPrompt.classList.add('hidden'); const isAdmin = adminEmails.includes(user.email); customTestSection.classList.remove('hidden'); deleteLeaderboardBtn.classList.toggle('hidden', !isAdmin); globalTestsSection.classList.remove('hidden'); leaderboardSection.classList.remove('hidden'); fetchAndDisplayGlobalTests(); loadLeaderboard(); cleanupOldData(); } else { loginBtn.classList.remove('hidden'); userInfo.classList.add('hidden'); loginPrompt.classList.remove('hidden'); customTestSection.classList.add('hidden'); globalTestsSection.classList.add('hidden'); leaderboardSection.classList.add('hidden'); loginForm.classList.remove('hidden'); registerForm.classList.add('hidden'); deleteLeaderboardBtn.classList.add('hidden'); resetComparisonUI(); if(carouselTrack) carouselTrack.innerHTML = ''; if(carouselDotsContainer) carouselDotsContainer.innerHTML = ''; if(leaderboardList) leaderboardList.innerHTML = ''; allFetchedTests = []; allAttempts = []; filteredAttempts = []; selectedLeaderboardRows = []; } resetCustomTestForm(); });
   testCategoryFilter.addEventListener('change', filterAndDisplayGlobalTests);
   testSearchInput.addEventListener('input', filterAndDisplayGlobalTests);
   leaderboardFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
   testNameFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
   categoryFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
-
-  // Pagination Buttons
   prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; updatePagination(); } });
   nextPageBtn.addEventListener('click', () => { const totalPages = Math.ceil(filteredAttempts.length / entriesPerPage); if (currentPage < totalPages) { currentPage++; updatePagination(); } });
-
-  // Admin delete leaderboard entries
-  deleteLeaderboardBtn.addEventListener('click', () => {
-      if (!currentUser || !adminEmails.includes(currentUser.email) || selectedLeaderboardRows.length === 0) return;
-      showConfirmationModal(`Delete ${selectedLeaderboardRows.length} selected entries?`, () => {
-          const updates = {}; selectedLeaderboardRows.forEach(id => { updates[`attempts/${id}`] = null; });
-          database.ref().update(updates).then(() => { alert('Entries deleted.'); selectedLeaderboardRows = []; loadLeaderboard(); }).catch(err => alert('Error deleting entries.'));
-      });
-  });
-
-  // Paste to start test
-  originalTextEl.addEventListener('paste', function() {
-      document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected'));
-      setTimeout(() => { if (originalTextEl.value.trim() && !testActive) { originalTextGroup.classList.add('hidden'); timerOptions.classList.remove('hidden'); timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; }); } }, 0);
-  });
-
-  // Timer start buttons
-  timerButtons.forEach(button => {
-      button.addEventListener('click', function() { startTimer(parseInt(this.dataset.minutes)); });
-  });
-
-  // Main action buttons
+  deleteLeaderboardBtn.addEventListener('click', () => { if (!currentUser || !adminEmails.includes(currentUser.email) || selectedLeaderboardRows.length === 0) return; showConfirmationModal(`Delete ${selectedLeaderboardRows.length} selected entries?`, () => { const updates = {}; selectedLeaderboardRows.forEach(id => { updates[`attempts/${id}`] = null; }); database.ref().update(updates).then(() => { alert('Entries deleted.'); selectedLeaderboardRows = []; loadLeaderboard(); }).catch(err => alert('Error deleting entries.')); }); });
+  originalTextEl.addEventListener('paste', function() { document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected')); setTimeout(() => { if (originalTextEl.value.trim() && !testActive) { originalTextGroup.classList.add('hidden'); timerOptions.classList.remove('hidden'); timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; }); } }, 0); });
+  timerButtons.forEach(button => { button.addEventListener('click', function() { startTimer(parseInt(this.dataset.minutes)); }); });
   compareBtn.addEventListener('click', function() { stopTimer(); compareTexts(); disableTimerOptions(); });
   showFullTextBtn.addEventListener('click', showFullTexts);
   backToResultsBtn.addEventListener('click', showResults);
   downloadPdfBtn.addEventListener('click', downloadAsPdf);
-
-  // MODIFIED: Both close buttons now refresh the page
-  closeResultsBtn.addEventListener('click', function() {
-    location.reload();
-  });
-  closeResultsBtnEnd.addEventListener('click', function() {
-    location.reload();
-  });
-
-  // Custom test form buttons
+  closeResultsBtn.addEventListener('click', () => location.reload() ); // Refresh page
+  closeResultsBtnEnd.addEventListener('click', () => location.reload() ); // Refresh page
   saveTestBtn.addEventListener('click', saveOrUpdateTest);
   clearCustomFormBtn.addEventListener('click', resetCustomTestForm);
   clearTestsBtn.addEventListener('click', showManageTestsModalHandler);
 
   // --- Helper Functions ---
+  function resetAuthForms() { loginEmail.value = ''; loginPassword.value = ''; registerName.value = ''; registerEmail.value = ''; registerPassword.value = ''; confirmPassword.value = ''; }
+  function resetComparisonUI() { const vid = document.getElementById('testVideoPlayer'); if (vid) vid.remove(); originalTextEl.value = ''; userTextEl.value = ''; comparisonResultEl.innerHTML = ''; statsEl.innerHTML = ''; feedbackEl.innerHTML = ''; resultsSection.classList.add('hidden'); fullTextSection.classList.add('hidden'); showFullTextBtn.classList.add('hidden'); closeResultsBtn.classList.add('hidden'); closeResultsBtnEnd.classList.add('hidden'); originalTextGroup.classList.remove('hidden'); userTextEl.readOnly = false; userTextEl.classList.remove('locked-textarea'); compareBtn.disabled = false; testActive = false; startTime = null; stopTimer(); timerDisplay.classList.add('hidden'); timerDisplay.classList.remove('timer-ended'); timerOptions.classList.add('hidden'); document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected')); }
 
-  function resetAuthForms() {
-      loginEmail.value = ''; loginPassword.value = '';
-      registerName.value = ''; registerEmail.value = ''; registerPassword.value = ''; confirmPassword.value = '';
-  }
-
-  function resetComparisonUI() {
-      const existingVideo = document.getElementById('testVideoPlayer'); if (existingVideo) existingVideo.remove();
-      originalTextEl.value = ''; userTextEl.value = ''; comparisonResultEl.innerHTML = ''; statsEl.innerHTML = ''; feedbackEl.innerHTML = '';
-      resultsSection.classList.add('hidden'); fullTextSection.classList.add('hidden'); showFullTextBtn.classList.add('hidden');
-      closeResultsBtn.classList.add('hidden'); // Hide original close button
-      closeResultsBtnEnd.classList.add('hidden'); // Hide new close button
-      originalTextGroup.classList.remove('hidden'); userTextEl.readOnly = false; userTextEl.classList.remove('locked-textarea');
-      compareBtn.disabled = false; testActive = false; startTime = null;
-      stopTimer(); // Ensure timer is stopped
-      timerDisplay.classList.add('hidden'); timerDisplay.classList.remove('timer-ended'); // Reset timer display
-      timerOptions.classList.add('hidden'); // Hide timer options
-      document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected')); // Deselect test cards
-  }
-
-  // --- Leaderboard Functions (unchanged) ---
+  // --- Leaderboard Functions ---
   function loadLeaderboard() { const filter = leaderboardFilter.value; const category = categoryFilter.value; let query = database.ref('attempts').orderByChild('timestamp'); if (filter === 'week') { const d=new Date(); d.setDate(d.getDate()-7); query = query.startAt(d.getTime()); } else if (filter === 'month') { const d=new Date(); d.setMonth(d.getMonth()-1); query = query.startAt(d.getTime()); } query.once('value').then(snapshot => { const attempts = snapshot.val() || {}; allAttempts = Object.entries(attempts).map(([id, attempt]) => ({ id, ...attempt })); sortAttempts(currentSortColumn, currentSortDirection); updateTestNameFilter(allAttempts); filteredAttempts = allAttempts.filter(att => (testNameFilter.value==='all' || att.testTitle===testNameFilter.value) && (category==='all' || att.category===category)); updatePagination(); }).catch(error => { console.error('Leaderboard load error:', error); leaderboardList.innerHTML = '<p>Error loading.</p>'; }); }
   function sortAttempts(column, direction) { if (!Array.isArray(allAttempts)) { allAttempts = []; } allAttempts.sort((a, b) => { const statsA = a.stats || {}; const statsB = b.stats || {}; let aValue, bValue; switch (column) { case 'accuracy': case 'wpm': case 'totalOriginal': case 'totalUser': case 'totalMistakes': case 'timeTaken': aValue = statsA[column] ?? 0; bValue = statsB[column] ?? 0; break; case 'userName': aValue = (a.userName || '').toLowerCase(); bValue = (b.userName || '').toLowerCase(); break; case 'testTitle': aValue = (a.testTitle || 'Custom').toLowerCase(); bValue = (b.testTitle || 'Custom').toLowerCase(); break; case 'date': aValue = a.timestamp || 0; bValue = b.timestamp || 0; break; default: return 0; } if (typeof aValue === 'number') return direction === 'asc' ? aValue - bValue : bValue - aValue; if (typeof aValue === 'string') return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue); return 0; }); }
   function updateTestNameFilter(attempts) { uniqueTestNames = new Set(attempts.map(att => att.testTitle || 'Custom Test')); const current = testNameFilter.value; testNameFilter.innerHTML = '<option value="all">All Tests</option>'; Array.from(uniqueTestNames).sort().forEach(name => testNameFilter.add(new Option(name, name))); testNameFilter.value = uniqueTestNames.has(current) ? current : 'all'; }
   function updatePagination() { const totalEntries = filteredAttempts.length; const totalPages = Math.ceil(totalEntries / entriesPerPage); currentPage = Math.max(1, Math.min(currentPage, totalPages || 1)); const startIdx = (currentPage - 1) * entriesPerPage; const endIdx = Math.min(startIdx + entriesPerPage, totalEntries); prevPageBtn.disabled = currentPage === 1; nextPageBtn.disabled = currentPage >= totalPages; leaderboardPagination.textContent = totalEntries > 0 ? `Showing ${startIdx + 1}-${endIdx} of ${totalEntries}` : 'No entries found.'; renderLeaderboardTable(filteredAttempts.slice(startIdx, endIdx), startIdx + 1); }
   function renderLeaderboardTable(attempts, startRank) { if (attempts.length === 0) { leaderboardList.innerHTML = '<p>No attempts match filters.</p>'; return; } const isAdmin = currentUser && adminEmails.includes(currentUser.email); let tableHTML = `<table><thead><tr> ${isAdmin?'<th>Sel</th>':''} <th data-column="rank">#</th> <th data-column="userName">User</th> <th data-column="testTitle">Test</th> <th data-column="accuracy">Acc%</th> <th data-column="wpm">WPM</th> <th data-column="totalOriginal">Orig</th> <th data-column="totalUser">Typed</th> <th data-column="timeTaken">Time</th> <th data-column="totalMistakes">Mistakes</th> <th data-column="date">Date</th> </tr></thead><tbody>`; attempts.forEach((att, idx) => { const d = new Date(att.timestamp); const s = att.stats || {}; const acc = s.accuracy ?? 0; const time = s.timeTaken ?? 0; const accClass = acc>=95?'accuracy-high':acc>=85?'accuracy-medium':'accuracy-low'; const timeFmt = `${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}`; const rank = startRank + idx; let badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':''; const isSel = selectedLeaderboardRows.includes(att.id); tableHTML += `<tr data-id="${att.id}" class="${isAdmin?'leaderboard-row-selectable':''} ${isSel?'selected-row':''}"> ${isAdmin?`<td><input type="checkbox" class="delete-checkbox" data-id="${att.id}" ${isSel?'checked':''}></td>`:''} <td>${rank}${badge}</td> <td class="leaderboard-user"><img src="${att.userPhoto||`https://www.gravatar.com/avatar/${att.id}?d=identicon&s=30`}" alt=""><span>${att.userName||'User'}</span></td> <td>${att.testTitle||'Custom'} ${att.category?`<span class="category-badge category-${att.category}">${getCategoryName(att.category)}</span>`:''}</td> <td class="accuracy-cell ${accClass}">${acc.toFixed(1)}</td> <td>${s.wpm??0}</td> <td>${s.totalOriginal??0}</td> <td>${s.totalUser??0}</td> <td>${timeFmt}</td> <td>${s.totalMistakes??0}</td> <td>${d.toLocaleDateString()}</td> </tr>`; }); tableHTML += `</tbody></table>`; leaderboardList.innerHTML = tableHTML; makeTableSortable(); addLeaderboardRowSelectionListeners(); updateDeleteButtonState(); }
-  function makeTableSortable() { document.querySelectorAll('.leaderboard-list th[data-column]').forEach(header => { header.style.cursor = 'pointer'; header.replaceWith(header.cloneNode(true)); const newHeader = document.querySelector(`.leaderboard-list th[data-column="${header.dataset.column}"]`); newHeader.addEventListener('click', () => { const column = newHeader.dataset.column; if (!column) return; if (currentSortColumn === column) { currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc'; } else { currentSortColumn = column; currentSortDirection = (column === 'accuracy' || column === 'wpm') ? 'desc' : 'asc'; } sortAttempts(currentSortColumn, currentSortDirection); currentPage = 1; updatePagination(); }); if (newHeader.dataset.column === currentSortColumn) { newHeader.classList.add(`sorted-${currentSortDirection}`); } }); }
+  function makeTableSortable() { document.querySelectorAll('.leaderboard-list th[data-column]').forEach(header => { header.style.cursor = 'pointer'; header.replaceWith(header.cloneNode(true)); const newHeader = document.querySelector(`.leaderboard-list th[data-column="${header.dataset.column}"]`); newHeader.addEventListener('click', () => { const column = newHeader.dataset.column; if (!column) return; if (currentSortColumn === column) { currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc'; } else { currentSortColumn = column; currentSortDirection = (column === 'accuracy' || column === 'wpm' || column === 'date' || column === 'totalOriginal') ? 'desc' : 'asc'; } sortAttempts(currentSortColumn, currentSortDirection); currentPage = 1; updatePagination(); document.querySelectorAll('.leaderboard-list th[data-column]').forEach(h => { h.classList.remove('sorted-asc', 'sorted-desc'); if (h.dataset.column === column) h.classList.add(`sorted-${currentSortDirection}`); }); }); if (newHeader.dataset.column === currentSortColumn) { newHeader.classList.add(`sorted-${currentSortDirection}`); } }); }
   function addLeaderboardRowSelectionListeners() { if (!currentUser || !adminEmails.includes(currentUser.email)) return; document.querySelectorAll('.leaderboard-list .delete-checkbox').forEach(cb => { cb.addEventListener('change', (e) => { const id = e.target.dataset.id; const row = e.target.closest('tr'); if (e.target.checked) { selectedLeaderboardRows.push(id); row.classList.add('selected-row'); } else { selectedLeaderboardRows = selectedLeaderboardRows.filter(rId => rId !== id); row.classList.remove('selected-row'); } updateDeleteButtonState(); }); }); document.querySelectorAll('.leaderboard-list tr.leaderboard-row-selectable').forEach(row => { row.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { const cb = row.querySelector('.delete-checkbox'); if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); } } }); }); }
   function updateDeleteButtonState() { deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0; }
-  function cleanupOldData() { const sixMonthsAgo = new Date(); sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6); database.ref('attempts').orderByChild('timestamp').endAt(sixMonthsAgo.getTime()).once('value').then(snapshot => { const updates = {}; let count = 0; snapshot.forEach(child => { updates[child.key] = null; count++; }); if (count > 0) { console.log(`Cleaning up ${count} old entries.`); database.ref('attempts').update(updates); } }); }
+  function cleanupOldData() { const d = new Date(); d.setMonth(d.getMonth() - 6); database.ref('attempts').orderByChild('timestamp').endAt(d.getTime()).once('value').then(snapshot => { const updates = {}; let count = 0; snapshot.forEach(child => { updates[child.key] = null; count++; }); if (count > 0) { console.log(`Cleaning up ${count} old entries.`); database.ref('attempts').update(updates); } }); }
   setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
 
   // --- Timer Functions ---
-  function startTimer(minutes) {
-      if (testActive) stopTimer();
-      endTime = new Date(); endTime.setMinutes(endTime.getMinutes() + minutes);
-      testActive = true;
-      timerOptions.classList.add('hidden'); timerDisplay.classList.remove('hidden', 'timer-ended');
-      updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000);
-  }
+  function startTimer(minutes) { if (testActive) stopTimer(); endTime = new Date(); endTime.setMinutes(endTime.getMinutes() + minutes); testActive = true; timerOptions.classList.add('hidden'); timerDisplay.classList.remove('hidden', 'timer-ended'); updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000); }
   function stopTimer() { clearInterval(timerInterval); testActive = false; timerDisplay.classList.add('hidden'); timerDisplay.classList.remove('timer-ended'); }
   function disableTimerOptions() { timerButtons.forEach(btn => { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }); }
   function updateTimerDisplay() { const now = new Date(); const remaining = endTime - now; if (remaining <= 0) { stopTimer(); timerDisplay.textContent = "TIME'S UP!"; timerDisplay.classList.remove('hidden'); timerDisplay.classList.add('timer-ended'); compareTexts(); lockTest(); disableTimerOptions(); return; } const minutes = Math.floor((remaining % 3600000) / 60000); const seconds = Math.floor((remaining % 60000) / 1000); timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`; }
-  function lockTest() { userTextEl.readOnly = true; userTextEl.classList.add('locked-textarea'); compareBtn.disabled = true; closeResultsBtn.classList.remove('hidden'); closeResultsBtnEnd.classList.remove('hidden'); } // Show both close buttons when locking
+  function lockTest() { userTextEl.readOnly = true; userTextEl.classList.add('locked-textarea'); compareBtn.disabled = true; closeResultsBtn.classList.remove('hidden'); closeResultsBtnEnd.classList.remove('hidden'); }
 
   // --- Core Comparison Logic ---
-  function compareTexts() {
-      const originalTextRaw = originalTextEl.value; const userTextRaw = userTextEl.value;
-      if (!originalTextRaw || !userTextRaw) { alert('Please enter both original text and your transcription.'); return; }
-      let testTitle = "Custom Test"; let testCategory = 'general';
-      const selectedTestCard = document.querySelector('.test-card.selected');
-      if (selectedTestCard) { testTitle = selectedTestCard.querySelector('h4')?.firstChild.textContent.trim() || 'Selected'; testCategory = selectedTestCard.dataset.category || 'general'; }
-      const originalWords = processText(originalTextRaw); const userWords = processText(userTextRaw);
-      const comparison = compareParagraphsLCS(originalWords, userWords);
-      displayComparison(comparison); displayStats(comparison.stats); displayFeedback(comparison.stats, comparison.punctuationMistakes); displayFullTexts(originalTextRaw, userTextRaw);
-      resultDateEl.textContent = new Date().toLocaleString();
-      showResults(); // Show results section
-      showFullTextBtn.classList.remove('hidden');
-      closeResultsBtn.classList.remove('hidden'); // Show original close button
-      closeResultsBtnEnd.classList.remove('hidden'); // Show NEW close button
-      if (testActive) lockTest(); // Lock if timer was running
-      if (currentUser) saveAttemptToFirebase(testTitle, testCategory, comparison.stats);
-  }
-
+  function compareTexts() { const originalTextRaw = originalTextEl.value; const userTextRaw = userTextEl.value; if (!originalTextRaw || !userTextRaw) { alert('Please enter both original text and your transcription.'); return; } let testTitle = "Custom Test"; let testCategory = 'general'; const selectedTestCard = document.querySelector('.test-card.selected'); if (selectedTestCard) { testTitle = selectedTestCard.querySelector('h4')?.firstChild.textContent.trim() || 'Selected'; testCategory = selectedTestCard.dataset.category || 'general'; } const originalWords = processText(originalTextRaw); const userWords = processText(userTextRaw); const comparison = compareParagraphsLCS(originalWords, userWords); displayComparison(comparison); displayStats(comparison.stats); displayFeedback(comparison.stats, comparison.punctuationMistakes); displayFullTexts(originalTextRaw, userTextRaw); resultDateEl.textContent = new Date().toLocaleString(); showResults(); showFullTextBtn.classList.remove('hidden'); closeResultsBtn.classList.remove('hidden'); closeResultsBtnEnd.classList.remove('hidden'); if (testActive) lockTest(); if (currentUser) saveAttemptToFirebase(testTitle, testCategory, comparison.stats); }
   function saveAttemptToFirebase(testTitle, category, stats) { const attemptData = { userId: currentUser.uid, userName: currentUser.displayName || 'User', userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=30`, testTitle, category, stats, timestamp: firebase.database.ServerValue.TIMESTAMP }; database.ref('attempts').push(attemptData).then(() => { console.log('Attempt saved.'); loadLeaderboard(); }).catch(error => console.error('Error saving attempt:', error)); }
 
   // --- Result Display Toggles ---
@@ -1920,7 +1787,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // --- Global Test Management & Carousel ---
   function fetchAndDisplayGlobalTests() { database.ref('tests').orderByChild('timestamp').once('value').then(snapshot => { allFetchedTests = Object.entries(snapshot.val() || {}).map(([id, test]) => ({ id, ...test })).sort((a,b) => (b.timestamp||0) - (a.timestamp||0)); filterAndDisplayGlobalTests(); }).catch(error => { console.error('Error fetching tests:', error); filterAndDisplayGlobalTests(); }); }
   function filterAndDisplayGlobalTests() { const category = testCategoryFilter.value; const searchTerm = testSearchInput.value.trim().toLowerCase(); let tests = allFetchedTests; if (category !== 'all') tests = tests.filter(t => t.category === category); if (searchTerm) tests = tests.filter(t => (t.title?.toLowerCase().includes(searchTerm)) || (t.text?.toLowerCase().includes(searchTerm))); renderGlobalTests(tests); }
-  function renderGlobalTests(filteredTests) { carouselTrack = document.querySelector('.carousel-track'); carouselDotsContainer = document.querySelector('.carousel-dots'); carouselPrevBtn = document.querySelector('.prev-btn'); carouselNextBtn = document.querySelector('.next-btn'); if (!carouselTrack || !carouselDotsContainer || !carouselPrevBtn || !carouselNextBtn) return; carouselTrack.innerHTML = ''; carouselDotsContainer.innerHTML = ''; carouselCards = []; if (filteredTests.length === 0) { carouselTrack.innerHTML = '<p style="padding: 1rem; text-align: center; width: 100%;">No tests match filters.</p>'; disableCarouselButtons(); return; } const isAdmin = currentUser && adminEmails.includes(currentUser.email); filteredTests.forEach(test => { const card = document.createElement('div'); card.className = 'test-card'; card.dataset.id = test.id; card.dataset.category = test.category; const canModify = isAdmin || (currentUser && (test.userId === currentUser.uid || (!test.userId && test.userName === currentUser.displayName))); card.innerHTML = `<div class="test-card-content" style="cursor: pointer;"><h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4><p>${test.text.substring(0,100)}${test.text.length>100?'...':''}</p>${test.videoUrl?'<div class="video-indicator"><svg viewBox="0 0 24 24"><path d="M10,16.5V7.5L16,12M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"></path></svg> Includes Video</div>':''}<div class="test-author"><img src="${test.userPhoto||`https://www.gravatar.com/avatar/${test.id}?d=identicon&s=24`}" alt=""><span>By ${test.userName||'User'}</span></div></div> ${canModify?'<div class="test-card-actions"><button class="edit-test-btn">Edit</button><button class="delete-test-btn">Delete</button></div>':''}`; card.querySelector('.test-card-content').addEventListener('click', () => selectTest(card, test)); if (canModify) { card.querySelector('.edit-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); editTest(test.id, test); }); card.querySelector('.delete-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); deleteTest(test.id, test.title); }); } carouselTrack.appendChild(card); carouselCards.push(card); }); if (carouselCards.length > 0) initializeCarousel(); else disableCarouselButtons(); }
+  // MODIFIED: renderGlobalTests uses simpler video indicator and author text
+  function renderGlobalTests(filteredTests) { carouselTrack = document.querySelector('.carousel-track'); carouselDotsContainer = document.querySelector('.carousel-dots'); carouselPrevBtn = document.querySelector('.prev-btn'); carouselNextBtn = document.querySelector('.next-btn'); if (!carouselTrack || !carouselDotsContainer || !carouselPrevBtn || !carouselNextBtn) return; carouselTrack.innerHTML = ''; carouselDotsContainer.innerHTML = ''; carouselCards = []; if (filteredTests.length === 0) { carouselTrack.innerHTML = '<p style="padding: 1rem; text-align: center; width: 100%;">No tests match filters.</p>'; disableCarouselButtons(); return; } const isAdmin = currentUser && adminEmails.includes(currentUser.email); filteredTests.forEach(test => { const card = document.createElement('div'); card.className = 'test-card'; card.dataset.id = test.id; card.dataset.category = test.category; const canModify = isAdmin || (currentUser && (test.userId === currentUser.uid || (!test.userId && test.userName === currentUser.displayName))); card.innerHTML = `<div class="test-card-content" style="cursor: pointer;"><h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4><p>${test.text.substring(0,100)}${test.text.length>100?'...':''}</p>${test.videoUrl?`<div class="video-indicator">• Includes Video</div>`:''}<div class="test-author"><img src="${test.userPhoto||`https://www.gravatar.com/avatar/${test.id}?d=identicon&s=24`}" alt=""><span>By ${test.userName||'User'}</span></div></div> ${canModify?'<div class="test-card-actions"><button class="edit-test-btn">Edit</button><button class="delete-test-btn">Delete</button></div>':''}`; card.querySelector('.test-card-content').addEventListener('click', () => selectTest(card, test)); if (canModify) { card.querySelector('.edit-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); editTest(test.id, test); }); card.querySelector('.delete-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); deleteTest(test.id, test.title); }); } carouselTrack.appendChild(card); carouselCards.push(card); }); if (carouselCards.length > 0) initializeCarousel(); else disableCarouselButtons(); }
   function disableCarouselButtons() { if (carouselPrevBtn) carouselPrevBtn.disabled = true; if (carouselNextBtn) carouselNextBtn.disabled = true; }
   function selectTest(cardElement, testData) { document.querySelectorAll('.test-card').forEach(c => c.classList.remove('selected')); cardElement.classList.add('selected'); originalTextEl.value = testData.text; originalTextGroup.classList.add('hidden'); timerOptions.classList.remove('hidden'); timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }); embedVideo(testData.videoUrl); userTextEl.value = ''; startTime = null; resultsSection.classList.add('hidden'); fullTextSection.classList.add('hidden'); showFullTextBtn.classList.add('hidden'); closeResultsBtn.classList.add('hidden'); closeResultsBtnEnd.classList.add('hidden'); stopTimer(); timerDisplay.classList.add('hidden'); }
   function editTest(testId, testData) { editingTestIdInput.value = testId; customTitle.value = testData.title; customOriginal.value = testData.text; customVideoUrl.value = testData.videoUrl || ''; customCategory.value = testData.category; saveTestBtn.textContent = 'Update Test'; customTestTitleHeader.textContent = 'Edit Test'; customTestSection.scrollIntoView({ behavior: 'smooth' }); }
