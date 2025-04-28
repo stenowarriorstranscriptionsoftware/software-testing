@@ -239,6 +239,41 @@
       </section>
     </main>
 
+    <!-- Edit Test Modal -->
+    <div id="editTestModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Edit Test</h3>
+        <div class="input-group">
+          <input type="text" id="editTestTitle" placeholder=" ">
+          <label for="editTestTitle">Test Title</label>
+        </div>
+        <div class="input-group">
+          <select id="editTestCategory">
+            <option value="general">General Matter</option>
+            <option value="kailash">Kailash Chandra</option>
+            <option value="progressive">Progressive</option>
+            <option value="legal">Legal</option>
+            <option value="previous">Previous Year</option>
+            <option value="test">Test</option>
+          </select>
+          <label for="editTestCategory">Test Category</label>
+        </div>
+        <div class="input-group">
+          <textarea id="editTestText" placeholder=" "></textarea>
+          <label for="editTestText">Original Text</label>
+        </div>
+        <div class="input-group">
+          <input type="url" id="editTestVideoUrl" placeholder=" ">
+          <label for="editTestVideoUrl">Video URL (Optional)</label>
+        </div>
+        <div class="modal-buttons">
+          <button id="cancelEditTest" class="secondary-btn">Cancel</button>
+          <button id="saveEditedTest" class="primary-btn">Save Changes</button>
+          <button id="deleteTest" class="danger-btn">Delete Test</button>
+        </div>
+      </div>
+    </div>
+
     <footer>
       <p>© 2023 Steno Warriors | Professional Transcription Tool</p>
     </footer>
