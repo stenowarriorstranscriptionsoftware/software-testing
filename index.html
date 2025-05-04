@@ -22,6 +22,20 @@
   --light: #f8f9fa;
   --dark: #212529;
   --gray: #6c757d;
+
+  /* Added/Refined Variables for Consistency */
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --border-radius-lg: 15px; /* Kept for container */
+  --spacing-sm: 0.8rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+
+  /* Softer Shadows */
+  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+  --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -36,26 +50,26 @@ body {
   min-height: 100vh;
   color: var(--dark);
   line-height: 1.6;
-  padding: 20px;
-  transition: background 0.3s ease, color 0.3s ease;
+  padding: var(--spacing-md); /* Use variable */
+  transition: background 0.5s ease, color 0.5s ease; /* Smoother transition */
 }
 
 body.dark-mode {
-  background: #121212;
+  background: #1a1a1a; /* Darker background */
   color: #e0e0e0;
 }
 
 body.dark-mode .container {
-  background: #1e1e1e;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  background: #2a2a2a; /* Darker container */
+  box-shadow: var(--shadow-lg); /* Use variable */
 }
 
 .container {
   max-width: 1200px;
-  margin: 0 auto;
+  margin: var(--spacing-md) auto; /* Added top/bottom margin */
   background: white;
-  border-radius: 15px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-lg); /* Use variable */
+  box-shadow: var(--shadow-lg); /* Use variable */
   overflow: hidden;
   transition: all 0.3s ease;
 }
@@ -63,7 +77,7 @@ body.dark-mode .container {
 header {
   background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
   color: white;
-  padding: 2rem;
+  padding: var(--spacing-lg) var(--spacing-md); /* Use variables */
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -82,7 +96,7 @@ header::before {
 }
 
 header h1 {
-  font-size: 2.8rem;
+  font-size: 2.5rem; /* Slightly larger font size */
   font-weight: 700;
   margin-bottom: 0.5rem;
   position: relative;
@@ -91,7 +105,7 @@ header h1 {
 }
 
 .subtitle {
-  font-size: 1.2rem;
+  font-size: 1.1rem; /* Slightly larger font size */
   opacity: 0.9;
   position: relative;
   z-index: 1;
@@ -105,8 +119,8 @@ header h1 {
 
 .theme-toggle {
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
+  top: var(--spacing-sm); /* Use variable */
+  right: var(--spacing-sm); /* Use variable */
   z-index: 100;
 }
 
@@ -114,12 +128,13 @@ header h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 40px; /* Slightly larger size */
+  height: 40px; /* Slightly larger size */
   background: rgba(255, 255, 255, 0.2);
   border-radius: 50%;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
 .toggle-label:hover {
@@ -132,16 +147,16 @@ header h1 {
 }
 
 .toggle-icon {
-  font-size: 1.2rem;
+  font-size: 1.1rem; /* Slightly larger size */
 }
 
 .input-section {
-  padding: 2rem;
+  padding: var(--spacing-md); /* Use variable */
 }
 
 .input-group {
   position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-md); /* Use variable */
 }
 
 .input-group label {
@@ -153,10 +168,11 @@ header h1 {
   pointer-events: none;
   background: white;
   padding: 0 0.5rem;
+  z-index: 2; /* Ensure label is above input */
 }
 
 body.dark-mode .input-group label {
-  background: #1e1e1e;
+  background: #2a2a2a; /* Match dark mode container */
 }
 
 .input-group textarea:focus + label,
@@ -169,19 +185,32 @@ body.dark-mode .input-group label {
   left: 0.8rem;
   font-size: 0.8rem;
   color: var(--primary);
+  background: white; /* Ensure background is white in day mode */
 }
+
+body.dark-mode .input-group textarea:focus + label,
+body.dark-mode .input-group textarea:not(:placeholder-shown) + label,
+body.dark-mode .input-group input:focus + label,
+body.dark-mode .input-group input:not(:placeholder-shown) + label,
+body.dark-mode .input-group select:focus + label,
+body.dark-mode .input-group select:not(:placeholder-shown) + label {
+   background: #2a2a2a; /* Match dark mode container */
+}
+
 
 textarea, input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="search"], select {
   width: 100%;
-  padding: 1.2rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 10px;
+  padding: 1rem; /* Adjusted padding */
+  border: 1px solid #e2e8f0; /* Slightly thinner border */
+  border-radius: var(--border-radius-sm); /* Use variable */
   font-family: 'Poppins', sans-serif;
   font-size: 1rem;
   resize: vertical;
   transition: all 0.3s;
   background: transparent;
+  position: relative; /* Needed for z-index */
   z-index: 1;
+  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
 }
 
 body.dark-mode textarea,
@@ -193,7 +222,10 @@ body.dark-mode input[type="search"],
 body.dark-mode select {
   border-color: #444;
   color: #e0e0e0;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
+  background: #3a3a3a; /* Slightly darker background for inputs in dark mode */
 }
+
 
 textarea:focus,
 input[type="text"]:focus,
@@ -204,13 +236,33 @@ input[type="search"]:focus,
 select:focus {
   border-color: var(--primary-light);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15); /* Softer focus shadow */
+  background: white; /* Ensure white background on focus in day mode */
 }
+
+body.dark-mode textarea:focus,
+body.dark-mode input[type="text"]:focus,
+body.dark-mode input[type="email"]:focus,
+body.dark-mode input[type="password"]:focus,
+body.dark-mode input[type="url"]:focus,
+body.dark-mode input[type="search"]:focus,
+body.dark-mode select:focus {
+   background: #3a3a3a; /* Maintain dark mode background on focus */
+   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3); /* Darker focus shadow */
+}
+
+
+/* Specific style for the user transcription textarea */
+#userText {
+    height: 250px; /* Increased default height */
+}
+
 
 .button-group {
   display: flex;
-  gap: 0.8rem;
+  gap: var(--spacing-sm); /* Use variable */
   margin-top: 1rem;
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
 }
 
 button {
@@ -220,12 +272,15 @@ button {
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
-  border-radius: 12px;
+  border-radius: var(--border-radius-md); /* Use variable */
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 6px rgba(67, 97, 238, 0.2);
+  box-shadow: var(--shadow-sm); /* Use variable */
   position: relative;
   overflow: hidden;
+  flex-grow: 1; /* Allow buttons to grow */
+  min-width: 120px; /* Minimum width for buttons */
+  will-change: transform, box-shadow; /* Optimize transitions */
 }
 
 button::after {
@@ -259,74 +314,119 @@ button:focus:not(:active)::after {
 
 button:hover {
   transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(67, 97, 238, 0.3);
+  box-shadow: var(--shadow-md); /* Use variable */
 }
 
 button:active {
   transform: translateY(1px);
-  box-shadow: 0 2px 4px rgba(67, 97, 238, 0.2);
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 .secondary-btn {
   background-color: var(--gray);
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
-  flex: initial;
+  color: var(--dark); /* Ensure dark text in day mode */
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
+
+body.dark-mode .secondary-btn {
+  background-color: #555; /* Darker gray */
+  color: #e0e0e0;
+  box-shadow: var(--shadow-sm); /* Use variable */
+}
+
+.secondary-btn:hover {
+  background-color: #5a6268; /* Darker hover */
+  box-shadow: var(--shadow-md); /* Use variable */
+}
+
+body.dark-mode .secondary-btn:hover {
+  background-color: #666; /* Darker hover */
+}
+
 
 .download-btn {
   background-color: var(--success);
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
-  flex: initial;
+  box-shadow: 0 4px 6px rgba(76, 201, 240, 0.3); /* Success specific shadow */
 }
+.download-btn:hover {
+   box-shadow: 0 6px 12px rgba(76, 201, 240, 0.4); /* Success specific shadow */
+}
+
 
 .close-results-btn {
   background-color: var(--danger);
   margin-left: auto;
+  box-shadow: 0 4px 6px rgba(247, 37, 133, 0.3); /* Danger specific shadow */
+}
+.close-results-btn:hover {
+   box-shadow: 0 6px 12px rgba(247, 37, 133, 0.4); /* Danger specific shadow */
 }
 
+
 #results, #fullTextSection {
-  padding: 0 2rem 2rem;
+  padding: 0 var(--spacing-md) var(--spacing-md); /* Use variable */
 }
 
 .hidden {
   display: none !important; /* Use important to ensure override */
+  /* Added transition for smoother hiding/showing */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
 }
+
+/* Style for elements that are shown */
+#results:not(.hidden),
+#fullTextSection:not(.hidden),
+#loginPrompt:not(.hidden),
+#leaderboardSection:not(.hidden),
+#globalTestsSection:not(.hidden),
+#customTestSection:not(.hidden) {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
 
 .results-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
-  border-radius: 15px;
+  margin-bottom: var(--spacing-md); /* Use variable */
+  padding: var(--spacing-md); /* Use variable */
+  border-radius: var(--border-radius-md); /* Use variable */
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* Softer shadow */
   border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-wrap: wrap; /* Allow header content to wrap */
+  gap: var(--spacing-sm); /* Use variable */
 }
 
 body.dark-mode .results-header {
   background: rgba(30, 30, 30, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Dark mode shadow */
 }
 
 .result-meta {
   display: flex;
-  gap: 1rem;
+  gap: var(--spacing-sm); /* Use variable */
   font-size: 0.9rem;
   color: var(--gray);
   margin-top: 0.5rem;
+  flex-wrap: wrap; /* Allow meta items to wrap */
 }
 
 .fulltext-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-md); /* Use variable */
   padding-bottom: 1rem;
   border-bottom: 1px solid #e2e8f0;
+  flex-wrap: wrap; /* Allow header content to wrap */
+  gap: var(--spacing-sm); /* Use variable */
 }
 
 body.dark-mode .fulltext-header {
@@ -334,24 +434,26 @@ body.dark-mode .fulltext-header {
 }
 
 /* Comparison Text Styles */
-.correct { color: #2ecc71; font-weight: bold; } /* Green */
-.missing { color: #e74c3c; font-weight: bold; background-color: rgba(231, 76, 60, 0.1); padding: 0 2px; border-radius: 3px;} /* Red, background */
-.addition { color: #3498db; font-weight: bold; background-color: rgba(52, 152, 219, 0.1); padding: 0 2px; border-radius: 3px; text-decoration: line-through;} /* Blue, background, strikethrough */
-.capitalization { color: #9b59b6; font-weight: bold; border-bottom: 2px dotted rgba(155, 89, 182, 0.7); } /* Purple, dotted underline */
+.correct { color: #2ecc71; font-weight: normal; } /* Green, normal weight for clean look */
+.missing { color: #e74c3c; font-weight: normal; background-color: rgba(231, 76, 60, 0.1); padding: 0 2px; border-radius: 3px;} /* Red, background, normal weight */
+.addition { color: #3498db; font-weight: normal; background-color: rgba(52, 152, 219, 0.1); padding: 0 2px; border-radius: 3px; text-decoration: line-through;} /* Blue, background, strikethrough, normal weight */
+.capitalization { color: #9b59b6; font-weight: normal; border-bottom: 1px dotted rgba(155, 89, 182, 0.7); } /* Purple, dotted underline, thinner, normal weight */
 /* Punctuation errors will use the .missing style (red background) */
 
 
 .legend-box {
   border: 1px solid #e2e8f0;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 1.5rem;
+  padding: var(--spacing-sm); /* Use variable */
+  border-radius: var(--border-radius-sm); /* Use variable */
+  margin-bottom: var(--spacing-md); /* Use variable */
   background: white;
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
 body.dark-mode .legend-box {
-  background: #1e1e1e;
+  background: #2a2a2a; /* Match dark mode container */
   border-color: #444;
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 .legend-row {
@@ -363,36 +465,39 @@ body.dark-mode .legend-box {
 
 .legend-row span {
   margin-right: 8px;
-  font-size: 1.2rem; /* Keep box size consistent */
+  font-size: 1rem; /* Slightly smaller box size */
   display: inline-block; /* Needed for background color */
   padding: 0 2px; /* Match padding */
   border-radius: 3px; /* Match border radius */
   line-height: 1.2; /* Adjust line height for visual consistency */
-  min-width: 1.5em; /* Ensure some width */
+  min-width: 1.2em; /* Ensure some width */
   text-align: center;
+  font-weight: bold; /* Keep bold for legend icons */
 }
 /* Apply styles directly to legend spans */
 .legend-row .correct { background-color: transparent; text-decoration: none; color: #2ecc71; }
 .legend-row .missing { background-color: rgba(231, 76, 60, 0.1); text-decoration: none; color: #e74c3c;} /* Red background */
 .legend-row .addition { background-color: rgba(52, 152, 219, 0.1); text-decoration: line-through; color: #3498db;} /* Blue background, strikethrough */
-.legend-row .capitalization { background-color: transparent; text-decoration: none; border-bottom: 2px dotted rgba(155, 89, 182, 0.7); color: #9b59b6;} /* Purple dotted underline */
+.legend-row .capitalization { background-color: transparent; text-decoration: none; border-bottom: 1px dotted rgba(155, 89, 182, 0.7); color: #9b59b6;} /* Purple dotted underline */
 /* Punctuation legend entry will also use .missing style */
 
 
 .result-box, .stats-box, .feedback-box, .text-display {
   background: white;
-  padding: 1.5rem;
-  border-radius: 10px;
-  margin-bottom: 1.5rem;
+  padding: var(--spacing-md); /* Use variable */
+  border-radius: var(--border-radius-md); /* Use variable */
+  margin-bottom: var(--spacing-md); /* Use variable */
   border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
 body.dark-mode .result-box,
 body.dark-mode .stats-box,
 body.dark-mode .feedback-box,
 body.dark-mode .text-display {
-  background: #1e1e1e;
+  background: #2a2a2a; /* Match dark mode container */
   border-color: #444;
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 .result-box {
@@ -402,70 +507,75 @@ body.dark-mode .text-display {
 }
 
 .comparison-section {
-  margin-bottom: 2rem;
+  margin-bottom: var(--spacing-md); /* Use variable */
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border-radius: var(--border-radius-md); /* Use variable */
+  padding: var(--spacing-md); /* Use variable */
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* Softer shadow */
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 body.dark-mode .comparison-section {
   background: rgba(30, 30, 30, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Dark mode shadow */
 }
 
 .analysis-section {
   display: flex;
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: var(--spacing-md); /* Use variable */
+  margin-bottom: var(--spacing-md); /* Use variable */
+  flex-direction: column; /* Stack columns by default */
 }
 
 .analysis-column {
   flex: 1;
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  border-radius: 15px;
-  padding: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border-radius: var(--border-radius-md); /* Use variable */
+  padding: var(--spacing-md); /* Use variable */
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* Softer shadow */
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 body.dark-mode .analysis-column {
   background: rgba(30, 30, 30, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Dark mode shadow */
 }
 
 .stats-box {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjusted min width */
+  gap: var(--spacing-sm); /* Use variable */
 }
 
 .stat-item {
   background: rgba(255, 255, 255, 0.9);
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  padding: var(--spacing-sm); /* Use variable */
+  border-radius: var(--border-radius-md); /* Use variable */
+  box-shadow: var(--shadow-sm); /* Use variable */
   position: relative;
   overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Added specific transitions */
 }
 
 body.dark-mode .stat-item {
   background: rgba(30, 30, 30, 0.9);
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 .stat-item h4 {
   color: var(--gray);
-  font-size: 0.9rem;
+  font-size: 0.9rem; /* Slightly larger font size */
   margin-bottom: 0.5rem;
   position: relative;
   z-index: 1;
 }
 
 .stat-item p {
-  font-size: 1.8rem;
+  font-size: 1.6rem; /* Slightly larger font size */
   font-weight: 700;
   color: var(--primary);
   position: relative;
@@ -482,7 +592,7 @@ body.dark-mode .stat-item {
   background: linear-gradient(90deg, var(--primary-light), var(--secondary));
   transform-origin: left;
   transform: scaleX(0);
-  transition: transform 1s ease-out;
+  transition: transform 0.5s ease-out; /* Smoother transition */
 }
 
 .stat-item:hover::after {
@@ -504,7 +614,8 @@ body.dark-mode .stat-item {
 
 .columns {
   display: flex;
-  gap: 1.5rem;
+  gap: var(--spacing-md); /* Use variable */
+  flex-direction: column; /* Stack columns by default */
 }
 
 .column {
@@ -512,18 +623,24 @@ body.dark-mode .stat-item {
 }
 
 .text-display {
-  height: 400px;
+  height: 300px; /* Adjusted height */
   overflow-y: auto;
   white-space: pre-wrap;
+  border: 1px solid #e2e8f0; /* Added subtle border */
+  border-radius: var(--border-radius-sm); /* Use variable */
+  padding: 1rem; /* Added padding */
+  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
 }
 
 body.dark-mode .text-display {
   color: #e0e0e0;
+  border-color: #444;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
 }
 
 footer {
   text-align: center;
-  padding: 1.5rem;
+  padding: var(--spacing-md); /* Use variable */
   color: var(--gray);
   font-size: 0.9rem;
   border-top: 1px solid #e2e8f0;
@@ -536,9 +653,10 @@ body.dark-mode footer {
 /* Timer Styles */
 .timer-options {
   display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  gap: var(--spacing-sm); /* Use variable */
+  margin-bottom: var(--spacing-md); /* Use variable */
   justify-content: center;
+  flex-wrap: wrap; /* Allow timer options to wrap */
 }
 
 .timer-option {
@@ -548,22 +666,27 @@ body.dark-mode footer {
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm); /* Use variable */
   cursor: pointer;
   transition: all 0.3s;
+  flex-grow: 1; /* Allow timer options to grow */
+  min-width: 100px; /* Minimum width */
+  text-align: center;
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
 .timer-option:hover {
   background-color: var(--secondary);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md); /* Use variable */
 }
 
 .timer-display {
   text-align: center;
-  font-size: 1.5rem;
+  font-size: 1.8rem; /* Slightly larger font size */
   font-weight: 600;
   color: var(--danger);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-md); /* Use variable */
 }
 
 .timer-ended {
@@ -582,15 +705,23 @@ body.dark-mode footer {
   justify-content: space-between;
   align-items: center;
   margin-top: 1rem;
+  flex-direction: column; /* Stack controls by default */
+  gap: var(--spacing-sm); /* Use variable */
+}
+
+.test-controls button {
+    width: 100%; /* Make buttons full width when stacked */
 }
 
 .locked-textarea {
   background-color: var(--light);
   cursor: not-allowed;
+  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
 }
 
 body.dark-mode .locked-textarea {
-  background-color: #2a2a2a;
+  background-color: #3a3a3a; /* Match dark mode input background */
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
 }
 
 /* Auth Styles */
@@ -601,15 +732,17 @@ body.dark-mode .locked-textarea {
   padding: 0.6rem 1.2rem;
   font-size: 0.9rem;
   font-weight: 500;
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm); /* Use variable */
   cursor: pointer;
   transition: all 0.3s;
   margin-top: 1rem;
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
 .auth-btn:hover {
   background-color: var(--secondary);
   transform: translateY(-2px);
+  box-shadow: var(--shadow-md); /* Use variable */
 }
 
 .user-photo {
@@ -618,6 +751,7 @@ body.dark-mode .locked-textarea {
   border-radius: 50%;
   margin-right: 10px;
   vertical-align: middle;
+  border: 2px solid var(--primary-light); /* Added subtle border */
 }
 
 #userInfo {
@@ -625,25 +759,27 @@ body.dark-mode .locked-textarea {
   align-items: center;
   gap: 10px;
   margin-top: 1rem;
+  flex-wrap: wrap; /* Allow user info to wrap */
 }
 
 /* Login Prompt */
 .login-prompt {
   max-width: 500px;
-  margin: 2rem auto;
-  padding: 2rem;
+  margin: var(--spacing-md) auto; /* Use variable */
+  padding: var(--spacing-md); /* Use variable */
   background: white;
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: var(--border-radius-md); /* Use variable */
+  box-shadow: var(--shadow-md); /* Use variable */
 }
 
 body.dark-mode .login-prompt {
-  background: #1e1e1e;
+  background: #2a2a2a; /* Match dark mode container */
+  box-shadow: var(--shadow-md); /* Use variable */
 }
 
 .login-prompt h3 {
   color: var(--primary);
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-md); /* Use variable */
   text-align: center;
 }
 
@@ -657,110 +793,100 @@ body.dark-mode .login-prompt {
   color: var(--primary);
   text-decoration: none;
   font-weight: 500;
+  transition: color 0.3s ease; /* Added transition */
 }
 
 .login-prompt a:hover {
   text-decoration: underline;
+  color: var(--secondary); /* Change color on hover */
 }
 
 /* Global Tests Section */
 .global-tests-section {
-  padding: 2rem;
-  margin: 2rem 0;
+  padding: var(--spacing-md); /* Use variable */
+  margin: var(--spacing-md) 0; /* Use variable */
   background: white;
-  border-radius: 10px;
+  border-radius: var(--border-radius-md); /* Use variable */
   border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
 body.dark-mode .global-tests-section {
-  background: #1e1e1e;
+  background: #2a2a2a; /* Match dark mode container */
   border-color: #444;
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 .test-filters {
-  margin-bottom: 1.5rem; /* Increased margin */
-  display: flex; /* Use flexbox for alignment */
-  gap: 1rem; /* Space between elements */
-  flex-wrap: wrap; /* Allow wrapping on smaller screens */
+  margin-bottom: var(--spacing-md); /* Use variable */
+  display: flex;
+  gap: var(--spacing-sm); /* Use variable */
+  flex-wrap: wrap;
 }
 
 .test-filters select,
-.test-filters input[type="search"] { /* Style both select and search */
-  padding: 0.8rem; /* Consistent padding */
-  border-radius: 8px; /* Consistent radius */
+.test-filters input[type="search"] {
+  padding: 0.8rem;
+  border-radius: var(--border-radius-sm); /* Use variable */
   border: 1px solid #e2e8f0;
   background: white;
-  font-size: 0.9rem; /* Slightly smaller font */
-  flex-grow: 1; /* Allow elements to grow */
+  font-size: 0.9rem;
+  flex-grow: 1;
+  min-width: 150px; /* Adjusted minimum width */
+  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
 }
-
-.test-filters input[type="search"] {
-    min-width: 200px; /* Minimum width for search */
-}
-
 
 body.dark-mode .test-filters select,
 body.dark-mode .test-filters input[type="search"] {
-  background: #2a2a2a;
+  background: #3a3a3a; /* Match dark mode input background */
   border-color: #444;
   color: #e0e0e0;
-}
-
-.tests-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1rem;
-  margin-top: 1rem;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
 }
 
 /* MODIFIED: Test Card Styling */
 /* Updated Test Card Styling */
 .test-card {
   background: white;
-  padding: 1.5rem;
-  border-radius: 15px;
-  border: none; /* Remove border */
+  padding: var(--spacing-md); /* Use variable */
+  border-radius: var(--border-radius-md); /* Use variable */
+  border: none;
   transition: all 0.3s ease;
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1),
-              0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md); /* Use variable */
   transform: translateY(0);
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05); /* Very subtle border */
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  will-change: transform, box-shadow; /* Optimize transitions */
 }
 
 body.dark-mode .test-card {
-  background: #2a2a2a;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3),
-              0 1px 3px rgba(0, 0, 0, 0.2);
+  background: #2a2a2a; /* Match dark mode container */
+  box-shadow: var(--shadow-md); /* Use variable */
   border-color: rgba(255, 255, 255, 0.05);
 }
 
 .test-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1),
-              0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-lg); /* Use variable */
 }
 
 body.dark-mode .test-card:hover {
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.3),
-              0 4px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-lg); /* Use variable */
 }
 
 .test-card.selected {
   border: 2px solid var(--primary-light);
-  padding: calc(1.5rem - 1px);
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2),
-              0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: calc(var(--spacing-md) - 1px); /* Adjust padding for border */
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2), var(--shadow-md); /* Combined shadow */
 }
 
 body.dark-mode .test-card.selected {
   border-color: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3),
-              0 4px 6px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3), var(--shadow-md); /* Combined shadow */
 }
 
 /* Add a subtle gradient overlay on hover */
@@ -846,18 +972,18 @@ body.dark-mode .test-card::after {
 .test-card-actions button {
   padding: 0.4rem 0.8rem;
   font-size: 0.85rem;
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm); /* Use variable */
   flex: 1;
   transition: all 0.2s ease;
 }
 
 .test-card-actions button:hover {
   transform: translateY(-2px);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 body.dark-mode .test-card-actions button:hover {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 /* NEW: Styles for Edit/Delete buttons */
@@ -892,48 +1018,68 @@ body.dark-mode .test-card-actions button:hover {
 
 /* Leaderboard Styles */
 .leaderboard-section {
-  padding: 2rem;
-  margin: 2rem 0;
+  padding: var(--spacing-md); /* Use variable */
+  margin: var(--spacing-md) 0; /* Use variable */
   background: white;
-  border-radius: 10px;
+  border-radius: var(--border-radius-md); /* Use variable */
   border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
 body.dark-mode .leaderboard-section {
-  background: #1e1e1e;
+  background: #2a2a2a; /* Match dark mode container */
   border-color: #444;
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 .leaderboard-controls {
   margin-bottom: 1rem;
   display: flex;
-  gap: 0.8rem;
+  gap: var(--spacing-sm); /* Use variable */
   align-items: center;
   flex-wrap: wrap;
 }
 
-.leaderboard-controls select {
-  padding: 0.5rem;
-  border-radius: 5px;
+.leaderboard-controls select,
+.leaderboard-controls button { /* Style buttons within controls */
+  padding: 0.5rem 0.8rem; /* Adjusted padding */
+  border-radius: var(--border-radius-sm); /* Use variable */
   border: 1px solid #e2e8f0;
   background: white;
+  font-size: 0.9rem;
+  flex-grow: 1; /* Allow elements to grow */
+  min-width: 80px; /* Minimum width */
+  text-align: center;
+  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
 }
 
-body.dark-mode .leaderboard-controls select {
-  background: #2a2a2a;
+body.dark-mode .leaderboard-controls select,
+body.dark-mode .leaderboard-controls button {
+  background: #3a3a3a; /* Match dark mode input background */
   border-color: #444;
   color: #e0e0e0;
+  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
 }
+
 
 /* Updated Leaderboard List Styles for Horizontal Scrolling */
 .leaderboard-list {
   overflow-x: auto;
   width: 100%;
   -webkit-overflow-scrolling: touch;
+  border-radius: var(--border-radius-sm); /* Added border radius */
+  border: 1px solid #e2e8f0; /* Added subtle border */
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
+body.dark-mode .leaderboard-list {
+  border-color: #444;
+  box-shadow: var(--shadow-sm); /* Use variable */
+}
+
+
 .leaderboard-list table {
-  min-width: 1000px;
+  min-width: 800px; /* Adjusted minimum width for table */
   width: 100%;
   border-collapse: collapse;
 }
@@ -941,9 +1087,10 @@ body.dark-mode .leaderboard-controls select {
 .leaderboard-list th,
 .leaderboard-list td {
   white-space: nowrap;
-  padding: 0.8rem 1rem;
+  padding: 0.8rem 0.5rem; /* Adjusted padding */
   text-align: left;
   border-bottom: 1px solid #e2e8f0;
+  font-size: 0.9rem; /* Adjusted font size */
 }
 
 body.dark-mode .leaderboard-list th,
@@ -957,6 +1104,7 @@ body.dark-mode .leaderboard-list td {
   font-weight: 500;
   position: relative;
   cursor: pointer;
+  transition: background-color 0.3s ease; /* Added transition */
 }
 
 .leaderboard-list th:hover {
@@ -966,9 +1114,10 @@ body.dark-mode .leaderboard-list td {
 .leaderboard-list th::after {
   content: "↕";
   position: absolute;
-  right: 0.5rem;
+  right: 0.5rem; /* Adjusted position */
   opacity: 0.5;
   font-size: 0.8rem;
+  transition: opacity 0.3s ease; /* Added transition */
 }
 
 .leaderboard-list th.sorted-asc::after {
@@ -986,26 +1135,27 @@ body.dark-mode .leaderboard-list td {
 }
 
 body.dark-mode .leaderboard-list tr:nth-child(even) {
-  background-color: #2a2a2a;
+  background-color: #3a3a3a; /* Darker row background */
 }
 
 .leaderboard-list tr:hover {
   background-color: #e9ecef;
+  transition: background-color 0.3s ease; /* Added transition */
 }
 
 body.dark-mode .leaderboard-list tr:hover {
-  background-color: #3a3a3a;
+  background-color: #4a4a4a; /* Darker hover background */
 }
 
 .leaderboard-user {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
+  gap: 0.5rem; /* Adjusted gap */
 }
 
 .leaderboard-user img {
-  width: 30px;
-  height: 30px;
+  width: 25px; /* Adjusted size */
+  height: 25px; /* Adjusted size */
   border-radius: 50%;
 }
 
@@ -1036,14 +1186,16 @@ body.dark-mode .leaderboard-list tr:hover {
 .custom-test-section {
   background: #f1f5fb;
   border: 1px solid #dce3f0;
-  padding: 2rem;
-  margin: 2rem;
-  border-radius: 10px;
+  padding: var(--spacing-md); /* Use variable */
+  margin: var(--spacing-md); /* Use variable */
+  border-radius: var(--border-radius-md); /* Use variable */
+  box-shadow: var(--shadow-sm); /* Added subtle shadow */
 }
 
 body.dark-mode .custom-test-section {
-  background: #2a2a2a;
+  background: #2a2a2a; /* Match dark mode container */
   border-color: #444;
+  box-shadow: var(--shadow-sm); /* Use variable */
 }
 
 .custom-test-section h3 {
@@ -1053,21 +1205,23 @@ body.dark-mode .custom-test-section {
 
 /* Video Container */
 .video-container {
-  margin: 1.5rem 0;
+  margin: 1rem 0; /* Adjusted margin */
   position: relative;
   padding-bottom: 56.25%; /* 16:9 aspect ratio */
   height: 0;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: var(--border-radius-md); /* Use variable */
+  box-shadow: var(--shadow-md); /* Added subtle shadow */
 }
 
-.video-container iframe {
+.video-container iframe,
+.video-container video {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  border-radius: 8px;
+  border-radius: var(--border-radius-sm); /* Use variable */
 }
 
 /* MODIFIED: Video indicator styling within card */
@@ -1134,6 +1288,10 @@ body.dark-mode .custom-test-section {
   background-color: #f39c12;
 }
 
+.category-test {
+  background-color: #607d8b;
+}
+
 /* Modal Styles */
 .modal {
   position: fixed;
@@ -1141,34 +1299,52 @@ body.dark-mode .custom-test-section {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
+  padding: 10px; /* Add padding to prevent content touching edges */
+  opacity: 0; /* Start hidden */
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease; /* Fade transition */
+}
+
+.modal.show {
+  opacity: 1;
+  visibility: visible;
 }
 
 .modal-content {
   background-color: white;
-  padding: 2rem;
-  border-radius: 10px;
-  width: 90%;
+  padding: var(--spacing-md); /* Use variable */
+  border-radius: var(--border-radius-md); /* Use variable */
+  width: 100%; /* Use full width on small screens */
   max-width: 500px;
-  max-height: 80vh;
+  max-height: 95vh; /* Adjusted max height */
   overflow-y: auto;
+  box-shadow: var(--shadow-lg); /* Added subtle shadow */
+  transform: translateY(-20px); /* Start slightly above */
+  transition: transform 0.3s ease; /* Slide transition */
 }
 
+.modal.show .modal-content {
+    transform: translateY(0); /* Slide into place */
+}
+
+
 body.dark-mode .modal-content {
-  background-color: #1e1e1e;
+  background-color: #2a2a2a; /* Match dark mode container */
+  box-shadow: var(--shadow-lg); /* Use variable */
 }
 
 .modal h3 {
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--spacing-md); /* Use variable */
   color: var(--primary);
 }
 
 .test-selection {
-  margin: 1.5rem 0;
+  margin: var(--spacing-md) 0; /* Use variable */
 }
 
 .test-item {
@@ -1189,8 +1365,14 @@ body.dark-mode .test-item {
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 1.5rem;
+  gap: var(--spacing-sm); /* Use variable */
+  margin-top: var(--spacing-md); /* Use variable */
+  flex-wrap: wrap; /* Allow buttons to wrap */
+}
+
+.modal-buttons button {
+    flex-grow: 1; /* Allow buttons to grow */
+    min-width: 100px; /* Minimum width */
 }
 
 .danger-btn {
@@ -1202,133 +1384,411 @@ body.dark-mode .test-item {
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
-  header h1 {
-    font-size: 2rem;
-    margin-top: 1rem;
-  }
-
-  .subtitle {
-    font-size: 1rem;
-  }
-
-  .theme-toggle {
-    top: 1rem;
-    right: 1rem;
-  }
-
+@media (min-width: 769px) { /* Apply desktop styles above 768px */
   .analysis-section {
-    flex-direction: column;
-  }
-
-  .button-group {
-    flex-direction: column;
-  }
-
-  button {
-    width: 100%;
-    margin-bottom: 0.5rem;
+    flex-direction: row; /* Side-by-side on desktop */
   }
 
   .columns {
-    flex-direction: column;
-  }
-
-  .text-display {
-    height: 300px;
-  }
-
-  .timer-options {
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row; /* Side-by-side on desktop */
   }
 
   .test-controls {
-    flex-direction: column;
-    gap: 0.8rem;
+    flex-direction: row; /* Side-by-side on desktop */
   }
-   .test-controls button { /* Ensure buttons in test-controls stack */
-      width: 100%;
-   }
 
+  .test-controls button {
+      width: auto; /* Auto width on desktop */
+  }
 
   .close-results-btn {
-    margin-left: 0;
-    width: 100%; /* Ensure close button takes full width when stacked */
+    margin-left: auto; /* Push to the right on desktop */
+    width: auto; /* Auto width on desktop */
   }
-  #closeResultsBtnEnd { /* Style new button on mobile too */
-      width: calc(100% - 4rem); /* Match padding of section */
+   #closeResultsBtnEnd { /* Style new button on mobile too */
+      width: fit-content; /* Match padding of section */
       margin-left: auto;
       margin-right: auto;
   }
 
-
   .leaderboard-controls {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    align-items: center;
   }
 
   .leaderboard-controls select {
-    width: 100%;
+    width: auto;
   }
 
-  .input-group label {
+   .test-filters {
+      flex-direction: row;
+  }
+}
+
+/* Styles specifically for smaller screens (e.g., mobile) */
+@media (max-width: 768px) {
+  body {
+    padding: 10px; /* Reduce padding further on very small screens */
+  }
+
+  .container {
+    border-radius: var(--border-radius-md); /* Slightly smaller border-radius */
+  }
+
+  header {
+    padding: 1rem; /* Reduce header padding */
+  }
+
+  header h1 {
+    font-size: 1.8rem; /* Further reduce heading size */
+  }
+
+  .subtitle {
+    font-size: 0.9rem; /* Further reduce subtitle size */
+  }
+
+  .theme-toggle {
+    top: 0.5rem;
+    right: 0.5rem;
+  }
+
+  .toggle-label {
+    width: 30px;
+    height: 30px;
+  }
+
+  .toggle-icon {
     font-size: 0.9rem;
   }
 
-  .stat-item {
-    padding: 1rem;
+  .input-section {
+    padding: 1rem; /* Reduce section padding */
+  }
+
+  .input-group {
+    margin-bottom: 1rem; /* Reduce margin */
+  }
+
+  .input-group label {
+    top: 0.8rem; /* Adjust label position */
+    left: 0.8rem;
+    font-size: 0.8rem;
+  }
+
+  .input-group textarea:focus + label,
+  .input-group textarea:not(:placeholder-shown) + label,
+  .input-group input:focus + label,
+  .input-group input:not(:placeholder-shown) + label,
+  .input-group select:focus + label,
+  .input-group select:not(:placeholder-shown) + label {
+    top: -0.5rem; /* Adjust label position */
+    left: 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  textarea, input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="search"], select {
+    padding: 0.8rem; /* Reduce input padding */
+    font-size: 0.9rem; /* Reduce input font size */
+  }
+
+  /* Specific style for the user transcription textarea on mobile */
+  #userText {
+      height: 200px; /* Adjusted height for smaller screens */
+  }
+
+
+  .button-group {
+    gap: 0.5rem; /* Reduce gap */
+  }
+
+  button {
+    padding: 0.6rem 1rem; /* Reduce button padding */
+    font-size: 0.9rem; /* Reduce button font size */
+    border-radius: var(--border-radius-md); /* Slightly smaller border-radius */
+  }
+
+  .secondary-btn, .download-btn {
+    padding: 0.5rem 1rem; /* Adjust padding */
+    font-size: 0.8rem; /* Adjust font size */
+  }
+
+
+  #results, #fullTextSection {
+    padding: 0 1rem 1rem; /* Reduce padding */
   }
 
   .results-header, .fulltext-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+    padding: 1rem; /* Reduce header padding */
+    gap: 0.8rem; /* Reduce gap */
   }
 
   .result-meta {
-    flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.5rem; /* Reduce gap */
+    font-size: 0.8rem; /* Reduce font size */
+  }
+
+  .comparison-section, .analysis-section {
+    margin-bottom: 1rem; /* Reduce margin */
+    padding: 1rem; /* Reduce padding */
+  }
+
+  .stats-box {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Further adjust min width */
+    gap: 0.8rem; /* Reduce gap */
+  }
+
+  .stat-item {
+    padding: 0.8rem; /* Reduce padding */
+    border-radius: var(--border-radius-md); /* Slightly smaller border-radius */
+  }
+
+  .stat-item h4 {
+    font-size: 0.7rem; /* Further reduce font size */
+  }
+
+  .stat-item p {
+    font-size: 1.3rem; /* Further reduce font size */
+  }
+
+  .feedback-box h3 {
+    margin-bottom: 0.8rem; /* Reduce margin */
+  }
+
+  .feedback-box ul {
+    padding-left: 1rem; /* Reduce padding */
+  }
+
+  .feedback-box li {
+    margin-bottom: 0.3rem; /* Reduce margin */
+  }
+
+  .columns {
+    gap: 1rem; /* Reduce gap */
+  }
+
+  .text-display {
+    height: 250px; /* Further reduce height */
+  }
+
+  footer {
+    padding: 1rem; /* Reduce padding */
+    font-size: 0.8rem; /* Reduce font size */
+  }
+
+  .timer-options {
+    gap: 0.8rem; /* Reduce gap */
+  }
+
+  .timer-option {
+    padding: 0.6rem 1rem; /* Reduce padding */
+    font-size: 0.9rem; /* Reduce font size */
+    border-radius: var(--border-radius-sm); /* Slightly smaller border-radius */
+  }
+
+  .timer-display {
+    font-size: 1.3rem; /* Reduce font size */
+    margin-bottom: 1rem; /* Reduce margin */
+  }
+
+  .test-controls {
+    gap: 0.5rem; /* Reduce gap */
+  }
+
+  .auth-btn {
+    padding: 0.5rem 1rem; /* Reduce padding */
+    font-size: 0.8rem; /* Reduce font size */
+    margin-top: 0.8rem; /* Reduce margin */
+  }
+
+  #userInfo {
+    gap: 8px; /* Reduce gap */
+  }
+
+  .user-photo {
+    width: 30px; /* Reduce size */
+    height: 30px; /* Reduce size */
+  }
+
+  .login-prompt {
+    margin: 1rem auto; /* Reduce margin */
+    padding: 1rem; /* Reduce padding */
+  }
+
+  .login-prompt h3 {
+    margin-bottom: 1rem; /* Reduce margin */
+  }
+
+  .global-tests-section, .leaderboard-section, .custom-test-section {
+    padding: 1rem; /* Reduce padding */
+    margin: 1rem 0; /* Reduce margin */
   }
 
   .test-filters {
-      flex-direction: column; /* Stack filters vertically */
+    gap: 0.8rem; /* Reduce gap */
+  }
+
+  .test-filters select,
+  .test-filters input[type="search"] {
+    padding: 0.6rem; /* Reduce padding */
+    font-size: 0.8rem; /* Reduce font size */
+  }
+
+  .tests-list {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Further adjust min width */
+    gap: 0.8rem; /* Reduce gap */
+  }
+
+  .test-card {
+    padding: 1rem; /* Reduce padding */
+    border-radius: var(--border-radius-md); /* Slightly smaller border-radius */
+    margin-bottom: 1rem; /* Reduce margin */
+  }
+
+  .test-card h4 {
+    font-size: 1rem; /* Reduce font size */
+    margin-bottom: 0.5rem; /* Reduce margin */
+  }
+
+  .test-card p {
+    font-size: 0.9rem; /* Reduce font size */
+    margin-bottom: 1rem; /* Reduce margin */
+  }
+
+  .test-author {
+    font-size: 0.8rem; /* Reduce font size */
+  }
+
+  .test-author img {
+    width: 20px; /* Reduce size */
+    height: 20px; /* Reduce size */
+  }
+
+  .video-indicator {
+    font-size: 0.7rem; /* Reduce font size */
+    margin: 0.3rem 0; /* Reduce margin */
+  }
+
+  .test-card-actions {
+    gap: 0.3rem; /* Reduce gap */
+  }
+
+  .test-card-actions button {
+    padding: 0.2rem 0.4rem; /* Reduce padding */
+    font-size: 0.7rem; /* Reduce font size */
+    border-radius: 5px; /* Slightly smaller border-radius */
+  }
+
+  .leaderboard-controls {
+    gap: 0.5rem; /* Reduce gap */
+  }
+
+  .leaderboard-controls select,
+  .leaderboard-controls button {
+    padding: 0.4rem 0.6rem; /* Reduce padding */
+    font-size: 0.8rem; /* Reduce font size */
+  }
+
+  .leaderboard-list table {
+    min-width: 500px; /* Keep a minimum width for the table */
+  }
+
+  .leaderboard-list th,
+  .leaderboard-list td {
+    padding: 0.6rem 0.3rem; /* Reduce padding */
+    font-size: 0.8rem; /* Reduce font size */
+  }
+
+  .leaderboard-user {
+    gap: 0.3rem; /* Reduce gap */
+  }
+
+  .leaderboard-user img {
+    width: 20px; /* Reduce size */
+    height: 20px; /* Reduce size */
+  }
+
+  .pagination-info {
+    font-size: 0.8rem; /* Reduce font size */
+  }
+
+  .custom-test-section {
+    margin: 1rem; /* Reduce margin */
+    padding: 1rem; /* Reduce padding */
+  }
+
+  .custom-test-section h3 {
+    margin-bottom: 1rem; /* Reduce margin */
+  }
+
+  .video-container {
+    margin: 0.8rem 0; /* Reduce margin */
+  }
+
+  .modal-content {
+    padding: 1rem; /* Reduce padding */
+  }
+
+  .modal h3 {
+    margin-bottom: 1rem; /* Reduce margin */
+  }
+
+  .test-selection {
+    margin: 1rem 0; /* Reduce margin */
+  }
+
+  .test-item {
+    padding: 0.6rem; /* Reduce padding */
+  }
+
+  .test-item input {
+    margin-right: 0.6rem; /* Reduce margin */
+  }
+
+  .modal-buttons {
+    gap: 0.5rem; /* Reduce gap */
+    margin-top: 1rem; /* Reduce margin */
   }
 }
-/* Add to existing styles.css */
-.delete-checkbox {
-  margin-right: 10px;
+
+
+/* Additional adjustments for very small screens */
+@media (max-width: 480px) {
+    header h1 {
+        font-size: 1.5rem;
+    }
+    .subtitle {
+        font-size: 0.8rem;
+    }
+    .toggle-label {
+        width: 25px;
+        height: 25px;
+    }
+    .toggle-icon {
+        font-size: 0.8rem;
+    }
+    button {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+    .secondary-btn, .download-btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.7rem;
+    }
+    .stats-box {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+    .stat-item p {
+        font-size: 1.1rem;
+    }
+    .leaderboard-list table {
+        min-width: 500px; /* Keep a minimum width for the table */
+    }
+     .test-card {
+        min-width: 200px; /* Adjust min width for carousel on very small screens */
+    }
 }
 
-.admin-controls {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
 
-.leaderboard-row-selectable {
-  cursor: pointer;
-}
-
-.leaderboard-row-selectable:hover {
-  background-color: #f0f0f0 !important;
-}
-
-body.dark-mode .leaderboard-row-selectable:hover {
-  background-color: #3a3a3a !important;
-}
-
-.selected-row {
-  background-color: #e3f2fd !important;
-}
-
-body.dark-mode .selected-row {
-  background-color: #2c3e50 !important;
-}
-
-.category-test {
-  background-color: #607d8b;
-}
 /* Carousel Styles */
 .tests-carousel {
   position: relative;
@@ -1344,7 +1804,7 @@ body.dark-mode .selected-row {
 .carousel-track {
   display: flex;
   transition: transform 0.5s ease;
-  gap: 1rem; /* Gap between cards */
+  gap: var(--spacing-sm); /* Use variable for gap between cards */
   padding: 0.5rem 0; /* Padding for border visibility */
 }
 
@@ -1355,7 +1815,7 @@ body.dark-mode .selected-row {
   width: 40px;
   height: 40px;
   background: var(--primary);
-  color: white;
+  color: white; /* Keep white for contrast */
   border: none;
   border-radius: 50%;
   font-size: 1.2rem;
@@ -1364,11 +1824,16 @@ body.dark-mode .selected-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  box-shadow: var(--shadow-sm); /* Use variable */
+  transition: background 0.3s ease, box-shadow 0.3s ease; /* Added transitions */
+}
+  body.dark-mode .carousel-btn {
+  color: white;
 }
 
 .carousel-btn:hover {
   background: var(--secondary);
+  box-shadow: var(--shadow-md); /* Use variable */
 }
 
 .prev-btn {
@@ -1409,13 +1874,13 @@ body.dark-mode .selected-row {
 
 @media (min-width: 1024px) { /* Large screens: 3 cards */
   .test-card {
-    flex-basis: calc(33.333% - (2 * 1rem / 3)); /* 1rem gap */
+    flex-basis: calc(33.333% - (2 * var(--spacing-sm) / 3)); /* Use variable gap */
   }
 }
 
 @media (min-width: 640px) and (max-width: 1023px) { /* Medium screens: 2 cards */
   .test-card {
-    flex-basis: calc(50% - (1 * 1rem / 2)); /* 1rem gap */
+    flex-basis: calc(50% - (1 * var(--spacing-sm) / 2)); /* Use variable gap */
   }
 }
 
@@ -1432,6 +1897,38 @@ body.dark-mode .selected-row {
     font-size: 1rem;
   }
 }
+
+/* Add to existing styles.css */
+.delete-checkbox {
+  margin-right: 10px;
+}
+
+.admin-controls {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.leaderboard-row-selectable {
+  cursor: pointer;
+}
+
+.leaderboard-row-selectable:hover {
+  background-color: #f0f0f0 !important;
+}
+
+body.dark-mode .leaderboard-row-selectable:hover {
+  background-color: #3a3a3a !important;
+}
+
+.selected-row {
+  background-color: #e3f2fd !important;
+}
+
+body.dark-mode .selected-row {
+  background-color: #2c3e50 !important;
+}
+
 </style>
 </head>
 <body>
@@ -1444,7 +1941,7 @@ body.dark-mode .selected-row {
         </label>
       </div>
       <h1>Steno Warriors</h1>
-      <p class="subtitle">Advanced Transcription Comparison Tool</p>
+      <p class="subtitle">Advanced Transcription Software</p>
       <div id="authSection">
         <button id="loginBtn" class="auth-btn">Login with Google</button>
         <div id="userInfo" class="hidden">
@@ -1524,7 +2021,7 @@ body.dark-mode .selected-row {
       </section>
 
       <section id="globalTestsSection" class="hidden global-tests-section">
-        <h3>Community Tests</h3>
+        <h3>Select Tests</h3>
          <div class="test-filters">
           <select id="testCategoryFilter">
             <option value="all">All Categories</option>
@@ -1538,11 +2035,11 @@ body.dark-mode .selected-row {
           <input type="search" id="testSearchInput" placeholder="Search by title or content...">
         </div>
         <div id="globalTestsList" class="tests-carousel">
-          <button class="carousel-btn prev-btn" disabled><</button>
+          <button class="carousel-btn prev-btn" disabled>&lt;</button>
           <div class="carousel-container">
             <div class="carousel-track"></div>
           </div>
-          <button class="carousel-btn next-btn" disabled>></button>
+          <button class="carousel-btn next-btn" disabled>&gt;</button>
         </div>
         <div class="carousel-dots"></div>
       </section>
@@ -1599,7 +2096,7 @@ body.dark-mode .selected-row {
         </div>
 
         <div class="button-group test-controls">
-          <button id="compareBtn">Compare Texts</button>
+          <button id="compareBtn">Show Result</button>
           <button id="showFullTextBtn" class="secondary-btn hidden">View Full Texts</button>
           <button id="closeResultsBtn" class="close-results-btn hidden">Close Results & Refresh</button>
         </div>
@@ -1611,7 +2108,7 @@ body.dark-mode .selected-row {
             <h2>Results</h2>
             <div class="result-meta">
               <span id="resultDate"></span>
-              <span>Steno Warriors Transcription Tool</span>
+              <span>Steno Warriors Transcription Software</span>
             </div>
           </div>
           <button id="downloadPdfBtn" class="download-btn">Download as PDF</button>
@@ -1662,7 +2159,7 @@ body.dark-mode .selected-row {
     </main>
 
     <footer>
-      <p>© 2023 Steno Warriors | Professional Transcription Tool</p>
+      <p>© 2023 Steno Warriors | Professional Transcription Software</p>
     </footer>
   </div>
 
@@ -1903,7 +2400,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function sortAttempts(column, direction) { if (!Array.isArray(allAttempts)) { allAttempts = []; } allAttempts.sort((a, b) => { const statsA = a.stats || {}; const statsB = b.stats || {}; let aValue, bValue; switch (column) { case 'accuracy': case 'wpm': case 'totalOriginal': case 'totalUser': case 'totalMistakes': case 'timeTaken': aValue = statsA[column] ?? 0; bValue = statsB[column] ?? 0; break; case 'userName': aValue = (a.userName || '').toLowerCase(); bValue = (b.userName || '').toLowerCase(); break; case 'testTitle': aValue = (a.testTitle || 'Custom').toLowerCase(); bValue = (b.testTitle || 'Custom').toLowerCase(); break; case 'date': aValue = a.timestamp || 0; bValue = b.timestamp || 0; break; default: return 0; } if (typeof aValue === 'number') return direction === 'asc' ? aValue - bValue : bValue - aValue; if (typeof aValue === 'string') return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue); return 0; }); }
   function updateTestNameFilter(attempts) { uniqueTestNames = new Set(attempts.map(att => att.testTitle || 'Custom Test')); const current = testNameFilter.value; testNameFilter.innerHTML = '<option value="all">All Tests</option>'; Array.from(uniqueTestNames).sort().forEach(name => testNameFilter.add(new Option(name, name))); testNameFilter.value = uniqueTestNames.has(current) ? current : 'all'; }
   function updatePagination() { const totalEntries = filteredAttempts.length; const totalPages = Math.ceil(totalEntries / entriesPerPage); currentPage = Math.max(1, Math.min(currentPage, totalPages || 1)); const startIdx = (currentPage - 1) * entriesPerPage; const endIdx = Math.min(startIdx + entriesPerPage, totalEntries); prevPageBtn.disabled = currentPage === 1; nextPageBtn.disabled = currentPage >= totalPages; leaderboardPagination.textContent = totalEntries > 0 ? `Showing ${startIdx + 1}-${endIdx} of ${totalEntries}` : 'No entries found.'; renderLeaderboardTable(filteredAttempts.slice(startIdx, endIdx), startIdx + 1); }
-  function renderLeaderboardTable(attempts, startRank) { if (attempts.length === 0) { leaderboardList.innerHTML = '<p>No attempts match filters.</p>'; return; } const isAdmin = currentUser && adminEmails.includes(currentUser.email); let tableHTML = `<table><thead><tr> ${isAdmin?'<th>Sel</th>':''} <th data-column="rank">#</th> <th data-column="userName">User</th> <th data-column="testTitle">Test</th> <th data-column="accuracy">Acc%</th> <th data-column="wpm">WPM</th> <th data-column="totalOriginal">Orig</th> <th data-column="totalUser">Typed</th> <th data-column="timeTaken">Time</th> <th data-column="totalMistakes">Mistakes</th> <th data-column="date">Date</th> </tr></thead><tbody>`; attempts.forEach((att, idx) => { const d = new Date(att.timestamp); const s = att.stats || {}; const acc = s.accuracy ?? 0; const time = s.timeTaken ?? 0; const accClass = acc>=95?'accuracy-high':acc>=85?'accuracy-medium':'accuracy-low'; const timeFmt = `${Math.floor(time/60)}:${(time%60).toString().padStart(2,'0')}`; const rank = startRank + idx; let badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':''; const isSel = selectedLeaderboardRows.includes(att.id); tableHTML += `<tr data-id="${att.id}" class="${isAdmin?'leaderboard-row-selectable':''} ${isSel?'selected-row':''}"> ${isAdmin?`<td><input type="checkbox" class="delete-checkbox" data-id="${att.id}" ${isSel?'checked':''}></td>`:''} <td>${rank}${badge}</td> <td class="leaderboard-user"><img src="${att.userPhoto||`https://www.gravatar.com/avatar/${att.id}?d=identicon&s=30`}" alt=""><span>${att.userName||'User'}</span></td> <td>${att.testTitle||'Custom'} ${att.category?`<span class="category-badge category-${att.category}">${getCategoryName(att.category)}</span>`:''}</td> <td class="accuracy-cell ${accClass}">${acc.toFixed(1)}</td> <td>${s.wpm??0}</td> <td>${s.totalOriginal??0}</td> <td>${s.totalUser??0}</td> <td>${timeFmt}</td> <td>${s.totalMistakes??0}</td> <td>${d.toLocaleDateString()}</td> </tr>`; }); tableHTML += `</tbody></table>`; leaderboardList.innerHTML = tableHTML; makeTableSortable(); addLeaderboardRowSelectionListeners(); updateDeleteButtonState(); }
+  function renderLeaderboardTable(attempts, startRank) { if (attempts.length === 0) { leaderboardList.innerHTML = '<p>No attempts match filters.</p>'; return; } const isAdmin = currentUser && adminEmails.includes(currentUser.email); let tableHTML = `<table><thead><tr> ${isAdmin?'<th>Sel</th>':''} <th data-column="rank">#</th> <th data-column="userName">User</th> <th data-column="testTitle">Test</th> <th data-column="accuracy">Acc%</th> <th data-column="wpm">WPM</th> <th data-column="totalOriginal">Orig</th> <th data-column="totalUser">Typed</th> <th data-column="timeTaken">Time</th> <th data-column="totalMistakes">Mistakes</th> <th data-column="date">Date</th> </tr></thead><tbody>`; attempts.forEach((att, idx) => { const d = new Date(att.timestamp); const s = att.stats || {}; const acc = s.accuracy ?? 0; const time = s.timeTaken ?? 0; const accClass = acc>=95?'accuracy-high':acc>=85?'accuracy-medium':'accuracy-low'; const timeFmt = `${Math.floor(time/60)}:${(time%60).toString().padStart(2, '0')}`; const rank = startRank + idx; let badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':''; const isSel = selectedLeaderboardRows.includes(att.id); tableHTML += `<tr data-id="${att.id}" class="${isAdmin?'leaderboard-row-selectable':''} ${isSel?'selected-row':''}"> ${isAdmin?`<td><input type="checkbox" class="delete-checkbox" data-id="${att.id}" ${isSel?'checked':''}></td>`:''} <td>${rank}${badge}</td> <td class="leaderboard-user"><img src="${att.userPhoto||`https://www.gravatar.com/avatar/${att.id}?d=identicon&s=30`}" alt=""><span>${att.userName||'User'}</span></td> <td>${att.testTitle||'Custom'} ${att.category?`<span class="category-badge category-${att.category}">${getCategoryName(att.category)}</span>`:''}</td> <td class="accuracy-cell ${accClass}">${acc.toFixed(1)}</td> <td>${s.wpm??0}</td> <td>${s.totalOriginal??0}</td> <td>${s.totalUser??0}</td> <td>${timeFmt}</td> <td>${s.totalMistakes??0}</td> <td>${d.toLocaleDateString()}</td> </tr>`; }); tableHTML += `</tbody></table>`; leaderboardList.innerHTML = tableHTML; makeTableSortable(); addLeaderboardRowSelectionListeners(); updateDeleteButtonState(); }
   function makeTableSortable() { document.querySelectorAll('.leaderboard-list th[data-column]').forEach(header => { header.style.cursor = 'pointer'; header.replaceWith(header.cloneNode(true)); const newHeader = document.querySelector(`.leaderboard-list th[data-column="${header.dataset.column}"]`); newHeader.addEventListener('click', () => { const column = newHeader.dataset.column; if (!column) return; if (currentSortColumn === column) { currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc'; } else { currentSortColumn = column; currentSortDirection = (column === 'accuracy' || column === 'wpm' || column === 'date' || column === 'totalOriginal') ? 'desc' : 'asc'; } sortAttempts(currentSortColumn, currentSortDirection); currentPage = 1; updatePagination(); document.querySelectorAll('.leaderboard-list th[data-column]').forEach(h => { h.classList.remove('sorted-asc', 'sorted-desc'); if (h.dataset.column === column) h.classList.add(`sorted-${currentSortDirection}`); }); }); if (newHeader.dataset.column === currentSortColumn) { newHeader.classList.add(`sorted-${currentSortDirection}`); } }); }
   function addLeaderboardRowSelectionListeners() { if (!currentUser || !adminEmails.includes(currentUser.email)) return; document.querySelectorAll('.leaderboard-list .delete-checkbox').forEach(cb => { cb.addEventListener('change', (e) => { const id = e.target.dataset.id; const row = e.target.closest('tr'); if (e.target.checked) { selectedLeaderboardRows.push(id); row.classList.add('selected-row'); } else { selectedLeaderboardRows = selectedLeaderboardRows.filter(rId => rId !== id); row.classList.remove('selected-row'); } updateDeleteButtonState(); }); }); document.querySelectorAll('.leaderboard-list tr.leaderboard-row-selectable').forEach(row => { row.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { const cb = row.querySelector('.delete-checkbox'); if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); } } }); }); }
   function updateDeleteButtonState() { deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0; }
@@ -1926,7 +2423,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function showResults() { fullTextSection.classList.add('hidden'); resultsSection.classList.remove('hidden'); }
 
   // --- PDF Download ---
-  function downloadAsPdf() { const resultsElement = document.getElementById('results'); html2canvas(resultsElement, { scale: 1.5, useCORS: true }).then(canvas => { const imgData = canvas.toDataURL('image/jpeg', 0.8); const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = pdf.internal.pageSize.getHeight(); const ratio = canvas.width / canvas.height; const imgWidth = pdfWidth - 20; const imgHeight = imgWidth / ratio; let heightLeft = imgHeight; let position = 10; pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); while (heightLeft > 0) { position = heightLeft - imgHeight + 10; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); } pdf.save('steno-warriors-results.pdf'); }).catch(err => { console.error("PDF generation error:", err); alert("Could not generate PDF."); }); }
+  function downloadAsPdf() { const resultsElement = document.getElementById('results'); html2canvas(resultsElement, { scale: 3, useCORS: true }).then(canvas => { const imgData = canvas.toDataURL('image/jpeg', 0.8); const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = pdf.internal.pageSize.getHeight(); const ratio = canvas.width / canvas.height; const imgWidth = pdfWidth - 20; const imgHeight = imgWidth / ratio; let heightLeft = imgHeight; let position = 10; pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); while (heightLeft > 0) { position = heightLeft - imgHeight + 10; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); } pdf.save('steno-warriors-results.pdf'); }).catch(err => { console.error("PDF generation error:", err); alert("Could not generate PDF."); }); }
 
   // --- Text Processing ---
   function processText(text) { return text.replace(/<[^>]*>/g, '').replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').trim().split(/\s+/).filter(word => word.length > 0); }
@@ -1945,7 +2442,42 @@ document.addEventListener('DOMContentLoaded', function() {
   function getOverallAssessment(accuracy, wpm) { let a = ''; if (accuracy >= 98) a += '<p>🌟 Outstanding accuracy!</p>'; else if (accuracy >= 95) a += '<p>👍 Excellent accuracy!</p>'; else if (accuracy >= 90) a += '<p>✅ Good accuracy.</p>'; else if (accuracy >= 80) a += '<p>📝 Fair accuracy.</p>'; else a += '<p>⚠️ Accuracy needs improvement.</p>'; if (wpm >= 60) a += '<p>⚡ Very Fast Typer!</p>'; else if (wpm >= 50) a += '<p>🚀 Fast Typer!</p>'; else if (wpm >= 40) a += '<p>🏃 Moderate Speed.</p>'; else a += '<p>🐢 Developing Speed.</p>'; return a; }
 
   // --- Video Embedding ---
-  function embedVideo(url) { const cont = document.getElementById('testVideoPlayer'); if (cont) cont.remove(); if (!url) return; const videoContainer = document.createElement('div'); videoContainer.className = 'video-container'; videoContainer.id = 'testVideoPlayer'; let videoId; try { const urlObj = new URL(url); if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) videoId = urlObj.searchParams.get('v') || urlObj.pathname.split('/').pop(); } catch (e) { /* Ignore invalid URLs */ } if (videoId) { videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`; } else { videoContainer.innerHTML = `<video controls style="width:100%; height:100%; position:absolute; top:0; left:0; border-radius: 8px;"><source src="${url}">Video not supported.</video>`; } originalTextGroup.insertAdjacentElement('afterend', videoContainer); }
+  function embedVideo(url) {
+    const cont = document.getElementById('testVideoPlayer');
+    if (cont) cont.remove();
+    if (!url) return;
+
+    const videoContainer = document.createElement('div');
+    videoContainer.className = 'video-container';
+    videoContainer.id = 'testVideoPlayer';
+
+    let videoId;
+    try {
+      const urlObj = new URL(url);
+      // Check for common YouTube URL patterns
+      if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
+         if (urlObj.hostname.includes('youtube.com')) {
+          videoId = urlObj.searchParams.get('v');
+        } else if (urlObj.hostname.includes('youtu.be')) {
+          videoId = urlObj.pathname.split('/').pop();
+        }
+      }
+    } catch (e) {
+      console.error("Error parsing video URL:", e);
+      /* Ignore invalid URLs */
+    }
+
+    if (videoId) {
+      // Use the standard YouTube embed URL format
+      videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+    } else {
+      // Fallback for non-YouTube URLs or if videoId couldn't be extracted
+      videoContainer.innerHTML = `<video controls style="width:100%; height:100%; position:absolute; top:0; left:0; border-radius: var(--border-radius-sm);"><source src="${url}">Video not supported.</video>`;
+    }
+
+    originalTextGroup.insertAdjacentElement('afterend', videoContainer);
+  }
+
 
   // --- Global Test Management & Carousel ---
   function fetchAndDisplayGlobalTests() { database.ref('tests').orderByChild('timestamp').once('value').then(snapshot => { allFetchedTests = Object.entries(snapshot.val() || {}).map(([id, test]) => ({ id, ...test })).sort((a,b) => (b.timestamp||0) - (a.timestamp||0)); filterAndDisplayGlobalTests(); }).catch(error => { console.error('Error fetching tests:', error); filterAndDisplayGlobalTests(); }); }
@@ -1991,7 +2523,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function selectTest(cardElement, testData) { document.querySelectorAll('.test-card').forEach(c => c.classList.remove('selected')); cardElement.classList.add('selected'); originalTextEl.value = testData.text; originalTextGroup.classList.add('hidden'); timerOptions.classList.remove('hidden'); timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }); embedVideo(testData.videoUrl); userTextEl.value = ''; startTime = null; resultsSection.classList.add('hidden'); fullTextSection.classList.add('hidden'); showFullTextBtn.classList.add('hidden'); closeResultsBtn.classList.add('hidden'); closeResultsBtnEnd.classList.add('hidden'); stopTimer(); timerDisplay.classList.add('hidden'); }
   function editTest(testId, testData) { editingTestIdInput.value = testId; customTitle.value = testData.title; customOriginal.value = testData.text; customVideoUrl.value = testData.videoUrl || ''; customCategory.value = testData.category; saveTestBtn.textContent = 'Update Test'; customTestTitleHeader.textContent = 'Edit Test'; customTestSection.scrollIntoView({ behavior: 'smooth' }); }
   function deleteTest(testId, testTitle) { showConfirmationModal(`Delete test "${testTitle}"?`, () => { database.ref('tests/' + testId).remove().then(() => { alert('Test deleted.'); fetchAndDisplayGlobalTests(); }).catch(err => alert('Error deleting test.')); }); }
-  function showConfirmationModal(message, onConfirm) { const modal = document.createElement('div'); modal.className = 'modal'; modal.innerHTML = `<div class="modal-content"><h3>Confirm</h3><p>${message}</p><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn">Confirm</button></div></div>`; document.body.appendChild(modal); const close = () => document.body.removeChild(modal); modal.querySelector('.secondary-btn').onclick = close; modal.querySelector('.danger-btn').onclick = () => { onConfirm(); close(); }; modal.onclick = (e) => { if (e.target === modal) close(); }; }
+  function showConfirmationModal(message, onConfirm) { const modal = document.createElement('div'); modal.className = 'modal'; modal.innerHTML = `<div class="modal-content"><h3>Confirm</h3><p>${message}</p><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn">Confirm</button></div></div>`; document.body.appendChild(modal); // Add modal to body to make it visible setTimeout(() => modal.classList.add('show'), 10); // Add show class after a small delay for transition const close = () => { modal.classList.remove('show'); setTimeout(() => document.body.removeChild(modal), 300); }; // Remove after transition modal.querySelector('.secondary-btn').onclick = close; modal.querySelector('.danger-btn').onclick = () => { onConfirm(); close(); }; modal.onclick = (e) => { if (e.target === modal) close(); }; }
   function initializeCarousel() { if (!carouselTrack || carouselCards.length === 0) { disableCarouselButtons(); return; } cardWidth = carouselCards[0].offsetWidth + 16; const containerWidth = carouselTrack.parentElement.offsetWidth; carouselVisibleCards = Math.max(1, Math.floor(containerWidth / cardWidth)); const totalCards = carouselCards.length; const dotCount = Math.ceil(totalCards / carouselVisibleCards); carouselDotsContainer.innerHTML = ''; if (dotCount > 1) { for (let i = 0; i < dotCount; i++) { const dot = document.createElement('div'); dot.className = 'carousel-dot'; if (i === 0) dot.classList.add('active'); dot.addEventListener('click', () => { carouselCurrentIndex = i; updateCarouselVisuals(); }); carouselDotsContainer.appendChild(dot); } } carouselCurrentIndex = 0; updateCarouselVisuals(); const newPrevBtn = carouselPrevBtn.cloneNode(true); carouselPrevBtn.parentNode.replaceChild(newPrevBtn, carouselPrevBtn); carouselPrevBtn = newPrevBtn; const newNextBtn = carouselNextBtn.cloneNode(true); carouselNextBtn.parentNode.replaceChild(newNextBtn, carouselNextBtn); carouselNextBtn = newNextBtn; carouselPrevBtn.addEventListener('click', () => { if (carouselCurrentIndex > 0) { carouselCurrentIndex--; updateCarouselVisuals(); } }); carouselNextBtn.addEventListener('click', () => { const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1; if (carouselCurrentIndex < maxIndex) { carouselCurrentIndex++; updateCarouselVisuals(); } }); let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { const newContainerWidth = carouselTrack.parentElement.offsetWidth; const newVisibleCards = Math.max(1, Math.floor(newContainerWidth / cardWidth)); if (newVisibleCards !== carouselVisibleCards) { initializeCarousel(); } else { updateCarouselVisuals(); } }, 250); }); }
   function updateCarouselVisuals() { if (!carouselTrack || carouselCards.length === 0) return; const totalCards = carouselCards.length; const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1; carouselCurrentIndex = Math.max(0, Math.min(carouselCurrentIndex, maxIndex)); const offset = -carouselCurrentIndex * (carouselVisibleCards * cardWidth); carouselTrack.style.transform = `translateX(${offset}px)`; document.querySelectorAll('.carousel-dot').forEach((dot, index) => { dot.classList.toggle('active', index === carouselCurrentIndex); }); carouselPrevBtn.disabled = carouselCurrentIndex === 0; carouselNextBtn.disabled = carouselCurrentIndex >= maxIndex; }
   function getCategoryName(cat) { const names = { general: 'General', kailash: 'KC', progressive: 'Progressive', legal: 'Legal', previous: 'Previous Yr', test: 'Test' }; return names[cat] || cat; }
@@ -2064,7 +2596,7 @@ document.addEventListener('DOMContentLoaded', function() {
       alert('Failed to fetch your tests.');
     });
   }
-  function showManageTestsModal(userTests) { const modal = document.createElement('div'); modal.className = 'modal'; let listHTML = ''; Object.entries(userTests).forEach(([id, test]) => { listHTML += `<div class="test-item"><input type="checkbox" id="del-${id}" data-testid="${id}"><label for="del-${id}">${test.title} (${getCategoryName(test.category)})</label></div>`; }); modal.innerHTML = `<div class="modal-content"><h3>Manage Your Tests</h3><p>Select tests to delete.</p><div class="test-selection" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 1rem;">${listHTML}</div><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn" disabled>Delete Selected</button></div></div>`; document.body.appendChild(modal); const close = () => document.body.removeChild(modal); const delBtn = modal.querySelector('.danger-btn'); const checkboxes = modal.querySelectorAll('input[type="checkbox"]'); checkboxes.forEach(cb => cb.onchange = () => { delBtn.disabled = !Array.from(checkboxes).some(c => c.checked); }); modal.querySelector('.secondary-btn').onclick = close; delBtn.onclick = () => { const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.dataset.testid); if (selectedIds.length === 0) return; showConfirmationModal(`Delete ${selectedIds.length} test(s)?`, () => { const updates = {}; selectedIds.forEach(id => { updates[`/tests/${id}`] = null; }); database.ref().update(updates).then(() => { alert('Test(s) deleted.'); fetchAndDisplayGlobalTests(); close(); }).catch(err => alert('Error deleting.')); }); }; modal.onclick = (e) => { if (e.target === modal) close(); }; }
+  function showManageTestsModal(userTests) { const modal = document.createElement('div'); modal.className = 'modal'; let listHTML = ''; Object.entries(userTests).forEach(([id, test]) => { listHTML += `<div class="test-item"><input type="checkbox" id="del-${id}" data-testid="${id}"><label for="del-${id}">${test.title} (${getCategoryName(test.category)})</label></div>`; }); modal.innerHTML = `<div class="modal-content"><h3>Manage Your Tests</h3><p>Select tests to delete.</p><div class="test-selection" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 1rem;">${listHTML}</div><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn" disabled>Delete Selected</button></div></div>`; document.body.appendChild(modal); // Add modal to body setTimeout(() => modal.classList.add('show'), 10); // Add show class for transition const close = () => { modal.classList.remove('show'); setTimeout(() => document.body.removeChild(modal), 300); }; // Remove after transition const delBtn = modal.querySelector('.danger-btn'); const checkboxes = modal.querySelectorAll('input[type="checkbox"]'); checkboxes.forEach(cb => cb.onchange = () => { delBtn.disabled = !Array.from(checkboxes).some(c => c.checked); }); modal.querySelector('.secondary-btn').onclick = close; delBtn.onclick = () => { const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.dataset.testid); if (selectedIds.length === 0) return; showConfirmationModal(`Delete ${selectedIds.length} test(s)?`, () => { const updates = {}; selectedIds.forEach(id => { updates[`/tests/${id}`] = null; }); database.ref().update(updates).then(() => { alert('Test(s) deleted.'); fetchAndDisplayGlobalTests(); close(); }).catch(err => alert('Error deleting.')); }); }; modal.onclick = (e) => { if (e.target === modal) close(); }; }
 
   // --- Dark Mode ---
   const darkModeToggle = document.getElementById('darkModeToggle');
