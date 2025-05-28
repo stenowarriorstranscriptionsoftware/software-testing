@@ -1,2609 +1,791 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Steno Warriors Transcription</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <meta http-equiv="content-type" content="text/html;charset=utf-8" />
+  <title>Steno Warriors Transcription Software</title>
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
-<style>
-:root {
-  --primary: #4361ee;
-  --primary-light: #4895ef;
-  --secondary: #3f37c9;
-  --success: #4cc9f0;
-  --danger: #f72585;
-  --warning: #f8961e;
-  --light: #f8f9fa;
-  --dark: #212529;
-  --gray: #6c757d;
-
-  /* Added/Refined Variables for Consistency */
-  --border-radius-sm: 8px;
-  --border-radius-md: 12px;
-  --border-radius-lg: 15px; /* Kept for container */
-  --spacing-sm: 0.8rem;
-  --spacing-md: 1.5rem;
-  --spacing-lg: 2rem;
-
-  /* Softer Shadows */
-  --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 5px 15px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
-  --shadow-inset: inset 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e2e8f0 100%);
-  min-height: 100vh;
-  color: var(--dark);
-  line-height: 1.6;
-  padding: var(--spacing-md); /* Use variable */
-  transition: background 0.5s ease, color 0.5s ease; /* Smoother transition */
-}
-
-body.dark-mode {
-  background: #1a1a1a; /* Darker background */
-  color: #e0e0e0;
-}
-
-body.dark-mode .container {
-  background: #2a2a2a; /* Darker container */
-  box-shadow: var(--shadow-lg); /* Use variable */
-}
-
-.container {
-  max-width: 1200px;
-  margin: var(--spacing-md) auto; /* Added top/bottom margin */
-  background: white;
-  border-radius: var(--border-radius-lg); /* Use variable */
-  box-shadow: var(--shadow-lg); /* Use variable */
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-header {
-  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-  color: white;
-  padding: var(--spacing-lg) var(--spacing-md); /* Use variables */
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-header::before {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-  animation: rotate 20s linear infinite;
-  z-index: 0;
-}
-
-header h1 {
-  font-size: 2.5rem; /* Slightly larger font size */
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  position: relative;
-  z-index: 1;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-
-.subtitle {
-  font-size: 1.1rem; /* Slightly larger font size */
-  opacity: 0.9;
-  position: relative;
-  z-index: 1;
-  letter-spacing: 0.5px;
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.theme-toggle {
-  position: absolute;
-  top: var(--spacing-sm); /* Use variable */
-  right: var(--spacing-sm); /* Use variable */
-  z-index: 100;
-}
-
-.toggle-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px; /* Slightly larger size */
-  height: 40px; /* Slightly larger size */
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-.toggle-label:hover {
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(30deg);
-}
-
-#darkModeToggle {
-  display: none;
-}
-
-.toggle-icon {
-  font-size: 1.1rem; /* Slightly larger size */
-}
-
-.input-section {
-  padding: var(--spacing-md); /* Use variable */
-}
-
-.input-group {
-  position: relative;
-  margin-bottom: var(--spacing-md); /* Use variable */
-}
-
-.input-group label {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  color: var(--gray);
-  transition: all 0.3s ease;
-  pointer-events: none;
-  background: white;
-  padding: 0 0.5rem;
-  z-index: 2; /* Ensure label is above input */
-}
-
-body.dark-mode .input-group label {
-  background: #2a2a2a; /* Match dark mode container */
-}
-
-.input-group textarea:focus + label,
-.input-group textarea:not(:placeholder-shown) + label,
-.input-group input:focus + label,
-.input-group input:not(:placeholder-shown) + label,
-.input-group select:focus + label,
-.input-group select:not(:placeholder-shown) + label {
-  top: -0.6rem;
-  left: 0.8rem;
-  font-size: 0.8rem;
-  color: var(--primary);
-  background: white; /* Ensure background is white in day mode */
-}
-
-body.dark-mode .input-group textarea:focus + label,
-body.dark-mode .input-group textarea:not(:placeholder-shown) + label,
-body.dark-mode .input-group input:focus + label,
-body.dark-mode .input-group input:not(:placeholder-shown) + label,
-body.dark-mode .input-group select:focus + label,
-body.dark-mode .input-group select:not(:placeholder-shown) + label {
-   background: #2a2a2a; /* Match dark mode container */
-}
-
-
-textarea, input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="search"], select {
-  width: 100%;
-  padding: 1rem; /* Adjusted padding */
-  border: 1px solid #e2e8f0; /* Slightly thinner border */
-  border-radius: var(--border-radius-sm); /* Use variable */
-  font-family: 'Poppins', sans-serif;
-  font-size: 1rem;
-  resize: vertical;
-  transition: all 0.3s;
-  background: transparent;
-  position: relative; /* Needed for z-index */
-  z-index: 1;
-  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
-}
-
-body.dark-mode textarea,
-body.dark-mode input[type="text"],
-body.dark-mode input[type="email"],
-body.dark-mode input[type="password"],
-body.dark-mode input[type="url"],
-body.dark-mode input[type="search"],
-body.dark-mode select {
-  border-color: #444;
-  color: #e0e0e0;
-  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
-  background: #3a3a3a; /* Slightly darker background for inputs in dark mode */
-}
-
-
-textarea:focus,
-input[type="text"]:focus,
-input[type="email"]:focus,
-input[type="password"]:focus,
-input[type="url"]:focus,
-input[type="search"]:focus,
-select:focus {
-  border-color: var(--primary-light);
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15); /* Softer focus shadow */
-  background: white; /* Ensure white background on focus in day mode */
-}
-
-body.dark-mode textarea:focus,
-body.dark-mode input[type="text"]:focus,
-body.dark-mode input[type="email"]:focus,
-body.dark-mode input[type="password"]:focus,
-body.dark-mode input[type="url"]:focus,
-body.dark-mode input[type="search"]:focus,
-body.dark-mode select:focus {
-   background: #3a3a3a; /* Maintain dark mode background on focus */
-   box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3); /* Darker focus shadow */
-}
-
-
-/* Specific style for the user transcription textarea */
-#userText {
-    height: 250px; /* Increased default height */
-}
-
-
-.button-group {
-  display: flex;
-  gap: var(--spacing-sm); /* Use variable */
-  margin-top: 1rem;
-  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
-}
-
-button {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: var(--border-radius-md); /* Use variable */
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: var(--shadow-sm); /* Use variable */
-  position: relative;
-  overflow: hidden;
-  flex-grow: 1; /* Allow buttons to grow */
-  min-width: 120px; /* Minimum width for buttons */
-  will-change: transform, box-shadow; /* Optimize transitions */
-}
-
-button::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 5px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.5);
-  opacity: 0;
-  border-radius: 100%;
-  transform: scale(1, 1) translate(-50%);
-  transform-origin: 50% 50%;
-}
-
-button:focus:not(:active)::after {
-  animation: ripple 0.6s ease-out;
-}
-
-@keyframes ripple {
-  0% {
-    transform: scale(0, 0);
-    opacity: 0.5;
-  }
-  100% {
-    transform: scale(20, 20);
-    opacity: 0;
-  }
-}
-
-button:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-md); /* Use variable */
-}
-
-button:active {
-  transform: translateY(1px);
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-.secondary-btn {
-  background-color: var(--gray);
-  color: var(--dark); /* Ensure dark text in day mode */
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-body.dark-mode .secondary-btn {
-  background-color: #555; /* Darker gray */
-  color: #e0e0e0;
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-.secondary-btn:hover {
-  background-color: #5a6268; /* Darker hover */
-  box-shadow: var(--shadow-md); /* Use variable */
-}
-
-body.dark-mode .secondary-btn:hover {
-  background-color: #666; /* Darker hover */
-}
-
-
-.download-btn {
-  background-color: var(--success);
-  box-shadow: 0 4px 6px rgba(76, 201, 240, 0.3); /* Success specific shadow */
-}
-.download-btn:hover {
-   box-shadow: 0 6px 12px rgba(76, 201, 240, 0.4); /* Success specific shadow */
-}
-
-
-.close-results-btn {
-  background-color: var(--danger);
-  margin-left: auto;
-  box-shadow: 0 4px 6px rgba(247, 37, 133, 0.3); /* Danger specific shadow */
-}
-.close-results-btn:hover {
-   box-shadow: 0 6px 12px rgba(247, 37, 133, 0.4); /* Danger specific shadow */
-}
-
-
-#results, #fullTextSection {
-  padding: 0 var(--spacing-md) var(--spacing-md); /* Use variable */
-}
-
-.hidden {
-  display: none !important; /* Use important to ensure override */
-  /* Added transition for smoother hiding/showing */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease;
-}
-
-/* Style for elements that are shown */
-#results:not(.hidden),
-#fullTextSection:not(.hidden),
-#loginPrompt:not(.hidden),
-#leaderboardSection:not(.hidden),
-#globalTestsSection:not(.hidden),
-#customTestSection:not(.hidden) {
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 0.5s ease, visibility 0.5s ease;
-}
-
-
-.results-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-md); /* Use variable */
-  padding: var(--spacing-md); /* Use variable */
-  border-radius: var(--border-radius-md); /* Use variable */
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* Softer shadow */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  flex-wrap: wrap; /* Allow header content to wrap */
-  gap: var(--spacing-sm); /* Use variable */
-}
-
-body.dark-mode .results-header {
-  background: rgba(30, 30, 30, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Dark mode shadow */
-}
-
-.result-meta {
-  display: flex;
-  gap: var(--spacing-sm); /* Use variable */
-  font-size: 0.9rem;
-  color: var(--gray);
-  margin-top: 0.5rem;
-  flex-wrap: wrap; /* Allow meta items to wrap */
-}
-
-.fulltext-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-md); /* Use variable */
-  padding-bottom: 1rem;
-  border-bottom: 1px solid #e2e8f0;
-  flex-wrap: wrap; /* Allow header content to wrap */
-  gap: var(--spacing-sm); /* Use variable */
-}
-
-body.dark-mode .fulltext-header {
-  border-bottom-color: #444;
-}
-
-/* Comparison Text Styles */
-.correct { color: #2ecc71; font-weight: normal; } /* Green, normal weight for clean look */
-.missing { color: #e74c3c; font-weight: normal; background-color: rgba(231, 76, 60, 0.1); padding: 0 2px; border-radius: 3px;} /* Red, background, normal weight */
-.addition { color: #3498db; font-weight: normal; background-color: rgba(52, 152, 219, 0.1); padding: 0 2px; border-radius: 3px; text-decoration: line-through;} /* Blue, background, strikethrough, normal weight */
-.capitalization { color: #9b59b6; font-weight: normal; border-bottom: 1px dotted rgba(155, 89, 182, 0.7); } /* Purple, dotted underline, thinner, normal weight */
-/* Punctuation errors will use the .missing style (red background) */
-
-
-.legend-box {
-  border: 1px solid #e2e8f0;
-  padding: var(--spacing-sm); /* Use variable */
-  border-radius: var(--border-radius-sm); /* Use variable */
-  margin-bottom: var(--spacing-md); /* Use variable */
-  background: white;
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-body.dark-mode .legend-box {
-  background: #2a2a2a; /* Match dark mode container */
-  border-color: #444;
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-.legend-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.legend-row span {
-  margin-right: 8px;
-  font-size: 1rem; /* Slightly smaller box size */
-  display: inline-block; /* Needed for background color */
-  padding: 0 2px; /* Match padding */
-  border-radius: 3px; /* Match border radius */
-  line-height: 1.2; /* Adjust line height for visual consistency */
-  min-width: 1.2em; /* Ensure some width */
-  text-align: center;
-  font-weight: bold; /* Keep bold for legend icons */
-}
-/* Apply styles directly to legend spans */
-.legend-row .correct { background-color: transparent; text-decoration: none; color: #2ecc71; }
-.legend-row .missing { background-color: rgba(231, 76, 60, 0.1); text-decoration: none; color: #e74c3c;} /* Red background */
-.legend-row .addition { background-color: rgba(52, 152, 219, 0.1); text-decoration: line-through; color: #3498db;} /* Blue background, strikethrough */
-.legend-row .capitalization { background-color: transparent; text-decoration: none; border-bottom: 1px dotted rgba(155, 89, 182, 0.7); color: #9b59b6;} /* Purple dotted underline */
-/* Punctuation legend entry will also use .missing style */
-
-
-.result-box, .stats-box, .feedback-box, .text-display {
-  background: white;
-  padding: var(--spacing-md); /* Use variable */
-  border-radius: var(--border-radius-md); /* Use variable */
-  margin-bottom: var(--spacing-md); /* Use variable */
-  border: 1px solid #e2e8f0;
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-body.dark-mode .result-box,
-body.dark-mode .stats-box,
-body.dark-mode .feedback-box,
-body.dark-mode .text-display {
-  background: #2a2a2a; /* Match dark mode container */
-  border-color: #444;
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-.result-box {
-  line-height: 1.8;
-  white-space: pre-wrap; /* Ensure whitespace is handled correctly */
-  word-wrap: break-word; /* Allow long words to break */
-}
-
-.comparison-section {
-  margin-bottom: var(--spacing-md); /* Use variable */
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: var(--border-radius-md); /* Use variable */
-  padding: var(--spacing-md); /* Use variable */
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* Softer shadow */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-body.dark-mode .comparison-section {
-  background: rgba(30, 30, 30, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Dark mode shadow */
-}
-
-.analysis-section {
-  display: flex;
-  gap: var(--spacing-md); /* Use variable */
-  margin-bottom: var(--spacing-md); /* Use variable */
-  flex-direction: column; /* Stack columns by default */
-}
-
-.analysis-column {
-  flex: 1;
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: var(--border-radius-md); /* Use variable */
-  padding: var(--spacing-md); /* Use variable */
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1); /* Softer shadow */
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-body.dark-mode .analysis-column {
-  background: rgba(30, 30, 30, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3); /* Dark mode shadow */
-}
-
-.stats-box {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjusted min width */
-  gap: var(--spacing-sm); /* Use variable */
-}
-
-.stat-item {
-  background: rgba(255, 255, 255, 0.9);
-  padding: var(--spacing-sm); /* Use variable */
-  border-radius: var(--border-radius-md); /* Use variable */
-  box-shadow: var(--shadow-sm); /* Use variable */
-  position: relative;
-  overflow: hidden;
-  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Added specific transitions */
-}
-
-body.dark-mode .stat-item {
-  background: rgba(30, 30, 30, 0.9);
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-.stat-item h4 {
-  color: var(--gray);
-  font-size: 0.9rem; /* Slightly larger font size */
-  margin-bottom: 0.5rem;
-  position: relative;
-  z-index: 1;
-}
-
-.stat-item p {
-  font-size: 1.6rem; /* Slightly larger font size */
-  font-weight: 700;
-  color: var(--primary);
-  position: relative;
-  z-index: 1;
-}
-
-.stat-item::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, var(--primary-light), var(--secondary));
-  transform-origin: left;
-  transform: scaleX(0);
-  transition: transform 0.5s ease-out; /* Smoother transition */
-}
-
-.stat-item:hover::after {
-  transform: scaleX(1);
-}
-
-.feedback-box h3 {
-  color: var(--primary);
-  margin-bottom: 1rem;
-}
-
-.feedback-box ul {
-  padding-left: 1.5rem;
-}
-
-.feedback-box li {
-  margin-bottom: 0.5rem;
-}
-
-.columns {
-  display: flex;
-  gap: var(--spacing-md); /* Use variable */
-  flex-direction: column; /* Stack columns by default */
-}
-
-.column {
-  flex: 1;
-}
-
-.text-display {
-  height: 300px; /* Adjusted height */
-  overflow-y: auto;
-  white-space: pre-wrap;
-  border: 1px solid #e2e8f0; /* Added subtle border */
-  border-radius: var(--border-radius-sm); /* Use variable */
-  padding: 1rem; /* Added padding */
-  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
-}
-
-body.dark-mode .text-display {
-  color: #e0e0e0;
-  border-color: #444;
-  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
-}
-
-footer {
-  text-align: center;
-  padding: var(--spacing-md); /* Use variable */
-  color: var(--gray);
-  font-size: 0.9rem;
-  border-top: 1px solid #e2e8f0;
-}
-
-body.dark-mode footer {
-  border-top-color: #444;
-}
-
-/* Timer Styles */
-.timer-options {
-  display: flex;
-  gap: var(--spacing-sm); /* Use variable */
-  margin-bottom: var(--spacing-md); /* Use variable */
-  justify-content: center;
-  flex-wrap: wrap; /* Allow timer options to wrap */
-}
-
-.timer-option {
-  background-color: var(--primary-light);
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  font-weight: 500;
-  border-radius: var(--border-radius-sm); /* Use variable */
-  cursor: pointer;
-  transition: all 0.3s;
-  flex-grow: 1; /* Allow timer options to grow */
-  min-width: 100px; /* Minimum width */
-  text-align: center;
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-.timer-option:hover {
-  background-color: var(--secondary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md); /* Use variable */
-}
-
-.timer-display {
-  text-align: center;
-  font-size: 1.8rem; /* Slightly larger font size */
-  font-weight: 600;
-  color: var(--danger);
-  margin-bottom: var(--spacing-md); /* Use variable */
-}
-
-.timer-ended {
-  color: var(--danger);
-  animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
-
-.test-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1rem;
-  flex-direction: column; /* Stack controls by default */
-  gap: var(--spacing-sm); /* Use variable */
-}
-
-.test-controls button {
-    width: 100%; /* Make buttons full width when stacked */
-}
-
-.locked-textarea {
-  background-color: var(--light);
-  cursor: not-allowed;
-  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
-}
-
-body.dark-mode .locked-textarea {
-  background-color: #3a3a3a; /* Match dark mode input background */
-  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
-}
-
-/* Auth Styles */
-.auth-btn {
-  background-color: var(--primary);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  font-size: 0.9rem;
-  font-weight: 500;
-  border-radius: var(--border-radius-sm); /* Use variable */
-  cursor: pointer;
-  transition: all 0.3s;
-  margin-top: 1rem;
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-.auth-btn:hover {
-  background-color: var(--secondary);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md); /* Use variable */
-}
-
-.user-photo {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  margin-right: 10px;
-  vertical-align: middle;
-  border: 2px solid var(--primary-light); /* Added subtle border */
-}
-
-#userInfo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 1rem;
-  flex-wrap: wrap; /* Allow user info to wrap */
-}
-
-/* Login Prompt */
-.login-prompt {
-  max-width: 500px;
-  margin: var(--spacing-md) auto; /* Use variable */
-  padding: var(--spacing-md); /* Use variable */
-  background: white;
-  border-radius: var(--border-radius-md); /* Use variable */
-  box-shadow: var(--shadow-md); /* Use variable */
-}
-
-body.dark-mode .login-prompt {
-  background: #2a2a2a; /* Match dark mode container */
-  box-shadow: var(--shadow-md); /* Use variable */
-}
-
-.login-prompt h3 {
-  color: var(--primary);
-  margin-bottom: var(--spacing-md); /* Use variable */
-  text-align: center;
-}
-
-.login-prompt p {
-  text-align: center;
-  margin-top: 1rem;
-  color: var(--gray);
-}
-
-.login-prompt a {
-  color: var(--primary);
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s ease; /* Added transition */
-}
-
-.login-prompt a:hover {
-  text-decoration: underline;
-  color: var(--secondary); /* Change color on hover */
-}
-
-/* Global Tests Section */
-.global-tests-section {
-  padding: var(--spacing-md); /* Use variable */
-  margin: var(--spacing-md) 0; /* Use variable */
-  background: white;
-  border-radius: var(--border-radius-md); /* Use variable */
-  border: 1px solid #e2e8f0;
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-body.dark-mode .global-tests-section {
-  background: #2a2a2a; /* Match dark mode container */
-  border-color: #444;
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-.test-filters {
-  margin-bottom: var(--spacing-md); /* Use variable */
-  display: flex;
-  gap: var(--spacing-sm); /* Use variable */
-  flex-wrap: wrap;
-}
-
-.test-filters select,
-.test-filters input[type="search"] {
-  padding: 0.8rem;
-  border-radius: var(--border-radius-sm); /* Use variable */
-  border: 1px solid #e2e8f0;
-  background: white;
-  font-size: 0.9rem;
-  flex-grow: 1;
-  min-width: 150px; /* Adjusted minimum width */
-  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
-}
-
-body.dark-mode .test-filters select,
-body.dark-mode .test-filters input[type="search"] {
-  background: #3a3a3a; /* Match dark mode input background */
-  border-color: #444;
-  color: #e0e0e0;
-  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
-}
-
-/* MODIFIED: Test Card Styling */
-/* Updated Test Card Styling */
-.test-card {
-  background: white;
-  padding: var(--spacing-md); /* Use variable */
-  border-radius: var(--border-radius-md); /* Use variable */
-  border: none;
-  transition: all 0.3s ease;
-  margin-bottom: var(--spacing-md);
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--shadow-md); /* Use variable */
-  transform: translateY(0);
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  will-change: transform, box-shadow; /* Optimize transitions */
-}
-
-body.dark-mode .test-card {
-  background: #2a2a2a; /* Match dark mode container */
-  box-shadow: var(--shadow-md); /* Use variable */
-  border-color: rgba(255, 255, 255, 0.05);
-}
-
-.test-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-lg); /* Use variable */
-}
-
-body.dark-mode .test-card:hover {
-  box-shadow: var(--shadow-lg); /* Use variable */
-}
-
-.test-card.selected {
-  border: 2px solid var(--primary-light);
-  padding: calc(var(--spacing-md) - 1px); /* Adjust padding for border */
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2), var(--shadow-md); /* Combined shadow */
-}
-
-body.dark-mode .test-card.selected {
-  border-color: var(--primary-light);
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3), var(--shadow-md); /* Combined shadow */
-}
-
-/* Add a subtle gradient overlay on hover */
-.test-card::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.test-card:hover::after {
-  opacity: 1;
-}
-
-body.dark-mode .test-card::after {
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-}
-
-/* Improve card content spacing */
-.test-card-content {
-  position: relative;
-  z-index: 1;
-}
-
-.test-card h4 {
-  color: var(--primary);
-  margin-bottom: 0.75rem;
-  display: flex;
-  align-items: center;
-  font-size: 1.1rem;
-}
-
-.test-card p {
-  color: var(--gray);
-  font-size: 0.95rem;
-  line-height: 1.5;
-  margin-bottom: 1.25rem;
-}
-
-.test-author {
-  display: flex;
-  align-items: center;
-  margin-top: auto;
-  font-size: 0.85rem;
-  color: var(--gray);
-}
-
-.test-author img {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  margin-right: 8px;
-  object-fit: cover;
-}
-
-.video-indicator {
-  display: inline-flex;
-  align-items: center;
-  font-size: 0.8rem;
-  color: var(--primary);
-  margin: 0.5rem 0;
-}
-
-.video-indicator::before {
-  content: '▶';
-  margin-right: 5px;
-  font-size: 0.7rem;
-}
-
-/* Card actions (edit/delete buttons) */
-.test-card-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-}
-
-.test-card-actions button {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.85rem;
-  border-radius: var(--border-radius-sm); /* Use variable */
-  flex: 1;
-  transition: all 0.2s ease;
-}
-
-.test-card-actions button:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-body.dark-mode .test-card-actions button:hover {
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-/* NEW: Styles for Edit/Delete buttons */
-.test-card-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.5rem; /* Space above buttons */
-}
-
-.test-card-actions button {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.8rem;
-  border-radius: 6px;
-  flex: 1; /* Make buttons take equal width */
-}
-
-.edit-test-btn {
-  background-color: var(--warning);
-}
-.edit-test-btn:hover {
-  background-color: #d97706; /* Darker warning */
-}
-
-.delete-test-btn {
-  background-color: var(--danger);
-}
-.delete-test-btn:hover {
-  background-color: #d11a5e; /* Darker danger */
-}
-/* --- End of New Styles --- */
-
-
-/* Leaderboard Styles */
-.leaderboard-section {
-  padding: var(--spacing-md); /* Use variable */
-  margin: var(--spacing-md) 0; /* Use variable */
-  background: white;
-  border-radius: var(--border-radius-md); /* Use variable */
-  border: 1px solid #e2e8f0;
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-body.dark-mode .leaderboard-section {
-  background: #2a2a2a; /* Match dark mode container */
-  border-color: #444;
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-.leaderboard-controls {
-  margin-bottom: 1rem;
-  display: flex;
-  gap: var(--spacing-sm); /* Use variable */
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.leaderboard-controls select,
-.leaderboard-controls button { /* Style buttons within controls */
-  padding: 0.5rem 0.8rem; /* Adjusted padding */
-  border-radius: var(--border-radius-sm); /* Use variable */
-  border: 1px solid #e2e8f0;
-  background: white;
-  font-size: 0.9rem;
-  flex-grow: 1; /* Allow elements to grow */
-  min-width: 80px; /* Minimum width */
-  text-align: center;
-  box-shadow: var(--shadow-inset); /* Added subtle inset shadow */
-}
-
-body.dark-mode .leaderboard-controls select,
-body.dark-mode .leaderboard-controls button {
-  background: #3a3a3a; /* Match dark mode input background */
-  border-color: #444;
-  color: #e0e0e0;
-  box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05); /* Dark mode inset shadow */
-}
-
-
-/* Updated Leaderboard List Styles for Horizontal Scrolling */
-.leaderboard-list {
-  overflow-x: auto;
-  width: 100%;
-  -webkit-overflow-scrolling: touch;
-  border-radius: var(--border-radius-sm); /* Added border radius */
-  border: 1px solid #e2e8f0; /* Added subtle border */
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-body.dark-mode .leaderboard-list {
-  border-color: #444;
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-
-.leaderboard-list table {
-  min-width: 800px; /* Adjusted minimum width for table */
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.leaderboard-list th,
-.leaderboard-list td {
-  white-space: nowrap;
-  padding: 0.8rem 0.5rem; /* Adjusted padding */
-  text-align: left;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 0.9rem; /* Adjusted font size */
-}
-
-body.dark-mode .leaderboard-list th,
-body.dark-mode .leaderboard-list td {
-  border-bottom-color: #444;
-}
-
-.leaderboard-list th {
-  background-color: var(--primary-light);
-  color: white;
-  font-weight: 500;
-  position: relative;
-  cursor: pointer;
-  transition: background-color 0.3s ease; /* Added transition */
-}
-
-.leaderboard-list th:hover {
-  background-color: var(--secondary);
-}
-
-.leaderboard-list th::after {
-  content: "↕";
-  position: absolute;
-  right: 0.5rem; /* Adjusted position */
-  opacity: 0.5;
-  font-size: 0.8rem;
-  transition: opacity 0.3s ease; /* Added transition */
-}
-
-.leaderboard-list th.sorted-asc::after {
-  content: "↑";
-  opacity: 1;
-}
-
-.leaderboard-list th.sorted-desc::after {
-  content: "↓";
-  opacity: 1;
-}
-
-.leaderboard-list tr:nth-child(even) {
-  background-color: #f8f9fa;
-}
-
-body.dark-mode .leaderboard-list tr:nth-child(even) {
-  background-color: #3a3a3a; /* Darker row background */
-}
-
-.leaderboard-list tr:hover {
-  background-color: #e9ecef;
-  transition: background-color 0.3s ease; /* Added transition */
-}
-
-body.dark-mode .leaderboard-list tr:hover {
-  background-color: #4a4a4a; /* Darker hover background */
-}
-
-.leaderboard-user {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem; /* Adjusted gap */
-}
-
-.leaderboard-user img {
-  width: 25px; /* Adjusted size */
-  height: 25px; /* Adjusted size */
-  border-radius: 50%;
-}
-
-.accuracy-cell {
-  font-weight: 600;
-}
-
-.accuracy-high {
-  color: #2ecc71;
-}
-
-.accuracy-medium {
-  color: #f39c12;
-}
-
-.accuracy-low {
-  color: #e74c3c;
-}
-
-.pagination-info {
-  text-align: center;
-  margin-top: 1rem;
-  color: var(--gray);
-  font-size: 0.9rem;
-}
-
-/* Custom Test Section */
-.custom-test-section {
-  background: #f1f5fb;
-  border: 1px solid #dce3f0;
-  padding: var(--spacing-md); /* Use variable */
-  margin: var(--spacing-md); /* Use variable */
-  border-radius: var(--border-radius-md); /* Use variable */
-  box-shadow: var(--shadow-sm); /* Added subtle shadow */
-}
-
-body.dark-mode .custom-test-section {
-  background: #2a2a2a; /* Match dark mode container */
-  border-color: #444;
-  box-shadow: var(--shadow-sm); /* Use variable */
-}
-
-.custom-test-section h3 {
-  margin-bottom: 1.2rem;
-  color: var(--primary);
-}
-
-/* Video Container */
-.video-container {
-  margin: 1rem 0; /* Adjusted margin */
-  position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  height: 0;
-  overflow: hidden;
-  border-radius: var(--border-radius-md); /* Use variable */
-  box-shadow: var(--shadow-md); /* Added subtle shadow */
-}
-
-.video-container iframe,
-.video-container video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border-radius: var(--border-radius-sm); /* Use variable */
-}
-
-/* MODIFIED: Video indicator styling within card */
-.test-card .video-indicator {
-  font-size: 0.8rem;
-  color: var(--primary);
-  margin-top: 0.5rem;
-}
-
-/* Badge Styles */
-.badge {
-  display: inline-block;
-  padding: 0.25em 0.4em;
-  font-size: 75%;
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: baseline;
-  border-radius: 0.25rem;
-  margin-left: 0.5rem;
-}
-
-.badge-gold {
-  color: #212529;
-  background-color: #ffd700;
-}
-
-.badge-silver {
-  color: #212529;
-  background-color: #c0c0c0;
-}
-
-.badge-bronze {
-  color: #212529;
-  background-color: #cd7f32;
-}
-
-.category-badge {
-  color: white;
-  padding: 0.2rem 0.5rem;
-  border-radius: 50px;
-  font-size: 0.7rem;
-  margin-left: 0.5rem;
-}
-
-.category-general {
-  background-color: #e74c3c;
-}
-
-.category-kailash {
-  background-color: #2ecc71;
-}
-
-.category-progressive {
-  background-color: #9b59b6;
-}
-
-.category-legal {
-  background-color: #3498db;
-}
-
-.category-previous {
-  background-color: #f39c12;
-}
-
-.category-test {
-  background-color: #607d8b;
-}
-
-/* Modal Styles */
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 10px; /* Add padding to prevent content touching edges */
-  opacity: 0; /* Start hidden */
-  visibility: hidden;
-  transition: opacity 0.3s ease, visibility 0.3s ease; /* Fade transition */
-}
-
-.modal.show {
-  opacity: 1;
-  visibility: visible;
-}
-
-.modal-content {
-  background-color: white;
-  padding: var(--spacing-md); /* Use variable */
-  border-radius: var(--border-radius-md); /* Use variable */
-  width: 100%; /* Use full width on small screens */
-  max-width: 500px;
-  max-height: 95vh; /* Adjusted max height */
-  overflow-y: auto;
-  box-shadow: var(--shadow-lg); /* Added subtle shadow */
-  transform: translateY(-20px); /* Start slightly above */
-  transition: transform 0.3s ease; /* Slide transition */
-}
-
-.modal.show .modal-content {
-    transform: translateY(0); /* Slide into place */
-}
-
-
-body.dark-mode .modal-content {
-  background-color: #2a2a2a; /* Match dark mode container */
-  box-shadow: var(--shadow-lg); /* Use variable */
-}
-
-.modal h3 {
-  margin-bottom: var(--spacing-md); /* Use variable */
-  color: var(--primary);
-}
-
-.test-selection {
-  margin: var(--spacing-md) 0; /* Use variable */
-}
-
-.test-item {
-  padding: 0.8rem;
-  border-bottom: 1px solid #e2e8f0;
-  display: flex;
-  align-items: center;
-}
-
-body.dark-mode .test-item {
-  border-bottom-color: #444;
-}
-
-.test-item input {
-  margin-right: 0.8rem;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-sm); /* Use variable */
-  margin-top: var(--spacing-md); /* Use variable */
-  flex-wrap: wrap; /* Allow buttons to wrap */
-}
-
-.modal-buttons button {
-    flex-grow: 1; /* Allow buttons to grow */
-    min-width: 100px; /* Minimum width */
-}
-
-.danger-btn {
-  background-color: var(--danger) !important;
-}
-
-.danger-btn:hover {
-  background-color: #d11a5e !important;
-}
-
-/* Responsive styles */
-@media (min-width: 769px) { /* Apply desktop styles above 768px */
-  .analysis-section {
-    flex-direction: row; /* Side-by-side on desktop */
-  }
-
-  .columns {
-    flex-direction: row; /* Side-by-side on desktop */
-  }
-
-  .test-controls {
-    flex-direction: row; /* Side-by-side on desktop */
-  }
-
-  .test-controls button {
-      width: auto; /* Auto width on desktop */
-  }
-
-  .close-results-btn {
-    margin-left: auto; /* Push to the right on desktop */
-    width: auto; /* Auto width on desktop */
-  }
-   #closeResultsBtnEnd { /* Style new button on mobile too */
-      width: fit-content; /* Match padding of section */
-      margin-left: auto;
-      margin-right: auto;
-  }
-
-  .leaderboard-controls {
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .leaderboard-controls select {
-    width: auto;
-  }
-
-   .test-filters {
-      flex-direction: row;
-  }
-}
-
-/* Styles specifically for smaller screens (e.g., mobile) */
-@media (max-width: 768px) {
-  body {
-    padding: 10px; /* Reduce padding further on very small screens */
-  }
-
-  .container {
-    border-radius: var(--border-radius-md); /* Slightly smaller border-radius */
-  }
-
-  header {
-    padding: 1rem; /* Reduce header padding */
-  }
-
-  header h1 {
-    font-size: 1.8rem; /* Further reduce heading size */
-  }
-
-  .subtitle {
-    font-size: 0.9rem; /* Further reduce subtitle size */
-  }
-
-  .theme-toggle {
-    top: 0.5rem;
-    right: 0.5rem;
-  }
-
-  .toggle-label {
-    width: 30px;
-    height: 30px;
-  }
-
-  .toggle-icon {
-    font-size: 0.9rem;
-  }
-
-  .input-section {
-    padding: 1rem; /* Reduce section padding */
-  }
-
-  .input-group {
-    margin-bottom: 1rem; /* Reduce margin */
-  }
-
-  .input-group label {
-    top: 0.8rem; /* Adjust label position */
-    left: 0.8rem;
-    font-size: 0.8rem;
-  }
-
-  .input-group textarea:focus + label,
-  .input-group textarea:not(:placeholder-shown) + label,
-  .input-group input:focus + label,
-  .input-group input:not(:placeholder-shown) + label,
-  .input-group select:focus + label,
-  .input-group select:not(:placeholder-shown) + label {
-    top: -0.5rem; /* Adjust label position */
-    left: 0.6rem;
-    font-size: 0.7rem;
-  }
-
-  textarea, input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="search"], select {
-    padding: 0.8rem; /* Reduce input padding */
-    font-size: 0.9rem; /* Reduce input font size */
-  }
-
-  /* Specific style for the user transcription textarea on mobile */
-  #userText {
-      height: 200px; /* Adjusted height for smaller screens */
-  }
-
-
-  .button-group {
-    gap: 0.5rem; /* Reduce gap */
-  }
-
-  button {
-    padding: 0.6rem 1rem; /* Reduce button padding */
-    font-size: 0.9rem; /* Reduce button font size */
-    border-radius: var(--border-radius-md); /* Slightly smaller border-radius */
-  }
-
-  .secondary-btn, .download-btn {
-    padding: 0.5rem 1rem; /* Adjust padding */
-    font-size: 0.8rem; /* Adjust font size */
-  }
-
-
-  #results, #fullTextSection {
-    padding: 0 1rem 1rem; /* Reduce padding */
-  }
-
-  .results-header, .fulltext-header {
-    padding: 1rem; /* Reduce header padding */
-    gap: 0.8rem; /* Reduce gap */
-  }
-
-  .result-meta {
-    gap: 0.5rem; /* Reduce gap */
-    font-size: 0.8rem; /* Reduce font size */
-  }
-
-  .comparison-section, .analysis-section {
-    margin-bottom: 1rem; /* Reduce margin */
-    padding: 1rem; /* Reduce padding */
-  }
-
-  .stats-box {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); /* Further adjust min width */
-    gap: 0.8rem; /* Reduce gap */
-  }
-
-  .stat-item {
-    padding: 0.8rem; /* Reduce padding */
-    border-radius: var(--border-radius-md); /* Slightly smaller border-radius */
-  }
-
-  .stat-item h4 {
-    font-size: 0.7rem; /* Further reduce font size */
-  }
-
-  .stat-item p {
-    font-size: 1.3rem; /* Further reduce font size */
-  }
-
-  .feedback-box h3 {
-    margin-bottom: 0.8rem; /* Reduce margin */
-  }
-
-  .feedback-box ul {
-    padding-left: 1rem; /* Reduce padding */
-  }
-
-  .feedback-box li {
-    margin-bottom: 0.3rem; /* Reduce margin */
-  }
-
-  .columns {
-    gap: 1rem; /* Reduce gap */
-  }
-
-  .text-display {
-    height: 250px; /* Further reduce height */
-  }
-
-  footer {
-    padding: 1rem; /* Reduce padding */
-    font-size: 0.8rem; /* Reduce font size */
-  }
-
-  .timer-options {
-    gap: 0.8rem; /* Reduce gap */
-  }
-
-  .timer-option {
-    padding: 0.6rem 1rem; /* Reduce padding */
-    font-size: 0.9rem; /* Reduce font size */
-    border-radius: var(--border-radius-sm); /* Slightly smaller border-radius */
-  }
-
-  .timer-display {
-    font-size: 1.3rem; /* Reduce font size */
-    margin-bottom: 1rem; /* Reduce margin */
-  }
-
-  .test-controls {
-    gap: 0.5rem; /* Reduce gap */
-  }
-
-  .auth-btn {
-    padding: 0.5rem 1rem; /* Reduce padding */
-    font-size: 0.8rem; /* Reduce font size */
-    margin-top: 0.8rem; /* Reduce margin */
-  }
-
-  #userInfo {
-    gap: 8px; /* Reduce gap */
-  }
-
-  .user-photo {
-    width: 30px; /* Reduce size */
-    height: 30px; /* Reduce size */
-  }
-
-  .login-prompt {
-    margin: 1rem auto; /* Reduce margin */
-    padding: 1rem; /* Reduce padding */
-  }
-
-  .login-prompt h3 {
-    margin-bottom: 1rem; /* Reduce margin */
-  }
-
-  .global-tests-section, .leaderboard-section, .custom-test-section {
-    padding: 1rem; /* Reduce padding */
-    margin: 1rem 0; /* Reduce margin */
-  }
-
-  .test-filters {
-    gap: 0.8rem; /* Reduce gap */
-  }
-
-  .test-filters select,
-  .test-filters input[type="search"] {
-    padding: 0.6rem; /* Reduce padding */
-    font-size: 0.8rem; /* Reduce font size */
-  }
-
-  .tests-list {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* Further adjust min width */
-    gap: 0.8rem; /* Reduce gap */
-  }
-
-  .test-card {
-    padding: 1rem; /* Reduce padding */
-    border-radius: var(--border-radius-md); /* Slightly smaller border-radius */
-    margin-bottom: 1rem; /* Reduce margin */
-  }
-
-  .test-card h4 {
-    font-size: 1rem; /* Reduce font size */
-    margin-bottom: 0.5rem; /* Reduce margin */
-  }
-
-  .test-card p {
-    font-size: 0.9rem; /* Reduce font size */
-    margin-bottom: 1rem; /* Reduce margin */
-  }
-
-  .test-author {
-    font-size: 0.8rem; /* Reduce font size */
-  }
-
-  .test-author img {
-    width: 20px; /* Reduce size */
-    height: 20px; /* Reduce size */
-  }
-
-  .video-indicator {
-    font-size: 0.7rem; /* Reduce font size */
-    margin: 0.3rem 0; /* Reduce margin */
-  }
-
-  .test-card-actions {
-    gap: 0.3rem; /* Reduce gap */
-  }
-
-  .test-card-actions button {
-    padding: 0.2rem 0.4rem; /* Reduce padding */
-    font-size: 0.7rem; /* Reduce font size */
-    border-radius: 5px; /* Slightly smaller border-radius */
-  }
-
-  .leaderboard-controls {
-    gap: 0.5rem; /* Reduce gap */
-  }
-
-  .leaderboard-controls select,
-  .leaderboard-controls button {
-    padding: 0.4rem 0.6rem; /* Reduce padding */
-    font-size: 0.8rem; /* Reduce font size */
-  }
-
-  .leaderboard-list table {
-    min-width: 500px; /* Keep a minimum width for the table */
-  }
-
-  .leaderboard-list th,
-  .leaderboard-list td {
-    padding: 0.6rem 0.3rem; /* Reduce padding */
-    font-size: 0.8rem; /* Reduce font size */
-  }
-
-  .leaderboard-user {
-    gap: 0.3rem; /* Reduce gap */
-  }
-
-  .leaderboard-user img {
-    width: 20px; /* Reduce size */
-    height: 20px; /* Reduce size */
-  }
-
-  .pagination-info {
-    font-size: 0.8rem; /* Reduce font size */
-  }
-
-  .custom-test-section {
-    margin: 1rem; /* Reduce margin */
-    padding: 1rem; /* Reduce padding */
-  }
-
-  .custom-test-section h3 {
-    margin-bottom: 1rem; /* Reduce margin */
-  }
-
-  .video-container {
-    margin: 0.8rem 0; /* Reduce margin */
-  }
-
-  .modal-content {
-    padding: 1rem; /* Reduce padding */
-  }
-
-  .modal h3 {
-    margin-bottom: 1rem; /* Reduce margin */
-  }
-
-  .test-selection {
-    margin: 1rem 0; /* Reduce margin */
-  }
-
-  .test-item {
-    padding: 0.6rem; /* Reduce padding */
-  }
-
-  .test-item input {
-    margin-right: 0.6rem; /* Reduce margin */
-  }
-
-  .modal-buttons {
-    gap: 0.5rem; /* Reduce gap */
-    margin-top: 1rem; /* Reduce margin */
-  }
-}
-
-
-/* Additional adjustments for very small screens */
-@media (max-width: 480px) {
-    header h1 {
-        font-size: 1.5rem;
-    }
-    .subtitle {
-        font-size: 0.8rem;
-    }
-    .toggle-label {
-        width: 25px;
-        height: 25px;
-    }
-    .toggle-icon {
-        font-size: 0.8rem;
-    }
-    button {
-        padding: 0.5rem 0.8rem;
-        font-size: 0.8rem;
-    }
-    .secondary-btn, .download-btn {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.7rem;
-    }
-    .stats-box {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    }
-    .stat-item p {
-        font-size: 1.1rem;
-    }
-    .leaderboard-list table {
-        min-width: 500px; /* Keep a minimum width for the table */
-    }
-     .test-card {
-        min-width: 200px; /* Adjust min width for carousel on very small screens */
-    }
-}
-
-
-/* Carousel Styles */
-.tests-carousel {
-  position: relative;
-  margin: 1rem 0;
-  overflow: hidden;
-}
-
-.carousel-container {
-  overflow: hidden;
-  margin: 0 2.5rem; /* Adjust margin to account for button width */
-}
-
-.carousel-track {
-  display: flex;
-  transition: transform 0.5s ease;
-  gap: var(--spacing-sm); /* Use variable for gap between cards */
-  padding: 0.5rem 0; /* Padding for border visibility */
-}
-
-.carousel-btn {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
-  background: var(--primary);
-  color: white; /* Keep white for contrast */
-  border: none;
-  border-radius: 50%;
-  font-size: 1.2rem;
-  cursor: pointer;
-  z-index: 10;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-sm); /* Use variable */
-  transition: background 0.3s ease, box-shadow 0.3s ease; /* Added transitions */
-}
-  body.dark-mode .carousel-btn {
-  color: white;
-}
-
-.carousel-btn:hover {
-  background: var(--secondary);
-  box-shadow: var(--shadow-md); /* Use variable */
-}
-
-.prev-btn {
-  left: 0;
-}
-
-.next-btn {
-  right: 0;
-}
-
-.carousel-dots {
-  display: flex;
-  justify-content: center;
-  margin-top: 1rem;
-  gap: 0.5rem;
-}
-
-.carousel-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #ccc;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.carousel-dot.active {
-  background: var(--primary);
-  transform: scale(1.2);
-}
-
-/* Adjust test card size for carousel */
-.test-card {
-  min-width: 280px; /* Minimum width for a card */
-  flex-shrink: 0; /* Prevent cards from shrinking */
-  margin-bottom: 0; /* Remove bottom margin for carousel */
-}
-
-@media (min-width: 1024px) { /* Large screens: 3 cards */
-  .test-card {
-    flex-basis: calc(33.333% - (2 * var(--spacing-sm) / 3)); /* Use variable gap */
-  }
-}
-
-@media (min-width: 640px) and (max-width: 1023px) { /* Medium screens: 2 cards */
-  .test-card {
-    flex-basis: calc(50% - (1 * var(--spacing-sm) / 2)); /* Use variable gap */
-  }
-}
-
-@media (max-width: 639px) { /* Small screens: 1 card */
-  .test-card {
-    flex-basis: 100%;
-  }
-    .carousel-container {
-      margin: 0 1rem; /* Reduce margin on small screens */
-  }
-  .carousel-btn {
-    width: 30px;
-    height: 30px;
-    font-size: 1rem;
-  }
-}
-
-/* Add to existing styles.css */
-.delete-checkbox {
-  margin-right: 10px;
-}
-
-.admin-controls {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.leaderboard-row-selectable {
-  cursor: pointer;
-}
-
-.leaderboard-row-selectable:hover {
-  background-color: #f0f0f0 !important;
-}
-
-body.dark-mode .leaderboard-row-selectable:hover {
-  background-color: #3a3a3a !important;
-}
-
-.selected-row {
-  background-color: #e3f2fd !important;
-}
-
-body.dark-mode .selected-row {
-  background-color: #2c3e50 !important;
-}
-
-</style>
+  <script src="lookup.js"></script>
+  <script src="textLookup.js"></script>
+  <script src="1c2.js"></script>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com/">
+  <link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
+
 <body>
-  <div class="container">
-    <header>
-      <div class="theme-toggle">
-        <input type="checkbox" id="darkModeToggle">
-        <label for="darkModeToggle" class="toggle-label">
-          <span class="toggle-icon">🌙</span>
-        </label>
+  <!-- Login Container -->
+  <div id="login-container" class="login-container">
+    <div class="login-content">
+      <h2>Welcome to Steno Warriors</h2>
+      
+      <!-- Login Form -->
+      <div id="login-form">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Enter your password">
+          <a href="#" onclick="resetPassword()" style="font-size: 0.9rem; display: block; text-align: right; margin-top: 5px;">Forgot password?</a>
+        </div>
+        <button id="login-btn" class="auth-btn">Login</button>
+        <p style="margin-top: 15px; text-align: center;">
+          Don't have an account? <a href="#" id="show-register">Register</a>
+        </p>
+        <div class="auth-divider">OR</div>
+        <button id="googleSignIn" class="google-signin-btn">
+         <img src="https://developers.google.com/identity/images/g-logo.png" alt="Google logo" width="20" height="20">
+          Sign in with Google
+        </button>
       </div>
-      <h1>Steno Warriors</h1>
-      <p class="subtitle">Advanced Transcription Software</p>
-      <div id="authSection">
-        <button id="loginBtn" class="auth-btn">Login with Google</button>
-        <div id="userInfo" class="hidden">
-          <img id="userPhoto" class="user-photo">
-          <span id="userName"></span>
-          <button id="logoutBtn" class="auth-btn secondary-btn">Logout</button>
+      
+      <!-- Registration Form (initially hidden) -->
+      <div id="register-form" style="display: none;">
+        <div class="form-group">
+          <label for="register-name">Full Name</label>
+          <input type="text" id="register-name" placeholder="Enter your full name">
         </div>
+        <div class="form-group">
+          <label for="register-email">Email</label>
+          <input type="email" id="register-email" placeholder="Enter your email">
+        </div>
+        <div class="form-group">
+          <label for="register-password">Password</label>
+          <input type="password" id="register-password" placeholder="Create a password (min 6 chars)">
+        </div>
+        <div class="form-group">
+          <label for="register-confirm">Confirm Password</label>
+          <input type="password" id="register-confirm" placeholder="Confirm your password">
+        </div>
+        <button id="register-btn" class="auth-btn">Register</button>
+        <p style="margin-top: 15px; text-align: center;">
+          Already have an account? <a href="#" id="show-login">Login</a>
+        </p>
       </div>
-    </header>
-
-    <main>
-      <section id="loginPrompt" class="login-prompt">
-        <div id="loginForm">
-          <h3>Login to Steno Warriors</h3>
-          <div class="input-group">
-            <input type="email" id="loginEmail" placeholder=" ">
-            <label for="loginEmail">Email</label>
-          </div>
-          <div class="input-group">
-            <input type="password" id="loginPassword" placeholder=" ">
-            <label for="loginPassword">Password</label>
-          </div>
-          <button id="emailLoginBtn" class="auth-btn">Login</button>
-          <button id="googleLoginBtn" class="auth-btn secondary-btn">Login with Google</button>
-          <p>Don't have an account? <a href="#" id="showRegister">Register</a></p>
-        </div>
-
-        <div id="registerForm" class="hidden">
-          <h3>Create an Account</h3>
-          <div class="input-group">
-            <input type="text" id="registerName" placeholder=" ">
-            <label for="registerName">Full Name</label>
-          </div>
-          <div class="input-group">
-            <input type="email" id="registerEmail" placeholder=" ">
-            <label for="registerEmail">Email</label>
-          </div>
-          <div class="input-group">
-            <input type="password" id="registerPassword" placeholder=" ">
-            <label for="registerPassword">Password (min 6 characters)</label>
-          </div>
-          <div class="input-group">
-            <input type="password" id="confirmPassword" placeholder=" ">
-            <label for="confirmPassword">Confirm Password</label>
-          </div>
-          <button id="registerBtn" class="auth-btn">Register</button>
-          <button id="showLogin" class="auth-btn secondary-btn">Back to Login</button>
-        </div>
-      </section>
-
-      <section id="leaderboardSection" class="hidden leaderboard-section">
-        <h3>Leaderboard</h3>
-        <div class="leaderboard-controls">
-          <select id="leaderboardFilter">
-            <option value="all">All Tests</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-          </select>
-          <select id="testNameFilter">
-            <option value="all">All Tests</option>
-          </select>
-          <select id="categoryFilter">
-            <option value="all">All Categories</option>
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-            <option value="test">Test</option>
-          </select>
-          <button id="prevPageBtn" class="secondary-btn" disabled>Previous</button>
-          <button id="nextPageBtn" class="secondary-btn">Next</button>
-          <button id="deleteLeaderboardBtn" class="danger-btn hidden">Delete Selected</button>
-        </div>
-        <div id="leaderboardList" class="leaderboard-list"></div>
-        <div id="leaderboardPagination" class="pagination-info"></div>
-      </section>
-
-      <section id="globalTestsSection" class="hidden global-tests-section">
-        <h3>Select Tests</h3>
-         <div class="test-filters">
-          <select id="testCategoryFilter">
-            <option value="all">All Categories</option>
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-            <option value="test">Test</option>
-          </select>
-          <input type="search" id="testSearchInput" placeholder="Search by title or content...">
-        </div>
-        <div id="globalTestsList" class="tests-carousel">
-          <button class="carousel-btn prev-btn" disabled>&lt;</button>
-          <div class="carousel-container">
-            <div class="carousel-track"></div>
-          </div>
-          <button class="carousel-btn next-btn" disabled>&gt;</button>
-        </div>
-        <div class="carousel-dots"></div>
-      </section>
-
-      <section id="customTestSection" class="hidden custom-test-section">
-        <h3 id="customTestTitleHeader">Add Your Own Test</h3>
-        <input type="hidden" id="editingTestId">
-        <div class="input-group">
-          <input type="text" id="customTitle" placeholder=" ">
-          <label for="customTitle">Test Title</label>
-        </div>
-        <div class="input-group">
-          <select id="customCategory">
-            <option value="general">General Matter</option>
-            <option value="kailash">Kailash Chandra</option>
-            <option value="progressive">Progressive</option>
-            <option value="legal">Legal</option>
-            <option value="previous">Previous Year</option>
-            <option value="test">Test</option>
-          </select>
-          <label for="customCategory">Test Category</label>
-        </div>
-        <div class="input-group">
-          <textarea id="customOriginal" placeholder=" "></textarea>
-          <label for="customOriginal">Original Text</label>
-        </div>
-        <div class="input-group">
-          <input type="url" id="customVideoUrl" placeholder=" ">
-          <label for="customVideoUrl">Video URL (Optional)</label>
-        </div>
-        <div class="button-group">
-          <button id="saveTestBtn">Save & Share Test</button>
-          <button id="clearCustomFormBtn" class="secondary-btn">Clear Form</button>
-          <button id="clearTestsBtn" class="secondary-btn">Manage My Tests</button>
-        </div>
-      </section>
-
-      <section class="input-section">
-        <div class="input-group" id="originalTextGroup">
-          <textarea id="originalText" placeholder=" "></textarea>
-          <label for="originalText">Original Text</label>
-        </div>
-
-        <div id="timerOptions" class="timer-options hidden">
-          <button class="timer-option" data-minutes="40">40 Minutes</button>
-          <button class="timer-option" data-minutes="50">50 Minutes</button>
-        </div>
-
-        <div id="timerDisplay" class="timer-display hidden"></div>
-
-        <div class="input-group">
-          <textarea id="userText" placeholder=" " readonly></textarea>
-          <label for="userText">Your Transcription</label>
-        </div>
-
-        <div class="button-group test-controls">
-          <button id="compareBtn">Show Result</button>
-          <button id="showFullTextBtn" class="secondary-btn hidden">View Full Texts</button>
-          <button id="closeResultsBtn" class="close-results-btn hidden">Close Results & Refresh</button>
-        </div>
-      </section>
-
-      <section id="results" class="hidden">
-        <div class="results-header">
-          <div>
-            <h2>Results</h2>
-            <div class="result-meta">
-              <span id="resultDate"></span>
-              <span>Steno Warriors Transcription Software</span>
-            </div>
-          </div>
-          <button id="downloadPdfBtn" class="download-btn">Download as PDF</button>
-        </div>
-
-        <div class="comparison-section">
-          <div class="legend-box">
-            <div class="legend-row"><span class="correct">■</span> Correct</div>
-            <div class="legend-row"><span class="missing">■</span> Missing (from Original)</div>
-            <div class="legend-row"><span class="addition">■</span> Added (in Your Text)</div>
-            <div class="legend-row"><span class="capitalization">■</span> Capitalization Difference</div>
-            <div class="legend-row"><span class="missing" style="color: #e74c3c;">■</span> Punctuation Difference</div>
-            </div>
-          <div id="comparisonResult" class="result-box"></div>
-        </div>
-
-        <div class="analysis-section">
-          <div class="analysis-column">
-            <h3>Statistics</h3>
-            <div id="stats" class="stats-box"></div>
-          </div>
-          <div class="analysis-column">
-            <h3>Feedback</h3>
-            <div id="feedback" class="feedback-box"></div>
-          </div>
-        </div>
-      </section>
-
-      <section id="fullTextSection" class="hidden">
-        <div class="fulltext-header">
-          <h2>Full Texts</h2>
-          <button id="backToResultsBtn" class="secondary-btn">Back to Results</button>
-        </div>
-        <div class="columns">
-          <div class="column">
-            <h3>Original Text</h3>
-            <div id="originalDisplay" class="text-display"></div>
-          </div>
-          <div class="column">
-            <h3>Your Transcription</h3>
-            <div id="userDisplay" class="text-display"></div>
-          </div>
-        </div>
-      </section>
-
-      <button id="closeResultsBtnEnd" class="close-results-btn hidden" style="margin: 2rem auto; display: block; width: fit-content;">Close Results & Refresh</button>
-
-    </main>
-
-    <footer>
-      <p>© 2023 Steno Warriors | Professional Transcription Software</p>
-    </footer>
+    </div>
   </div>
 
+  <div class="header">
+    <h1>Steno Warriors Transcription Software</h1>
+    <div id="user-info" style="display: none;">
+      <img id="user-photo" width="40" height="40" style="border-radius: 50%; vertical-align: middle;">
+      <span id="user-name" style="margin: 0 10px;"></span>
+      <button id="signOut" class="sign-out-btn">Sign Out</button>
+    </div>
+  </div>
 
-<script>
-// Initialize Firebase
+  <div class="main" id="app-content" style="display: none;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <h2>Please select a KC passage</h2>
+      <button id="showLeaderboard" class="download-btn">Show Leaderboard</button>
+    </div>
+    
+    <div class="select-panel">
+       <select id="volume-select">
+         <option value="1">Volume 1</option>
+         <option value="2">Volume 2</option>
+         <option value="3">Volume 3</option>
+                 </select>
+      <select id="test-select">
+      </select>
+    
+      <select id="speed-select">
+        <option value="70">70 WPM</option>
+        <option value="75">75 WPM</option>
+        <option value="80">80 WPM</option>
+        <option value="85">85 WPM</option>
+        <option value="90">90 WPM</option>
+        <option value="95">95 WPM</option>
+        <option value="100">100 WPM</option>
+      </select>
+    </div>
+    <div id="video-container"></div>
+
+    <div class="timer-container">
+      Typing timer: <span id="timer">50:00</span>
+      <div class="timer-controls">
+        <label><input type="radio" name="duration" value="2400"> 40 min</label>
+        <label><input type="radio" name="duration" value="3000" checked> 50 min</label>
+        <button id="startPause" class="tmrBtn">Start</button>
+        <button id="reset" class="tmrBtn">Reset</button>
+      </div>
+    </div>
+    
+    <div id="paragraphA"></div>
+    <textarea class="inputBox" id="paragraphB" spellcheck="false" placeholder="Click Start to begin typing" disabled></textarea>
+    <div class="resultText" id="textBoxC" style="display: none;"></div>
+    <button onclick="downloadPDF()" class="download-btn">Show Result</button>
+  </div>
+
+  <!-- Leaderboard Modal -->
+  <div id="leaderboard-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+      <h2>Leaderboard</h2>
+      <div class="leaderboard-filters">
+        <select id="leaderboard-test-select">
+          <option value="all">All Transcriptions</option>
+        </select>
+        <select id="leaderboard-speed-select">
+          <option value="all">All Speeds</option>
+          <option value="70">70 WPM</option>
+        <option value="75">75 WPM</option>
+        <option value="80">80 WPM</option>
+        <option value="85">85 WPM</option>
+        <option value="90">90 WPM</option>
+        <option value="95">95 WPM</option>
+        <option value="100">100 WPM</option>
+        </select>
+        <button id="refresh-leaderboard" class="download-btn">Refresh</button>
+      </div>
+      <div id="leaderboard-content">
+        <table id="leaderboard-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Name</th>
+              <th>Transcription</th>
+              <th>Speed</th>
+              <th>Accuracy</th>
+              <th>Words</th>
+              <th>Typed</th>
+              <th>Time</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="leaderboard-pagination">
+        <button id="prev-page" disabled>Previous</button>
+        <span id="page-info">Page 1 of 1</span>
+        <button id="next-page" disabled>Next</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>
+      Made with <span style="color: red;">&hearts;</span> &middot; Anish &middot; <a href=""> Contact </a>
+    </div>
+  </div>
+
+  <!-- JS Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    // Firebase Configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBjY-pE5jxQJgKqDZrcE7Im66_5r-X_mRA", // Replace with your actual config
-  authDomain: "setup-login-page.firebaseapp.com",
-  databaseURL: "https://setup-login-page-default-rtdb.firebaseio.com",
-  projectId: "setup-login-page",
-  storageBucket: "setup-login-page.firebasestorage.app",
-  messagingSenderId: "341251531099",
-  appId: "1:341251531099:web:f4263621455541ffdc3a7e",
-  measurementId: "G-ZXFC7NR9HV"
+  apiKey: "AIzaSyD71idTIXlQt0TIjICLg2BL6dhfi7e6IXI",
+  authDomain: "stenowarriorskc.firebaseapp.com",
+  projectId: "stenowarriorskc",
+  storageBucket: "stenowarriorskc.firebasestorage.app",
+  messagingSenderId: "923880455930",
+  appId: "1:923880455930:web:4cc708da4c0641b79b5343",
+  measurementId: "G-WK8RPR2QMD"
 };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const database = firebase.database();
 
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const database = firebase.database();
-
-// Initialize jsPDF
-const { jsPDF } = window.jspdf;
-
-document.addEventListener('DOMContentLoaded', function() {
-  // --- DOM elements ---
-  const originalTextEl = document.getElementById('originalText');
-  const userTextEl = document.getElementById('userText');
-  const compareBtn = document.getElementById('compareBtn');
-  const showFullTextBtn = document.getElementById('showFullTextBtn');
-  const backToResultsBtn = document.getElementById('backToResultsBtn');
-  const downloadPdfBtn = document.getElementById('downloadPdfBtn');
-  const closeResultsBtn = document.getElementById('closeResultsBtn');
-  const closeResultsBtnEnd = document.getElementById('closeResultsBtnEnd');
-  const resultsSection = document.getElementById('results');
-  const fullTextSection = document.getElementById('fullTextSection');
-  const comparisonResultEl = document.getElementById('comparisonResult');
-  const statsEl = document.getElementById('stats');
-  const feedbackEl = document.getElementById('feedback');
-  const originalDisplayEl = document.getElementById('originalDisplay');
-  const userDisplayEl = document.getElementById('userDisplay');
-  const resultDateEl = document.getElementById('resultDate');
-  const originalTextGroup = document.getElementById('originalTextGroup');
-  const timerOptions = document.getElementById('timerOptions');
-  const timerDisplay = document.getElementById('timerDisplay');
-  const loginBtn = document.getElementById('loginBtn');
-  const logoutBtn = document.getElementById('logoutBtn');
-  const userInfo = document.getElementById('userInfo');
-  const userPhoto = document.getElementById('userPhoto');
-  const userName = document.getElementById('userName');
-  const loginPrompt = document.getElementById('loginPrompt');
-  const customTestSection = document.getElementById('customTestSection');
-  const globalTestsSection = document.getElementById('globalTestsSection');
-  const globalTestsList = document.getElementById('globalTestsList');
-  const leaderboardSection = document.getElementById('leaderboardSection');
-  const leaderboardList = document.getElementById('leaderboardList');
-  const leaderboardFilter = document.getElementById('leaderboardFilter');
-  const testNameFilter = document.getElementById('testNameFilter');
-  const categoryFilter = document.getElementById('categoryFilter');
-  const testCategoryFilter = document.getElementById('testCategoryFilter');
-  const testSearchInput = document.getElementById('testSearchInput');
-  const prevPageBtn = document.getElementById('prevPageBtn');
-  const nextPageBtn = document.getElementById('nextPageBtn');
-  const leaderboardPagination = document.getElementById('leaderboardPagination');
-  const saveTestBtn = document.getElementById('saveTestBtn');
-  const clearTestsBtn = document.getElementById('clearTestsBtn');
-  const clearCustomFormBtn = document.getElementById('clearCustomFormBtn');
-  const customTitle = document.getElementById('customTitle');
-  const customOriginal = document.getElementById('customOriginal');
-  const customVideoUrl = document.getElementById('customVideoUrl');
-  const customCategory = document.getElementById('customCategory');
-  const customTestTitleHeader = document.getElementById('customTestTitleHeader');
-  const editingTestIdInput = document.getElementById('editingTestId');
-  const loginForm = document.getElementById('loginForm');
-  const registerForm = document.getElementById('registerForm');
-  const emailLoginBtn = document.getElementById('emailLoginBtn');
-  const googleLoginBtn = document.getElementById('googleLoginBtn');
-  const registerBtn = document.getElementById('registerBtn');
-  const showRegister = document.getElementById('showRegister');
-  const showLogin = document.getElementById('showLogin');
-  const loginEmail = document.getElementById('loginEmail');
-  const loginPassword = document.getElementById('loginPassword');
-  const registerName = document.getElementById('registerName');
-  const registerEmail = document.getElementById('registerEmail');
-  const registerPassword = document.getElementById('registerPassword');
-  const confirmPassword = document.getElementById('confirmPassword');
-  const deleteLeaderboardBtn = document.getElementById('deleteLeaderboardBtn');
-  const timerButtons = document.querySelectorAll('.timer-option'); // *** ADDED: Select timer buttons ***
-
-  // --- Global state ---
-  let currentUser = null;
-  const adminEmails = ["anishkumar18034@gmail.com", "anishkumar1803@gmail.com", "admin2@example.com"]; // Add your admin emails here
-  let allFetchedTests = [];
-  let timerInterval;
-  let endTime;
-  let testActive = false;
-  // let timerButtons = document.querySelectorAll('.timer-option'); // Moved selection up
-  let currentPage = 1;
-  const entriesPerPage = 10;
-  let allAttempts = [];
-  let filteredAttempts = [];
-  let uniqueTestNames = new Set();
-  let currentSortColumn = 'accuracy';
-  let currentSortDirection = 'desc';
-  let selectedLeaderboardRows = [];
-  let carouselTrack;
-  let carouselDotsContainer;
-  let carouselCards = [];
-  let carouselPrevBtn;
-  let carouselNextBtn;
-  let cardWidth = 0;
-  let carouselCurrentIndex = 0;
-  let carouselVisibleCards = 3;
-  let startTime = null;
-
-  // --- Initial Setup ---
-  // *** ADDED: Ensure userText is read-only initially ***
-  userTextEl.readOnly = true;
-  userTextEl.classList.add('locked-textarea');
-
-  // --- Event Listeners ---
-
-  userTextEl.addEventListener('input', function() { if (!startTime) { startTime = new Date(); } });
-  showRegister.addEventListener('click', (e) => { e.preventDefault(); loginForm.classList.add('hidden'); registerForm.classList.remove('hidden'); });
-  showLogin.addEventListener('click', (e) => { e.preventDefault(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); });
-  emailLoginBtn.addEventListener('click', () => { const email = loginEmail.value.trim(); const password = loginPassword.value.trim(); if (!email || !password) { alert('Please enter both email and password'); return; } auth.signInWithEmailAndPassword(email, password).then(() => console.log('Login successful')).catch(error => { console.error('Login error:', error); alert('Login failed: ' + error.message); }); });
-  registerBtn.addEventListener('click', () => { const name = registerName.value.trim(); const email = registerEmail.value.trim(); const password = registerPassword.value.trim(); const confirm = confirmPassword.value.trim(); if (!name || !email || !password || !confirm) { alert('Please fill in all fields'); return; } if (password !== confirm) { alert('Passwords do not match'); return; } if (password.length < 6) { alert('Password should be at least 6 characters'); return; } auth.createUserWithEmailAndPassword(email, password).then((cred) => cred.user.updateProfile({ displayName: name })).then(() => { alert('Registration successful! You are now logged in.'); resetAuthForms(); registerForm.classList.add('hidden'); loginForm.classList.remove('hidden'); }).catch(error => { console.error('Registration error:', error); alert('Registration failed: ' + error.message); }); });
-  googleLoginBtn.addEventListener('click', () => { const provider = new firebase.auth.GoogleAuthProvider(); auth.signInWithPopup(provider).catch(error => { console.error('Google login error:', error); alert('Google login failed. Please try again.'); }); });
-  logoutBtn.addEventListener('click', () => { auth.signOut(); });
-  auth.onAuthStateChanged(user => {
-    currentUser = user;
-    if (user) {
-      loginBtn.classList.add('hidden');
-      userInfo.classList.remove('hidden');
-      userPhoto.src = user.photoURL || `https://www.gravatar.com/avatar/${user.uid}?d=identicon&s=40`;
-      userName.textContent = user.displayName || 'User';
-      loginPrompt.classList.add('hidden');
-      const isAdmin = adminEmails.includes(user.email);
-      // Only show custom test section for admins
-      customTestSection.classList.toggle('hidden', !isAdmin);
-      deleteLeaderboardBtn.classList.toggle('hidden', !isAdmin);
-      globalTestsSection.classList.remove('hidden');
-      leaderboardSection.classList.remove('hidden');
-      fetchAndDisplayGlobalTests();
-      loadLeaderboard();
-      cleanupOldData();
-
-      // Show/hide Manage Tests button based on admin status
-      if (isAdmin) {
-        clearTestsBtn.classList.remove('hidden');
-      } else {
-        clearTestsBtn.classList.add('hidden');
-      }
-    } else {
-      loginBtn.classList.remove('hidden');
-      userInfo.classList.add('hidden');
-      loginPrompt.classList.remove('hidden');
-      customTestSection.classList.add('hidden');
-      globalTestsSection.classList.add('hidden');
-      leaderboardSection.classList.add('hidden');
-      loginForm.classList.remove('hidden');
-      registerForm.classList.add('hidden');
-      deleteLeaderboardBtn.classList.add('hidden');
-      resetComparisonUI();
-      if(carouselTrack) carouselTrack.innerHTML = '';
-      if(carouselDotsContainer) carouselDotsContainer.innerHTML = '';
-      if(leaderboardList) leaderboardList.innerHTML = '';
-      allFetchedTests = [];
-      allAttempts = [];
-      filteredAttempts = [];
-      selectedLeaderboardRows = [];
-    }
-    resetCustomTestForm();
-  });
-  testCategoryFilter.addEventListener('change', filterAndDisplayGlobalTests);
-  testSearchInput.addEventListener('input', filterAndDisplayGlobalTests);
-  leaderboardFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
-  testNameFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
-  categoryFilter.addEventListener('change', () => { currentPage = 1; loadLeaderboard(); });
-  prevPageBtn.addEventListener('click', () => { if (currentPage > 1) { currentPage--; updatePagination(); } });
-  nextPageBtn.addEventListener('click', () => { const totalPages = Math.ceil(filteredAttempts.length / entriesPerPage); if (currentPage < totalPages) { currentPage++; updatePagination(); } });
-  deleteLeaderboardBtn.addEventListener('click', () => { if (!currentUser || !adminEmails.includes(currentUser.email) || selectedLeaderboardRows.length === 0) return; showConfirmationModal(`Delete ${selectedLeaderboardRows.length} selected entries?`, () => { const updates = {}; selectedLeaderboardRows.forEach(id => { updates[`attempts/${id}`] = null; }); database.ref().update(updates).then(() => { alert('Entries deleted.'); selectedLeaderboardRows = []; loadLeaderboard(); }).catch(err => alert('Error deleting entries.')); }); });
-  originalTextEl.addEventListener('paste', function() { document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected')); setTimeout(() => { if (originalTextEl.value.trim() && !testActive) { originalTextGroup.classList.add('hidden'); timerOptions.classList.remove('hidden'); timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; }); } }, 0); });
-
-  // *** MODIFIED: Timer Button Listener - Loop through all timer buttons ***
-  timerButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      // --- Make textarea editable ---
-      userTextEl.readOnly = false;
-      userTextEl.classList.remove('locked-textarea'); // Remove locked styling
-      userTextEl.focus(); // Optional: automatically focus the textarea
-      // --- Start the timer ---
-      startTimer(parseInt(this.dataset.minutes));
-    });
-  });
-
-  compareBtn.addEventListener('click', function() { stopTimer(); compareTexts(); disableTimerOptions(); });
-  showFullTextBtn.addEventListener('click', showFullTexts);
-  backToResultsBtn.addEventListener('click', showResults);
-  downloadPdfBtn.addEventListener('click', downloadAsPdf);
-  closeResultsBtn.addEventListener('click', () => location.reload() ); // Refresh page
-  closeResultsBtnEnd.addEventListener('click', () => location.reload() ); // Refresh page
-  saveTestBtn.addEventListener('click', saveOrUpdateTest);
-  clearCustomFormBtn.addEventListener('click', resetCustomTestForm);
-  clearTestsBtn.addEventListener('click', showManageTestsModalHandler);
-
-  // --- Helper Functions ---
-  function resetAuthForms() { loginEmail.value = ''; loginPassword.value = ''; registerName.value = ''; registerEmail.value = ''; registerPassword.value = ''; confirmPassword.value = ''; }
-  function resetComparisonUI() {
-      const vid = document.getElementById('testVideoPlayer');
-      if (vid) vid.remove();
-      originalTextEl.value = '';
-      userTextEl.value = '';
-      comparisonResultEl.innerHTML = '';
-      statsEl.innerHTML = '';
-      feedbackEl.innerHTML = '';
-      resultsSection.classList.add('hidden');
-      fullTextSection.classList.add('hidden');
-      showFullTextBtn.classList.add('hidden');
-      closeResultsBtn.classList.add('hidden');
-      closeResultsBtnEnd.classList.add('hidden');
-      originalTextGroup.classList.remove('hidden');
-      // *** MODIFIED: Reset userText to read-only state ***
-      userTextEl.readOnly = true;
-      userTextEl.classList.add('locked-textarea');
-      compareBtn.disabled = false;
-      testActive = false;
-      startTime = null;
-      stopTimer();
-      timerDisplay.classList.add('hidden');
-      timerDisplay.classList.remove('timer-ended');
-      timerOptions.classList.add('hidden');
-      document.querySelectorAll('.test-card').forEach(card => card.classList.remove('selected'));
-  }
-
-  // --- Leaderboard Functions ---
-  function loadLeaderboard() { const filter = leaderboardFilter.value; const category = categoryFilter.value; let query = database.ref('attempts').orderByChild('timestamp'); if (filter === 'week') { const d=new Date(); d.setDate(d.getDate()-7); query = query.startAt(d.getTime()); } else if (filter === 'month') { const d=new Date(); d.setMonth(d.getMonth()-1); query = query.startAt(d.getTime()); } query.once('value').then(snapshot => { const attempts = snapshot.val() || {}; allAttempts = Object.entries(attempts).map(([id, attempt]) => ({ id, ...attempt })); sortAttempts(currentSortColumn, currentSortDirection); updateTestNameFilter(allAttempts); filteredAttempts = allAttempts.filter(att => (testNameFilter.value==='all' || att.testTitle===testNameFilter.value) && (category==='all' || att.category===category)); updatePagination(); }).catch(error => { console.error('Leaderboard load error:', error); leaderboardList.innerHTML = '<p>Error loading.</p>'; }); }
-  function sortAttempts(column, direction) { if (!Array.isArray(allAttempts)) { allAttempts = []; } allAttempts.sort((a, b) => { const statsA = a.stats || {}; const statsB = b.stats || {}; let aValue, bValue; switch (column) { case 'accuracy': case 'wpm': case 'totalOriginal': case 'totalUser': case 'totalMistakes': case 'timeTaken': aValue = statsA[column] ?? 0; bValue = statsB[column] ?? 0; break; case 'userName': aValue = (a.userName || '').toLowerCase(); bValue = (b.userName || '').toLowerCase(); break; case 'testTitle': aValue = (a.testTitle || 'Custom').toLowerCase(); bValue = (b.testTitle || 'Custom').toLowerCase(); break; case 'date': aValue = a.timestamp || 0; bValue = b.timestamp || 0; break; default: return 0; } if (typeof aValue === 'number') return direction === 'asc' ? aValue - bValue : bValue - aValue; if (typeof aValue === 'string') return direction === 'asc' ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue); return 0; }); }
-  function updateTestNameFilter(attempts) { uniqueTestNames = new Set(attempts.map(att => att.testTitle || 'Custom Test')); const current = testNameFilter.value; testNameFilter.innerHTML = '<option value="all">All Tests</option>'; Array.from(uniqueTestNames).sort().forEach(name => testNameFilter.add(new Option(name, name))); testNameFilter.value = uniqueTestNames.has(current) ? current : 'all'; }
-  function updatePagination() { const totalEntries = filteredAttempts.length; const totalPages = Math.ceil(totalEntries / entriesPerPage); currentPage = Math.max(1, Math.min(currentPage, totalPages || 1)); const startIdx = (currentPage - 1) * entriesPerPage; const endIdx = Math.min(startIdx + entriesPerPage, totalEntries); prevPageBtn.disabled = currentPage === 1; nextPageBtn.disabled = currentPage >= totalPages; leaderboardPagination.textContent = totalEntries > 0 ? `Showing ${startIdx + 1}-${endIdx} of ${totalEntries}` : 'No entries found.'; renderLeaderboardTable(filteredAttempts.slice(startIdx, endIdx), startIdx + 1); }
-  function renderLeaderboardTable(attempts, startRank) { if (attempts.length === 0) { leaderboardList.innerHTML = '<p>No attempts match filters.</p>'; return; } const isAdmin = currentUser && adminEmails.includes(currentUser.email); let tableHTML = `<table><thead><tr> ${isAdmin?'<th>Sel</th>':''} <th data-column="rank">#</th> <th data-column="userName">User</th> <th data-column="testTitle">Test</th> <th data-column="accuracy">Acc%</th> <th data-column="wpm">WPM</th> <th data-column="totalOriginal">Orig</th> <th data-column="totalUser">Typed</th> <th data-column="timeTaken">Time</th> <th data-column="totalMistakes">Mistakes</th> <th data-column="date">Date</th> </tr></thead><tbody>`; attempts.forEach((att, idx) => { const d = new Date(att.timestamp); const s = att.stats || {}; const acc = s.accuracy ?? 0; const time = s.timeTaken ?? 0; const accClass = acc>=95?'accuracy-high':acc>=85?'accuracy-medium':'accuracy-low'; const timeFmt = `${Math.floor(time/60)}:${(time%60).toString().padStart(2, '0')}`; const rank = startRank + idx; let badge = rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':''; const isSel = selectedLeaderboardRows.includes(att.id); tableHTML += `<tr data-id="${att.id}" class="${isAdmin?'leaderboard-row-selectable':''} ${isSel?'selected-row':''}"> ${isAdmin?`<td><input type="checkbox" class="delete-checkbox" data-id="${att.id}" ${isSel?'checked':''}></td>`:''} <td>${rank}${badge}</td> <td class="leaderboard-user"><img src="${att.userPhoto||`https://www.gravatar.com/avatar/${att.id}?d=identicon&s=30`}" alt=""><span>${att.userName||'User'}</span></td> <td>${att.testTitle||'Custom'} ${att.category?`<span class="category-badge category-${att.category}">${getCategoryName(att.category)}</span>`:''}</td> <td class="accuracy-cell ${accClass}">${acc.toFixed(1)}</td> <td>${s.wpm??0}</td> <td>${s.totalOriginal??0}</td> <td>${s.totalUser??0}</td> <td>${timeFmt}</td> <td>${s.totalMistakes??0}</td> <td>${d.toLocaleDateString()}</td> </tr>`; }); tableHTML += `</tbody></table>`; leaderboardList.innerHTML = tableHTML; makeTableSortable(); addLeaderboardRowSelectionListeners(); updateDeleteButtonState(); }
-  function makeTableSortable() { document.querySelectorAll('.leaderboard-list th[data-column]').forEach(header => { header.style.cursor = 'pointer'; header.replaceWith(header.cloneNode(true)); const newHeader = document.querySelector(`.leaderboard-list th[data-column="${header.dataset.column}"]`); newHeader.addEventListener('click', () => { const column = newHeader.dataset.column; if (!column) return; if (currentSortColumn === column) { currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc'; } else { currentSortColumn = column; currentSortDirection = (column === 'accuracy' || column === 'wpm' || column === 'date' || column === 'totalOriginal') ? 'desc' : 'asc'; } sortAttempts(currentSortColumn, currentSortDirection); currentPage = 1; updatePagination(); document.querySelectorAll('.leaderboard-list th[data-column]').forEach(h => { h.classList.remove('sorted-asc', 'sorted-desc'); if (h.dataset.column === column) h.classList.add(`sorted-${currentSortDirection}`); }); }); if (newHeader.dataset.column === currentSortColumn) { newHeader.classList.add(`sorted-${currentSortDirection}`); } }); }
-  function addLeaderboardRowSelectionListeners() { if (!currentUser || !adminEmails.includes(currentUser.email)) return; document.querySelectorAll('.leaderboard-list .delete-checkbox').forEach(cb => { cb.addEventListener('change', (e) => { const id = e.target.dataset.id; const row = e.target.closest('tr'); if (e.target.checked) { selectedLeaderboardRows.push(id); row.classList.add('selected-row'); } else { selectedLeaderboardRows = selectedLeaderboardRows.filter(rId => rId !== id); row.classList.remove('selected-row'); } updateDeleteButtonState(); }); }); document.querySelectorAll('.leaderboard-list tr.leaderboard-row-selectable').forEach(row => { row.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { const cb = row.querySelector('.delete-checkbox'); if (cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event('change')); } } }); }); }
-  function updateDeleteButtonState() { deleteLeaderboardBtn.disabled = selectedLeaderboardRows.length === 0; }
-  function cleanupOldData() { const d = new Date(); d.setMonth(d.getMonth() - 6); database.ref('attempts').orderByChild('timestamp').endAt(d.getTime()).once('value').then(snapshot => { const updates = {}; let count = 0; snapshot.forEach(child => { updates[child.key] = null; count++; }); if (count > 0) { console.log(`Cleaning up ${count} old entries.`); database.ref('attempts').update(updates); } }); }
-  setInterval(cleanupOldData, 7 * 24 * 60 * 60 * 1000);
-
-  // --- Timer Functions ---
-  function startTimer(minutes) { if (testActive) stopTimer(); endTime = new Date(); endTime.setMinutes(endTime.getMinutes() + minutes); testActive = true; timerOptions.classList.add('hidden'); timerDisplay.classList.remove('hidden', 'timer-ended'); updateTimerDisplay(); timerInterval = setInterval(updateTimerDisplay, 1000); }
-  function stopTimer() { clearInterval(timerInterval); testActive = false; timerDisplay.classList.add('hidden'); timerDisplay.classList.remove('timer-ended'); }
-  function disableTimerOptions() { timerButtons.forEach(btn => { btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'; }); }
-  function updateTimerDisplay() { const now = new Date(); const remaining = endTime - now; if (remaining <= 0) { stopTimer(); timerDisplay.textContent = "TIME'S UP!"; timerDisplay.classList.remove('hidden'); timerDisplay.classList.add('timer-ended'); compareTexts(); lockTest(); disableTimerOptions(); return; } const minutes = Math.floor((remaining % 3600000) / 60000); const seconds = Math.floor((remaining % 60000) / 1000); timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`; }
-  function lockTest() { userTextEl.readOnly = true; userTextEl.classList.add('locked-textarea'); compareBtn.disabled = true; closeResultsBtn.classList.remove('hidden'); closeResultsBtnEnd.classList.remove('hidden'); }
-
-  // --- Core Comparison Logic ---
-  function compareTexts() { const originalTextRaw = originalTextEl.value; const userTextRaw = userTextEl.value; if (!originalTextRaw || !userTextRaw) { alert('Please enter both original text and your transcription.'); return; } let testTitle = "Custom Test"; let testCategory = 'general'; const selectedTestCard = document.querySelector('.test-card.selected'); if (selectedTestCard) { testTitle = selectedTestCard.querySelector('h4')?.firstChild.textContent.trim() || 'Selected'; testCategory = selectedTestCard.dataset.category || 'general'; } const originalWords = processText(originalTextRaw); const userWords = processText(userTextRaw); const comparison = compareParagraphsLCS(originalWords, userWords); displayComparison(comparison); displayStats(comparison.stats); displayFeedback(comparison.stats, comparison.punctuationMistakes); displayFullTexts(originalTextRaw, userTextRaw); resultDateEl.textContent = new Date().toLocaleString(); showResults(); showFullTextBtn.classList.remove('hidden'); closeResultsBtn.classList.remove('hidden'); closeResultsBtnEnd.classList.remove('hidden'); if (testActive) lockTest(); if (currentUser) saveAttemptToFirebase(testTitle, testCategory, comparison.stats); }
-  function saveAttemptToFirebase(testTitle, category, stats) { const attemptData = { userId: currentUser.uid, userName: currentUser.displayName || 'User', userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=30`, testTitle, category, stats, timestamp: firebase.database.ServerValue.TIMESTAMP }; database.ref('attempts').push(attemptData).then(() => { console.log('Attempt saved.'); loadLeaderboard(); }).catch(error => console.error('Error saving attempt:', error)); }
-
-  // --- Result Display Toggles ---
-  function showFullTexts() { resultsSection.classList.add('hidden'); fullTextSection.classList.remove('hidden'); }
-  function showResults() { fullTextSection.classList.add('hidden'); resultsSection.classList.remove('hidden'); }
-
-  // --- PDF Download ---
-  function downloadAsPdf() { const resultsElement = document.getElementById('results'); html2canvas(resultsElement, { scale: 3, useCORS: true }).then(canvas => { const imgData = canvas.toDataURL('image/jpeg', 0.8); const pdf = new jsPDF('p', 'mm', 'a4'); const pdfWidth = pdf.internal.pageSize.getWidth(); const pdfHeight = pdf.internal.pageSize.getHeight(); const ratio = canvas.width / canvas.height; const imgWidth = pdfWidth - 20; const imgHeight = imgWidth / ratio; let heightLeft = imgHeight; let position = 10; pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); while (heightLeft > 0) { position = heightLeft - imgHeight + 10; pdf.addPage(); pdf.addImage(imgData, 'JPEG', 10, position, imgWidth, imgHeight); heightLeft -= (pdfHeight - 20); } pdf.save('steno-warriors-results.pdf'); }).catch(err => { console.error("PDF generation error:", err); alert("Could not generate PDF."); }); }
-
-  // --- Text Processing ---
-  function processText(text) { return text.replace(/<[^>]*>/g, '').replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"').trim().split(/\s+/).filter(word => word.length > 0); }
-  function getWordBase(word) { return word ? word.replace(/[.,]$/, '') : ""; }
-  function getPunctuation(word) { if (!word) return ''; const lastChar = word.slice(-1); return (lastChar === '.' || lastChar === ',') ? lastChar : ''; }
-
-  // --- LCS Comparison ---
-  function getLcsTable(arr1, arr2) { const m = arr1.length; const n = arr2.length; const dp = Array(m + 1).fill(0).map(() => Array(n + 1).fill(0)); for (let i = 1; i <= m; i++) { for (let j = 1; j <= n; j++) { if (getWordBase(arr1[i - 1]).toLowerCase() === getWordBase(arr2[j - 1]).toLowerCase()) { dp[i][j] = dp[i - 1][j - 1] + 1; } else { dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]); } } } return dp; }
-  function compareParagraphsLCS(originalWords, userWords) { const m = originalWords.length; const n = userWords.length; const lcsTable = getLcsTable(originalWords, userWords); let i = m; let j = n; const diffResult = []; while (i > 0 || j > 0) { const origWord = i > 0 ? originalWords[i - 1] : ''; const userWord = j > 0 ? userWords[j - 1] : ''; const origBase = getWordBase(origWord); const userBase = getWordBase(userWord); const origPunc = getPunctuation(origWord); const userPunc = getPunctuation(userWord); if (i > 0 && j > 0 && origBase.toLowerCase() === userBase.toLowerCase()) { if (origPunc !== userPunc) { diffResult.push({ type: 'punctuation', originalWord: origWord, userWord: userWord }); } else if (origBase !== userBase) { diffResult.push({ type: 'capitalization', originalWord: origWord, userWord: userWord }); } else { diffResult.push({ type: 'correct', word: origWord }); } i--; j--; } else if (j > 0 && (i === 0 || lcsTable[i][j - 1] >= lcsTable[i - 1][j])) { diffResult.push({ type: 'addition', word: userWord }); j--; } else if (i > 0 && (j === 0 || lcsTable[i][j - 1] < lcsTable[i - 1][j])) { diffResult.push({ type: 'missing', word: origWord }); i--; } else { break; } } diffResult.reverse(); let html = '', totalMistakes = 0, capMistakes = 0, puncMistakes = 0, correctCount = 0; diffResult.forEach(diff => { switch (diff.type) { case 'correct': html += `<span class="correct">${diff.word}</span> `; correctCount++; break; case 'capitalization': html += `<span class="capitalization">${diff.originalWord}</span> `; totalMistakes++; capMistakes++; correctCount++; break; case 'punctuation': html += `<span class="missing">${diff.originalWord}</span> `; totalMistakes++; puncMistakes++; break; case 'missing': html += `<span class="missing">${diff.word}</span> `; totalMistakes++; break; case 'addition': html += `<span class="addition">${diff.word}</span> `; totalMistakes++; break; } }); const totalOrig = originalWords.length; const effectiveCorrect = correctCount - (capMistakes / 2); const accuracy = totalOrig > 0 ? Math.max(0, Math.min(100, (effectiveCorrect / totalOrig) * 100)) : (userWords.length === 0 ? 100 : 0); const timeTaken = startTime ? Math.round((new Date() - startTime) / 1000) : 0; const timeMins = timeTaken / 60; const wpm = timeMins > 0 ? Math.round(userWords.length / timeMins) : 0; return { html: html.trim(), stats: { totalOriginal: totalOrig, totalUser: userWords.length, totalMistakes, keystrokes: userTextEl.value.length, wpm, accuracy, errorRate: 100 - accuracy, timeTaken }, punctuationMistakes: puncMistakes }; }
-
-  // --- Display Functions ---
-  function displayComparison(comparison) { comparisonResultEl.innerHTML = comparison.html; }
-  function displayStats(stats) { statsEl.innerHTML = `<div class="stat-item"><h4>Original Words</h4><p>${stats.totalOriginal}</p></div> <div class="stat-item"><h4>Your Words</h4><p>${stats.totalUser}</p></div> <div class="stat-item"><h4>Total Mistakes</h4><p>${stats.totalMistakes}</p></div> <div class="stat-item"><h4>Keystrokes</h4><p>${stats.keystrokes}</p></div> <div class="stat-item"><h4>Typing Speed (WPM)</h4><p>${stats.wpm}</p></div> <div class="stat-item"><h4>Accuracy</h4><p>${stats.accuracy.toFixed(1)}%</p></div> <div class="stat-item"><h4>Time Taken</h4><p>${Math.floor(stats.timeTaken / 60)}:${(stats.timeTaken % 60).toString().padStart(2, '0')}</p></div>`; }
-  function displayFeedback(stats, punctuationMistakes) { let fb = `<h4>Overall Assessment</h4> ${getOverallAssessment(stats.accuracy, stats.wpm)} <h4>Mistake Summary</h4><ul>`; if (stats.totalMistakes > 0) { fb += `<li>Found ${stats.totalMistakes} total mistake(s).</li>`; if (punctuationMistakes > 0) fb += `<li>Including ${punctuationMistakes} punctuation difference(s).</li>`; } else if (stats.accuracy === 100) { fb += `<li>No mistakes found! Excellent work!</li>`; } else { fb += `<li>Some minor differences detected.</li>`; } fb += `</ul><h4>Improvement Suggestions</h4><ul>`; if (stats.accuracy < 90) fb += `<li>Focus on overall accuracy.</li>`; if (punctuationMistakes > 3) fb += `<li>Pay close attention to commas and periods.</li>`; if (stats.totalMistakes > 5) fb += `<li>Review the text carefully to reduce errors.</li>`; if (stats.wpm < 40) fb += `<li>Practice regularly to increase typing speed.</li>`; fb += `<li>Consistent practice is key!</li></ul>`; feedbackEl.innerHTML = fb; }
-  function displayFullTexts(original, user) { originalDisplayEl.textContent = original; userDisplayEl.textContent = user; }
-  function getOverallAssessment(accuracy, wpm) { let a = ''; if (accuracy >= 98) a += '<p>🌟 Outstanding accuracy!</p>'; else if (accuracy >= 95) a += '<p>👍 Excellent accuracy!</p>'; else if (accuracy >= 90) a += '<p>✅ Good accuracy.</p>'; else if (accuracy >= 80) a += '<p>📝 Fair accuracy.</p>'; else a += '<p>⚠️ Accuracy needs improvement.</p>'; if (wpm >= 60) a += '<p>⚡ Very Fast Typer!</p>'; else if (wpm >= 50) a += '<p>🚀 Fast Typer!</p>'; else if (wpm >= 40) a += '<p>🏃 Moderate Speed.</p>'; else a += '<p>🐢 Developing Speed.</p>'; return a; }
-
-  // --- Video Embedding ---
-  function embedVideo(url) {
-    const cont = document.getElementById('testVideoPlayer');
-    if (cont) cont.remove();
-    if (!url) return;
-
-    const videoContainer = document.createElement('div');
-    videoContainer.className = 'video-container';
-    videoContainer.id = 'testVideoPlayer';
-
-    let videoId;
-    try {
-      const urlObj = new URL(url);
-      // Check for common YouTube URL patterns
-      if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
-         if (urlObj.hostname.includes('youtube.com')) {
-          videoId = urlObj.searchParams.get('v');
-        } else if (urlObj.hostname.includes('youtu.be')) {
-          videoId = urlObj.pathname.split('/').pop();
-        }
-      }
-    } catch (e) {
-      console.error("Error parsing video URL:", e);
-      /* Ignore invalid URLs */
+    // Authentication Functions
+    function signInWithGoogle() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          console.log("User signed in:", result.user);
+        })
+        .catch((error) => {
+          console.error("Error signing in:", error);
+          showError('login-form', error.message);
+        });
     }
 
-    if (videoId) {
-      // Use the standard YouTube embed URL format
-      videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-    } else {
-      // Fallback for non-YouTube URLs or if videoId couldn't be extracted
-      videoContainer.innerHTML = `<video controls style="width:100%; height:100%; position:absolute; top:0; left:0; border-radius: var(--border-radius-sm);"><source src="${url}">Video not supported.</video>`;
+    function signOut() {
+      auth.signOut()
+        .then(() => {
+          console.log("User signed out");
+        })
+        .catch((error) => {
+          console.error("Error signing out:", error);
+        });
     }
 
-    originalTextGroup.insertAdjacentElement('afterend', videoContainer);
-  }
-
-
-  // --- Global Test Management & Carousel ---
-  function fetchAndDisplayGlobalTests() { database.ref('tests').orderByChild('timestamp').once('value').then(snapshot => { allFetchedTests = Object.entries(snapshot.val() || {}).map(([id, test]) => ({ id, ...test })).sort((a,b) => (b.timestamp||0) - (a.timestamp||0)); filterAndDisplayGlobalTests(); }).catch(error => { console.error('Error fetching tests:', error); filterAndDisplayGlobalTests(); }); }
-  function filterAndDisplayGlobalTests() { const category = testCategoryFilter.value; const searchTerm = testSearchInput.value.trim().toLowerCase(); let tests = allFetchedTests; if (category !== 'all') tests = tests.filter(t => t.category === category); if (searchTerm) tests = tests.filter(t => (t.title?.toLowerCase().includes(searchTerm)) || (t.text?.toLowerCase().includes(searchTerm))); renderGlobalTests(tests); }
-  // MODIFIED: renderGlobalTests uses simpler video indicator and author text
-  function renderGlobalTests(filteredTests) {
-    carouselTrack = document.querySelector('.carousel-track');
-    carouselDotsContainer = document.querySelector('.carousel-dots');
-    carouselPrevBtn = document.querySelector('.prev-btn');
-    carouselNextBtn = document.querySelector('.next-btn');
-    if (!carouselTrack || !carouselDotsContainer || !carouselPrevBtn || !carouselNextBtn) return;
-    carouselTrack.innerHTML = '';
-    carouselDotsContainer.innerHTML = '';
-    carouselCards = [];
-    if (filteredTests.length === 0) {
-      carouselTrack.innerHTML = '<p style="padding: 1rem; text-align: center; width: 100%;">No tests match filters.</p>';
-      disableCarouselButtons();
-      return;
-    }
-    const isAdmin = currentUser && adminEmails.includes(currentUser.email);
-    filteredTests.forEach(test => {
-      const card = document.createElement('div');
-      card.className = 'test-card';
-      card.dataset.id = test.id;
-      card.dataset.category = test.category;
-
-      // Only allow admins to modify tests
-      const canModify = isAdmin;
-
-      card.innerHTML = `<div class="test-card-content" style="cursor: pointer;"><h4>${test.title} <span class="category-badge category-${test.category}">${getCategoryName(test.category)}</span></h4><p>${test.text.substring(0,100)}${test.text.length>100?'...':''}</p>${test.videoUrl?`<div class="video-indicator">• Includes Video</div>`:''}<div class="test-author"><img src="${test.userPhoto||`https://www.gravatar.com/avatar/${test.id}?d=identicon&s=24`}" alt=""><span>By ${test.userName||'User'}</span></div></div> ${canModify?'<div class="test-card-actions"><button class="edit-test-btn">Edit</button><button class="delete-test-btn">Delete</button></div>':''}`;
-      card.querySelector('.test-card-content').addEventListener('click', () => selectTest(card, test));
-      if (canModify) {
-        card.querySelector('.edit-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); editTest(test.id, test); });
-        card.querySelector('.delete-test-btn')?.addEventListener('click', (e) => { e.stopPropagation(); deleteTest(test.id, test.title); });
-      }
-      carouselTrack.appendChild(card);
-      carouselCards.push(card);
-    });
-    if (carouselCards.length > 0) initializeCarousel();
-    else disableCarouselButtons();
-  }
-  function disableCarouselButtons() { if (carouselPrevBtn) carouselPrevBtn.disabled = true; if (carouselNextBtn) carouselNextBtn.disabled = true; }
-  function selectTest(cardElement, testData) { document.querySelectorAll('.test-card').forEach(c => c.classList.remove('selected')); cardElement.classList.add('selected'); originalTextEl.value = testData.text; originalTextGroup.classList.add('hidden'); timerOptions.classList.remove('hidden'); timerButtons.forEach(btn => { btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'; }); embedVideo(testData.videoUrl); userTextEl.value = ''; startTime = null; resultsSection.classList.add('hidden'); fullTextSection.classList.add('hidden'); showFullTextBtn.classList.add('hidden'); closeResultsBtn.classList.add('hidden'); closeResultsBtnEnd.classList.add('hidden'); stopTimer(); timerDisplay.classList.add('hidden'); }
-  function editTest(testId, testData) { editingTestIdInput.value = testId; customTitle.value = testData.title; customOriginal.value = testData.text; customVideoUrl.value = testData.videoUrl || ''; customCategory.value = testData.category; saveTestBtn.textContent = 'Update Test'; customTestTitleHeader.textContent = 'Edit Test'; customTestSection.scrollIntoView({ behavior: 'smooth' }); }
-  function deleteTest(testId, testTitle) { showConfirmationModal(`Delete test "${testTitle}"?`, () => { database.ref('tests/' + testId).remove().then(() => { alert('Test deleted.'); fetchAndDisplayGlobalTests(); }).catch(err => alert('Error deleting test.')); }); }
-  function showConfirmationModal(message, onConfirm) { const modal = document.createElement('div'); modal.className = 'modal'; modal.innerHTML = `<div class="modal-content"><h3>Confirm</h3><p>${message}</p><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn">Confirm</button></div></div>`; document.body.appendChild(modal); // Add modal to body to make it visible setTimeout(() => modal.classList.add('show'), 10); // Add show class after a small delay for transition const close = () => { modal.classList.remove('show'); setTimeout(() => document.body.removeChild(modal), 300); }; // Remove after transition modal.querySelector('.secondary-btn').onclick = close; modal.querySelector('.danger-btn').onclick = () => { onConfirm(); close(); }; modal.onclick = (e) => { if (e.target === modal) close(); }; }
-  function initializeCarousel() { if (!carouselTrack || carouselCards.length === 0) { disableCarouselButtons(); return; } cardWidth = carouselCards[0].offsetWidth + 16; const containerWidth = carouselTrack.parentElement.offsetWidth; carouselVisibleCards = Math.max(1, Math.floor(containerWidth / cardWidth)); const totalCards = carouselCards.length; const dotCount = Math.ceil(totalCards / carouselVisibleCards); carouselDotsContainer.innerHTML = ''; if (dotCount > 1) { for (let i = 0; i < dotCount; i++) { const dot = document.createElement('div'); dot.className = 'carousel-dot'; if (i === 0) dot.classList.add('active'); dot.addEventListener('click', () => { carouselCurrentIndex = i; updateCarouselVisuals(); }); carouselDotsContainer.appendChild(dot); } } carouselCurrentIndex = 0; updateCarouselVisuals(); const newPrevBtn = carouselPrevBtn.cloneNode(true); carouselPrevBtn.parentNode.replaceChild(newPrevBtn, carouselPrevBtn); carouselPrevBtn = newPrevBtn; const newNextBtn = carouselNextBtn.cloneNode(true); carouselNextBtn.parentNode.replaceChild(newNextBtn, carouselNextBtn); carouselNextBtn = newNextBtn; carouselPrevBtn.addEventListener('click', () => { if (carouselCurrentIndex > 0) { carouselCurrentIndex--; updateCarouselVisuals(); } }); carouselNextBtn.addEventListener('click', () => { const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1; if (carouselCurrentIndex < maxIndex) { carouselCurrentIndex++; updateCarouselVisuals(); } }); let resizeTimeout; window.addEventListener('resize', () => { clearTimeout(resizeTimeout); resizeTimeout = setTimeout(() => { const newContainerWidth = carouselTrack.parentElement.offsetWidth; const newVisibleCards = Math.max(1, Math.floor(newContainerWidth / cardWidth)); if (newVisibleCards !== carouselVisibleCards) { initializeCarousel(); } else { updateCarouselVisuals(); } }, 250); }); }
-  function updateCarouselVisuals() { if (!carouselTrack || carouselCards.length === 0) return; const totalCards = carouselCards.length; const maxIndex = Math.ceil(totalCards / carouselVisibleCards) - 1; carouselCurrentIndex = Math.max(0, Math.min(carouselCurrentIndex, maxIndex)); const offset = -carouselCurrentIndex * (carouselVisibleCards * cardWidth); carouselTrack.style.transform = `translateX(${offset}px)`; document.querySelectorAll('.carousel-dot').forEach((dot, index) => { dot.classList.toggle('active', index === carouselCurrentIndex); }); carouselPrevBtn.disabled = carouselCurrentIndex === 0; carouselNextBtn.disabled = carouselCurrentIndex >= maxIndex; }
-  function getCategoryName(cat) { const names = { general: 'General', kailash: 'KC', progressive: 'Progressive', legal: 'Legal', previous: 'Previous Yr', test: 'Test' }; return names[cat] || cat; }
-
-  // --- Custom Test Form Management ---
-  function saveOrUpdateTest() {
-    if (!currentUser) {
-      alert('Please login to save tests.');
-      return;
-    }
-
-    // Check if user is admin
-    if (!adminEmails.includes(currentUser.email)) {
-      alert('Only admin users can add or edit tests.');
-      return;
-    }
-
-    const title = customTitle.value.trim();
-    const text = customOriginal.value.trim();
-    const videoUrl = customVideoUrl.value.trim();
-    const category = customCategory.value;
-    const editingTestId = editingTestIdInput.value;
-
-    if (!title || !text) {
-      alert('Title and Original Text are required.');
-      return;
-    }
-
-    const testData = {
-      title,
-      text,
-      videoUrl: videoUrl || null,
-      userId: currentUser.uid,
-      userName: currentUser.displayName,
-      userPhoto: currentUser.photoURL || `https://www.gravatar.com/avatar/${currentUser.uid}?d=identicon&s=24`,
-      category
-    };
-
-    let operation, message;
-    if (editingTestId) {
-      testData.updatedAt = firebase.database.ServerValue.TIMESTAMP;
-      operation = database.ref('tests/' + editingTestId).update(testData);
-      message = 'Test updated!';
-    } else {
-      testData.timestamp = firebase.database.ServerValue.TIMESTAMP;
-      operation = database.ref('tests').push(testData);
-      message = 'Test saved!';
-    }
-    performDbOperation(operation, message);
-  }
-  function performDbOperation(operationPromise, successMessage) { operationPromise.then(() => { alert(successMessage); resetCustomTestForm(); fetchAndDisplayGlobalTests(); }).catch(err => { console.error('DB Error:', err); alert('Failed to save test.'); }); }
-  function resetCustomTestForm() { editingTestIdInput.value = ''; customTitle.value = ''; customOriginal.value = ''; customVideoUrl.value = ''; customCategory.value = 'general'; saveTestBtn.textContent = 'Save & Share Test'; customTestTitleHeader.textContent = 'Add Your Own Test'; }
-  function showManageTestsModalHandler() {
-    if (!currentUser || !adminEmails.includes(currentUser.email)) {
-      alert('Only admin users can manage tests.');
-      return;
-    }
-
-    database.ref('tests').orderByChild('userId').equalTo(currentUser.uid).once('value').then(snap1 => {
-      let tests = snap1.val() || {};
-      return database.ref('tests').orderByChild('userName').equalTo(currentUser.displayName).once('value').then(snap2 => ({ ...tests, ...(snap2.val() || {}) }));
-    }).then(userTests => {
-      if (Object.keys(userTests).length === 0) {
-        alert("You haven't added any tests yet.");
+    // Email/Password Authentication Functions
+    function loginWithEmail() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      
+      // Clear previous errors
+      document.getElementById('login-form').querySelectorAll('.error-message').forEach(el => {
+        el.style.display = 'none';
+      });
+      
+      // Simple validation
+      if (!email) {
+        showError('login-email', 'Email is required');
         return;
       }
-      showManageTestsModal(userTests);
-    }).catch(err => {
-      console.error('Error fetching user tests:', err);
-      alert('Failed to fetch your tests.');
+      
+      if (!password) {
+        showError('login-password', 'Password is required');
+        return;
+      }
+      
+      auth.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          console.log("User logged in:", userCredential.user);
+        })
+        .catch((error) => {
+          let errorMessage = "Login failed. Please try again.";
+          if (error.code === "auth/user-not-found") {
+            errorMessage = "No user found with this email.";
+          } else if (error.code === "auth/wrong-password") {
+            errorMessage = "Incorrect password.";
+          } else if (error.code === "auth/invalid-email") {
+            errorMessage = "Invalid email format.";
+          }
+          showError('login-password', errorMessage);
+        });
+    }
+
+    function registerWithEmail() {
+      const name = document.getElementById('register-name').value;
+      const email = document.getElementById('register-email').value;
+      const password = document.getElementById('register-password').value;
+      const confirmPassword = document.getElementById('register-confirm').value;
+      
+      // Clear previous errors
+      document.getElementById('register-form').querySelectorAll('.error-message').forEach(el => {
+        el.style.display = 'none';
+      });
+      
+      // Validation
+      if (!name) {
+        showError('register-name', 'Name is required');
+        return;
+      }
+      
+      if (!email) {
+        showError('register-email', 'Email is required');
+        return;
+      }
+      
+      if (!password) {
+        showError('register-password', 'Password is required');
+        return;
+      }
+      
+      if (password.length < 6) {
+        showError('register-password', 'Password must be at least 6 characters');
+        return;
+      }
+      
+      if (password !== confirmPassword) {
+        showError('register-confirm', 'Passwords do not match');
+        return;
+      }
+      
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          // Update user profile with name
+          return userCredential.user.updateProfile({
+            displayName: name
+          });
+        })
+        .then(() => {
+          console.log("User registered successfully");
+        })
+        .catch((error) => {
+          let errorMessage = "Registration failed. Please try again.";
+          if (error.code === "auth/email-already-in-use") {
+            errorMessage = "Email already in use.";
+          } else if (error.code === "auth/invalid-email") {
+            errorMessage = "Invalid email address.";
+          } else if (error.code === "auth/weak-password") {
+            errorMessage = "Password should be at least 6 characters.";
+          }
+          showError('register-email', errorMessage);
+        });
+    }
+
+    function resetPassword() {
+      const email = document.getElementById('login-email').value || prompt("Please enter your email address to reset your password:");
+      if (email) {
+        auth.sendPasswordResetEmail(email)
+          .then(() => {
+            alert("Password reset email sent. Please check your inbox.");
+          })
+          .catch((error) => {
+            alert("Error sending reset email: " + error.message);
+          });
+      }
+    }
+
+    function showError(fieldId, message) {
+      const field = document.getElementById(fieldId);
+      let errorElement = field.nextElementSibling;
+      
+      if (!errorElement || !errorElement.classList.contains('error-message')) {
+        errorElement = document.createElement('div');
+        errorElement.className = 'error-message';
+        field.parentNode.insertBefore(errorElement, field.nextSibling);
+      }
+      
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+
+    function toggleAuthForms() {
+      const loginForm = document.getElementById('login-form');
+      const registerForm = document.getElementById('register-form');
+      
+      if (loginForm.style.display === 'none') {
+        loginForm.style.display = 'block';
+        registerForm.style.display = 'none';
+      } else {
+        loginForm.style.display = 'none';
+        registerForm.style.display = 'block';
+      }
+    }
+
+    // Auth State Listener
+    auth.onAuthStateChanged((user) => {
+      const loginContainer = document.getElementById('login-container');
+      const appContent = document.getElementById('app-content');
+      const userInfo = document.getElementById('user-info');
+
+      if (user) {
+        loginContainer.style.display = 'none';
+        appContent.style.display = 'block';
+        userInfo.style.display = 'block';
+        
+        // Set user info
+        if (user.photoURL) {
+          document.getElementById('user-photo').src = user.photoURL;
+        } else {
+          // Default avatar for email users
+          const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.displayName || 'U')}&background=4361ee&color=fff`;
+          document.getElementById('user-photo').src = defaultAvatar;
+        }
+        
+        document.getElementById('user-name').textContent = user.displayName || user.email;
+        populateLeaderboardTestSelect();
+      } else {
+        loginContainer.style.display = 'flex';
+        appContent.style.display = 'none';
+        userInfo.style.display = 'none';
+      }
     });
-  }
-  function showManageTestsModal(userTests) { const modal = document.createElement('div'); modal.className = 'modal'; let listHTML = ''; Object.entries(userTests).forEach(([id, test]) => { listHTML += `<div class="test-item"><input type="checkbox" id="del-${id}" data-testid="${id}"><label for="del-${id}">${test.title} (${getCategoryName(test.category)})</label></div>`; }); modal.innerHTML = `<div class="modal-content"><h3>Manage Your Tests</h3><p>Select tests to delete.</p><div class="test-selection" style="max-height: 40vh; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 1rem;">${listHTML}</div><div class="modal-buttons"><button class="secondary-btn">Cancel</button><button class="danger-btn" disabled>Delete Selected</button></div></div>`; document.body.appendChild(modal); // Add modal to body setTimeout(() => modal.classList.add('show'), 10); // Add show class for transition const close = () => { modal.classList.remove('show'); setTimeout(() => document.body.removeChild(modal), 300); }; // Remove after transition const delBtn = modal.querySelector('.danger-btn'); const checkboxes = modal.querySelectorAll('input[type="checkbox"]'); checkboxes.forEach(cb => cb.onchange = () => { delBtn.disabled = !Array.from(checkboxes).some(c => c.checked); }); modal.querySelector('.secondary-btn').onclick = close; delBtn.onclick = () => { const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.dataset.testid); if (selectedIds.length === 0) return; showConfirmationModal(`Delete ${selectedIds.length} test(s)?`, () => { const updates = {}; selectedIds.forEach(id => { updates[`/tests/${id}`] = null; }); database.ref().update(updates).then(() => { alert('Test(s) deleted.'); fetchAndDisplayGlobalTests(); close(); }).catch(err => alert('Error deleting.')); }); }; modal.onclick = (e) => { if (e.target === modal) close(); }; }
 
-  // --- Dark Mode ---
-  const darkModeToggle = document.getElementById('darkModeToggle');
-  darkModeToggle.addEventListener('change', function() { document.body.classList.toggle('dark-mode', this.checked); localStorage.setItem('darkMode', this.checked); });
-  if (localStorage.getItem('darkMode') === 'true') { darkModeToggle.checked = true; document.body.classList.add('dark-mode'); }
+    // Leaderboard Variables
+    let currentPage = 1;
+    const itemsPerPage = 10;
+    let currentLeaderboardData = [];
+    let currentTestFilter = 'all';
+    let currentSpeedFilter = 'all';
 
-}); // End DOMContentLoaded
-</script>
+    // DOM Elements
+    const leaderboardModal = document.getElementById('leaderboard-modal');
+    const showLeaderboardBtn = document.getElementById('showLeaderboard');
+    const closeModalBtn = document.querySelector('.close-modal');
+    const leaderboardTestSelect = document.getElementById('leaderboard-test-select');
+    const leaderboardSpeedSelect = document.getElementById('leaderboard-speed-select');
+    const refreshLeaderboardBtn = document.getElementById('refresh-leaderboard');
+    const prevPageBtn = document.getElementById('prev-page');
+    const nextPageBtn = document.getElementById('next-page');
+    const pageInfoSpan = document.getElementById('page-info');
+    const leaderboardTableBody = document.querySelector('#leaderboard-table tbody');
+
+    // Leaderboard Functions
+    function populateLeaderboardTestSelect() {
+      leaderboardTestSelect.innerHTML = '<option value="all">All Transcriptions</option>';
+      
+      // Add tests 1-22
+      for (let i = 1; i <= 22; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.text = `Transcription ${i}`;
+        leaderboardTestSelect.appendChild(option);
+      }
+      
+      // Add tests 23-44
+      for (let i = 23; i <= 44; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.text = `Transcription ${i}`;
+        leaderboardTestSelect.appendChild(option);
+      }
+       
+      // Add tests 45-66
+      for (let i = 45; i <= 66; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.text = `Transcription ${i}`;
+        leaderboardTestSelect.appendChild(option);
+      }
+    }
+
+    function loadLeaderboard() {
+      const threeMonthsAgo = new Date();
+      threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+      
+      leaderboardTableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">Loading leaderboard...</td></tr>';
+      
+      database.ref('leaderboard').orderByChild('timestamp').startAt(threeMonthsAgo.getTime()).once('value')
+        .then((snapshot) => {
+          currentLeaderboardData = [];
+          snapshot.forEach((childSnapshot) => {
+            const result = childSnapshot.val();
+            currentLeaderboardData.push({
+              id: childSnapshot.key,
+              ...result,
+              testNumber: result.testNumber.toString() // Ensure testNumber is string
+            });
+          });
+          
+          // Filter data
+          currentLeaderboardData = currentLeaderboardData.filter(item => {
+            const testMatch = currentTestFilter === 'all' || item.testNumber === currentTestFilter;
+            const speedMatch = currentSpeedFilter === 'all' || item.speed.toString() === currentSpeedFilter;
+            return testMatch && speedMatch;
+          });
+          
+          // Sort by accuracy
+          currentLeaderboardData.sort((a, b) => b.accuracy - a.accuracy);
+          
+          currentPage = 1;
+          renderLeaderboard();
+        })
+        .catch((error) => {
+          console.error("Error loading leaderboard:", error);
+          leaderboardTableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: red;">Error loading leaderboard. Please try again.</td></tr>';
+        });
+    }
+
+    function renderLeaderboard() {
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      const paginatedData = currentLeaderboardData.slice(startIndex, endIndex);
+      
+      leaderboardTableBody.innerHTML = '';
+      
+      if (paginatedData.length === 0) {
+        leaderboardTableBody.innerHTML = '<tr><td colspan="9" style="text-align: center;">No results found</td></tr>';
+        return;
+      }
+      
+      paginatedData.forEach((item, index) => {
+        const row = document.createElement('tr');
+        const rank = startIndex + index + 1;
+        const minutes = Math.floor(item.timeTaken / 60);
+        const seconds = item.timeTaken % 60;
+        const timeTakenStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        const dateStr = new Date(item.timestamp).toLocaleDateString();
+        
+        row.innerHTML = `
+          <td>${rank}</td>
+          <td>${item.userName}</td>
+          <td>Test ${item.testNumber}</td>
+          <td>${item.speed} WPM</td>
+          <td>${item.accuracy.toFixed(2)}%</td>
+          <td>${item.totalWords}</td>
+          <td>${item.typedWords}</td>
+          <td>${timeTakenStr}</td>
+          <td>${dateStr}</td>
+        `;
+        leaderboardTableBody.appendChild(row);
+      });
+      
+      const totalPages = Math.ceil(currentLeaderboardData.length / itemsPerPage);
+      pageInfoSpan.textContent = `Page ${currentPage} of ${totalPages}`;
+      prevPageBtn.disabled = currentPage === 1;
+      nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+    }
+
+    // Event Listeners
+    showLeaderboardBtn.addEventListener('click', () => {
+      leaderboardModal.style.display = 'block';
+      loadLeaderboard();
+    });
+
+    closeModalBtn.addEventListener('click', () => {
+      leaderboardModal.style.display = 'none';
+    });
+
+    window.addEventListener('click', (event) => {
+      if (event.target === leaderboardModal) {
+        leaderboardModal.style.display = 'none';
+      }
+    });
+
+    leaderboardTestSelect.addEventListener('change', (e) => {
+      currentTestFilter = e.target.value;
+      currentPage = 1;
+      loadLeaderboard();
+    });
+
+    leaderboardSpeedSelect.addEventListener('change', (e) => {
+      currentSpeedFilter = e.target.value;
+      currentPage = 1;
+      loadLeaderboard();
+    });
+
+    refreshLeaderboardBtn.addEventListener('click', loadLeaderboard);
+    prevPageBtn.addEventListener('click', () => {
+      if (currentPage > 1) {
+        currentPage--;
+        renderLeaderboard();
+      }
+    });
+
+    nextPageBtn.addEventListener('click', () => {
+      const totalPages = Math.ceil(currentLeaderboardData.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        currentPage++;
+        renderLeaderboard();
+      }
+    });
+
+    // Timer Functionality
+    let timerDisplay = document.getElementById('timer');
+    let startPauseButton = document.getElementById('startPause');
+    let resetButton = document.getElementById('reset');
+    let paragraphB = document.getElementById('paragraphB');
+    let timerInterval;
+    let timeLeft = 3000;
+    let isTimerRunning = false;
+    let startTimeStamp;
+    let pausedTime = 0;
+    let selectedDuration = 3000;
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function updateTimerDisplay() {
+        timerDisplay.textContent = formatTime(timeLeft);
+    }
+
+    function startTimer() {
+        if (!isTimerRunning) {
+            isTimerRunning = true;
+            startPauseButton.textContent = 'Pause';
+            paragraphB.disabled = false;
+            paragraphB.placeholder = "Start typing here...";
+            paragraphB.focus();
+            
+            startTimeStamp = Date.now() - pausedTime * 1000;
+            pausedTime = 0;
+            
+            timerInterval = setInterval(() => {
+                const elapsedSeconds = Math.floor((Date.now() - startTimeStamp) / 1000);
+                timeLeft = Math.max(0, selectedDuration - elapsedSeconds);
+                
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    startPauseButton.textContent = 'Start';
+                    paragraphB.disabled = true;
+                    compareParagraphs();
+                }
+            }, 200);
+        }
+    }
+
+    function pauseTimer() {
+        if (isTimerRunning) {
+            clearInterval(timerInterval);
+            isTimerRunning = false;
+            startPauseButton.textContent = 'Start';
+            paragraphB.disabled = true;
+            paragraphB.placeholder = "Timer paused - click Start to continue";
+            
+            const elapsedSeconds = Math.floor((Date.now() - startTimeStamp) / 1000);
+            pausedTime = selectedDuration - (timeLeft - elapsedSeconds);
+        }
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        isTimerRunning = false;
+        startPauseButton.textContent = 'Start';
+        paragraphB.disabled = true;
+        paragraphB.value = '';
+        paragraphB.placeholder = "Click Start to begin typing";
+        timeLeft = selectedDuration;
+        pausedTime = 0;
+        updateTimerDisplay();
+    }
+
+    startPauseButton.addEventListener('click', () => {
+        if (isTimerRunning) pauseTimer();
+        else startTimer();
+    });
+
+    resetButton.addEventListener('click', resetTimer);
+
+    document.querySelectorAll('input[name="duration"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (!isTimerRunning) {
+                selectedDuration = parseInt(this.value);
+                timeLeft = selectedDuration;
+                updateTimerDisplay();
+            }
+        });
+    });
+
+    // Test Selection
+    const volumeSelect = document.getElementById('volume-select');
+    const testSelect = document.getElementById('test-select');
+    const speedSelect = document.getElementById('speed-select');
+    const videoContainer = document.getElementById('video-container');
+
+    const tests = {
+        1: Array.from({ length: 22 }, (_, i) => `${i + 1}`),
+        2: Array.from({ length: 22 }, (_, i) => `${i + 23}`),
+        3: Array.from({ length: 22 }, (_, i) => `${i + 45}`)
+    };
+
+    function populateTests(volume) {
+        testSelect.innerHTML = '';
+        tests[volume].forEach(test => {
+            const option = document.createElement('option');
+            option.value = test;
+            option.text = "Transcription " + test;
+            testSelect.appendChild(option);
+        });
+    }
+
+    function updateVideo() {
+        const spd = speedSelect.value;
+        const tst = testSelect.value;
+        const videoUrl = urlLookup[parseInt(tst, 10)][parseInt(spd, 10)];
+        paragraphA.value = textTable[parseInt(tst, 10)];
+        paragraphB.placeholder = "Click Start to begin typing";
+        videoContainer.innerHTML = `<iframe src="${videoUrl}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+    }
+
+    volumeSelect.addEventListener('change', () => {
+        populateTests(volumeSelect.value);
+        updateVideo();
+    });
+
+    testSelect.addEventListener('change', updateVideo);
+    speedSelect.addEventListener('change', updateVideo);
+
+    // Initialize
+    updateTimerDisplay();
+    populateTests(volumeSelect.value);
+    updateVideo();
+
+    // PDF Generation
+    function downloadPDF() {
+        if (isTimerRunning) pauseTimer();
+        compareParagraphs();
+        
+        const currentDate = new Date();
+        const formattedDate = `${currentDate.getDate()} ${['January','February','March','April','May','June','July','August','September','October','November','December'][currentDate.getMonth()]} ${currentDate.getFullYear()},`;
+        const hours = currentDate.getHours();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedHours = hours % 12 || 12;
+        const minutes = currentDate.getMinutes().toString().padStart(2, '0');
+        const formattedTime = `${formattedHours}:${minutes} ${ampm}`;
+
+        const headerText = document.createElement('div');
+        headerText.innerHTML = `
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 style="color: #4361ee;">Steno Warriors Result Sheet</h2>
+                <div style="margin-top: 10px;">
+                    Test Date & Time: ${formattedDate} ${formattedTime}
+                </div>
+            </div>
+        `;
+        headerText.style.textAlign = 'center';
+
+        const textBoxC = document.getElementById('textBoxC');
+        textBoxC.insertBefore(headerText, textBoxC.firstChild);
+        
+        const downloadBtn = document.createElement('button');
+        downloadBtn.textContent = 'Download PDF';
+        downloadBtn.className = 'download-btn';
+        downloadBtn.onclick = generatePDF;
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.textContent = 'Close Results';
+        closeBtn.className = 'download-btn';
+        closeBtn.style.marginLeft = '10px';
+        closeBtn.onclick = () => location.reload();
+        
+        textBoxC.appendChild(downloadBtn);
+        textBoxC.appendChild(closeBtn);
+        textBoxC.style.display = 'block';
+    }
+
+    function generatePDF() {
+        const { jsPDF } = window.jspdf;
+        const element = document.getElementById('textBoxC');
+        const buttons = element.querySelectorAll('button');
+        buttons.forEach(btn => btn.style.display = 'none');
+        
+        html2canvas(element, {
+            scale: 2,
+            logging: false,
+            useCORS: true,
+            allowTaint: true
+        }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = 210;
+            const pageHeight = 295;
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+
+            buttons.forEach(btn => btn.style.display = 'block');
+            pdf.save('StenoWarriors_Result.pdf');
+        });
+    }
+
+    // Event Listeners
+    document.getElementById('googleSignIn').addEventListener('click', signInWithGoogle);
+    document.getElementById('signOut').addEventListener('click', signOut);
+    document.getElementById('login-btn').addEventListener('click', loginWithEmail);
+    document.getElementById('register-btn').addEventListener('click', registerWithEmail);
+    document.getElementById('show-register').addEventListener('click', toggleAuthForms);
+    document.getElementById('show-login').addEventListener('click', toggleAuthForms);
+
+    // Add keypress listeners for form submission
+    document.getElementById('login-password').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') loginWithEmail();
+    });
+
+    document.getElementById('register-confirm').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') registerWithEmail();
+    });
+  </script>
 </body>
 </html>
